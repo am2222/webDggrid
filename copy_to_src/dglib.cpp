@@ -13,8 +13,6 @@
 #include "DgProjGnomonicRF.h"
 #include "DgTriGrid2D.h"
 
-#include <Rcpp.h>
-
 #include <cassert>
 #include <fstream>
 #include <stdexcept>

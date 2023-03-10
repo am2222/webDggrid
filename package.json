@@ -1,0 +1,27 @@
+{
+  "name": "webdggrid",
+  "version": "1.0.0",
+  "description": "Wasm package for DGGRID ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/am2222/webDggrid.git"
+  },
+  "keywords": [
+    "DGGRID",
+    "DGGS",
+    "GIS"
+  ],
+  "author": "Majid Hojati",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/am2222/webDggrid/issues"
+  },
+  "homepage": "https://github.com/am2222/webDggrid#readme",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
