@@ -13,6 +13,14 @@ int main()
   return cells;
 }
 
+EMSCRIPTEN_KEEPALIVE
+int start()
+{
+  dglib::GridThing gt(0, 0, 0, 3, 4, "HEXAGON", "ISEA");
+  double cells = gt.nCells(3);
+  printf("hello, world!\n");
+  return cells;
+}
 
 // a=new Module.DoubleVectorVector()
 // b= new Module.DoubleVector()
@@ -90,5 +98,6 @@ EMSCRIPTEN_BINDINGS(my_module)
   emscripten::function("testuint", &testuint);
   emscripten::function("test2", &test2);
   emscripten::function("test3", &test3);
+  // emscripten::function("_start", &start);
   // emscripten::function("test4", &test4);
 }

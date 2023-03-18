@@ -5,7 +5,6 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "prebuild": "node Make",
     "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run lint",
@@ -50,6 +49,6 @@
     "prettier": "~2.8",
     "rimraf": "~3.0",
     "ts-jest": "~29.0",
-    "tsutils": "~3.21",
+    "tsutils": "~3.21"
   }
 }
