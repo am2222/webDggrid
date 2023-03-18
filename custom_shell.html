@@ -73,7 +73,7 @@
       var progressElement = document.getElementById('progress');
       var spinnerElement = document.getElementById('spinner');
 
-      var WEBDGGRID = {
+      var Module = {
         preRun: [],
         postRun: [],
         print: (function() {
@@ -131,11 +131,11 @@
           Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
         }
       };
-      WEBDGGRID.setStatus('Downloading...');
+      Module.setStatus('Downloading...');
       window.onerror = function() {
-        WEBDGGRID.setStatus('Exception thrown, see JavaScript console');
+        Module.setStatus('Exception thrown, see JavaScript console');
         spinnerElement.style.display = 'none';
-        WEBDGGRID.setStatus = function(text) {
+        Module.setStatus = function(text) {
           if (text) console.error('[post-exception status] ' + text);
         };
       };
