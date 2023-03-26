@@ -20,7 +20,7 @@ if (fs.existsSync(targetDir)) {
 
 fs.mkdirSync(targetDir);
 
-const child = spawn('emcc', [JSFLAGS, srcFiles.join(' '), CFLAGS, target],{shell: true});
+const child = spawn('emsdk_env.bat && emcc', [JSFLAGS, srcFiles.join(' '), CFLAGS, target],{shell: true});
 
 child.stdout.on('data', (data) => {
   console.log(`stdout:\n${data}`)

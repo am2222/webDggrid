@@ -13,14 +13,14 @@ int main()
   return cells;
 }
 
-EMSCRIPTEN_KEEPALIVE
-int start()
-{
-  dglib::GridThing gt(0, 0, 0, 3, 4, "HEXAGON", "ISEA");
-  double cells = gt.nCells(3);
-  printf("hello, world!\n");
-  return cells;
-}
+// EMSCRIPTEN_KEEPALIVE
+// int start()
+// {
+//   dglib::GridThing gt(0, 0, 0, 3, 4, "HEXAGON", "ISEA");
+//   double cells = gt.nCells(3);
+//   printf("hello, world!\n");
+//   return cells;
+// }
 
 // a=new Module.DoubleVectorVector()
 // b= new Module.DoubleVector()
@@ -39,14 +39,13 @@ std::vector<uint64_t> DgGEO_to_SEQNUM(
     std::vector<std::vector<double>> coordinates_deg)
 {
 
-  printf("Decimals: %d ", pole_lon_deg);
-
   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
 
-  std::vector<uint64_t> seqnum;
+  std::vector<uint64_t> seqnum(coordinates_deg.size());
   for (unsigned int i = 0; i < coordinates_deg.size(); i++)
   {
     std::vector<double> point =coordinates_deg.at(i);
+    printf("Decimals: %d \n", point.at(0));
     auto in = dgt.inGEO(point.at(0), point.at(1));
     dgt.outSEQNUM(in, seqnum.at(i));
   }
