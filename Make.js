@@ -7,8 +7,8 @@ import fs from 'fs'
 import { spawn } from 'child_process'
 
 const targetDir = './dist';
-const srcFiles = await glob('src/*.c*');
-const target = `-o ${targetDir}/webdggrid.html --shell-file custom_shell.html`;
+const srcFiles = await glob('dggrid_src/*.c*');
+const target = `-o ${targetDir}/webdggrid.html --shell-file ./copy_to_src/custom_shell.html`;
 
 const CFLAGS = '-I src';
 const JSFLAGS = `-lembind -O1 -s EXPORT_NAME=WEBDGGRID -s EXPORT_ES6=1 -s MODULARIZE=1 -s WASM=1 -s WASM_BIGINT=1  -sEXPORTED_FUNCTIONS=_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap -s ALLOW_MEMORY_GROWTH=1 -s BINARYEN_ASYNC_COMPILATION=0 `;
@@ -19,6 +19,8 @@ if (fs.existsSync(targetDir)) {
 }
 
 fs.mkdirSync(targetDir);
+
+console.log([JSFLAGS, srcFiles.join(' '), CFLAGS, target].join(' '))
 
 const child = spawn('emsdk_env.bat && emcc', [JSFLAGS, srcFiles.join(' '), CFLAGS, target],{shell: true});
 

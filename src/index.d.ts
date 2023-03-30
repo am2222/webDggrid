@@ -22,6 +22,7 @@ export declare class WebDggrid {
     private dggs;
     private resolution;
     constructor({ poleCoordinates, azimuth, topology, projection, aperture, resolution, }?: IDGGSProps);
+    main(): any;
     geoToSeqnum(coordinates: Number[][], resolution?: Number): Number[];
     getResolution(): Number;
     setResolution(resolution: Number): void;

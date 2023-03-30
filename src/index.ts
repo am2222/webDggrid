@@ -38,12 +38,18 @@ const wVectorToArray = (vector: any) => {
   }
 };
 
-export declare enum Topology {
+const extractColumn = (arr:any, column:number) => arr.map((x:any)=>x[column]);
+
+export enum Topology {
   "HEXAGON" = "HEXAGON",
+  "TRIANGLE"="TRIANGLE",
+  "SQUARE"="SQUARE",
+  "DIAMOND"="DIAMOND"
 }
 
-export declare enum Projection {
+export enum Projection {
   "ISEA" = "ISEA",
+  "FULLER" = "FULLER"
 }
 
 export interface Coordinate {
@@ -94,6 +100,33 @@ export class WebDggrid {
     if (resolution) {
       this.resolution = resolution;
     }
+  }
+
+  main(){
+    return Module._main()
+  }
+
+
+  nCells(resolution: Number = this.resolution):Number{
+    const {
+      poleCoordinates: { lat, lng },
+      azimuth,
+      topology,
+      projection,
+      aperture,
+    } = this.dggs;
+
+    const cellCount = Module.nCells(
+      lat,
+      lng,
+      azimuth,
+      aperture,
+      resolution,
+      topology,
+      projection
+    );
+
+    return cellCount as Number;
   }
 
   geoToSeqnum(

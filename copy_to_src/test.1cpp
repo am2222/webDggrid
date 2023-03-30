@@ -27,12 +27,12 @@ double nCells(double pole_lon_deg,
 }
 
 double cellAreaKM(double pole_lon_deg,
-                  double pole_lat_deg,
-                  double azimuth_deg,
-                  unsigned int aperture,
-                  int res,
-                  std::string topology,
-                  std::string projection)
+              double pole_lat_deg,
+              double azimuth_deg,
+              unsigned int aperture,
+              int res,
+              std::string topology,
+              std::string projection)
 {
   dglib::GridThing gt(pole_lon_deg, pole_lat_deg, azimuth_deg, azimuth_deg, aperture, topology, projection);
   double cells = gt.cellAreaKM(res);
@@ -40,12 +40,12 @@ double cellAreaKM(double pole_lon_deg,
 }
 
 double cellDistKM(double pole_lon_deg,
-                  double pole_lat_deg,
-                  double azimuth_deg,
-                  unsigned int aperture,
-                  int res,
-                  std::string topology,
-                  std::string projection)
+              double pole_lat_deg,
+              double azimuth_deg,
+              unsigned int aperture,
+              int res,
+              std::string topology,
+              std::string projection)
 {
   dglib::GridThing gt(pole_lon_deg, pole_lat_deg, azimuth_deg, azimuth_deg, aperture, topology, projection);
   double cells = gt.cellDistKM(res);
