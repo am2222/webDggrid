@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Webdggrid WASM</title>
+</head>
+
+<body>
+    <div id="placeholder"></div>
+    <script type="module">
+        //  Prefer local version (if available)  ---
+        const WebdggridLocal = await import("../dist/index.js").then(m => m.Webdggrid).catch(console.log);
+        // import { Zstd as ZstdExternal } from "https://cdn.jsdelivr.net/npm/@hpcc-js/wasm/dist/index.js";
+
+        const Webdggrid = WebdggridLocal ?? ZstdExternal;
+
+        const webdggrid = await Webdggrid.load();
+        document.getElementById("placeholder").innerHTML = `Loaded`;
+    </script>
+   
+
+</body>
+
+</html>

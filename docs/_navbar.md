@@ -1,2 +1,0 @@
-* [README](/)
-* [API](/api)

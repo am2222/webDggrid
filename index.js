@@ -1,10 +1,8 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
 
-import WEBDGGRID  from './dist/webdggrid.js'
-const module = await WEBDGGRID();
+const __dirname = path.dirname(__filename);
+import {Webdggrid} from './dist/index.js';
 
-const a= module._main();
-const a1= module.DgGEO_to_SEQNUM(0,0,0,3,4,'HEXAGON','ISEA',[0,0,50,29],[0,0,50,29]);
-const c=0
-
-debugger
-
+Webdggrid.load()
