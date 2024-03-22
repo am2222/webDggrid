@@ -148,6 +148,55 @@ val DgGEO_to_SEQNUM(
   return val::array(seqnum);
 }
 
+
+val SEQNUM_to_GEO(
+    double pole_lon_deg,
+    double pole_lat_deg,
+    double azimuth_deg,
+    unsigned int aperture,
+    int res,
+    std::string topology,
+    std::string projection,
+    val seqnum)
+{
+  dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
+
+  const std::vector<uint64_t> &seqnumVector = convertJSArrayToNumberVector<uint64_t>(seqnum);
+  const unsigned int  inputSize= seqnumVector.size();
+
+  std::vector<long double> xVectorDouble(inputSize);
+  std::vector<long double> yVectorDouble(inputSize);
+  for (unsigned int i = 0; i < inputSize; i++)
+  {
+    auto in = dgt.inSEQNUM(seqnumVector.at(i));
+    dgt.outGEO(in, xVectorDouble.at(i), yVectorDouble.at(i));
+  }
+  xVectorDouble.insert(std::end(xVectorDouble), std::begin(yVectorDouble), std::end(yVectorDouble));
+  std::vector<double> converted_values;
+
+  std::transform(xVectorDouble.begin(), xVectorDouble.end(), std::back_inserter(converted_values), [](const double value)
+  { 
+      return static_cast<double>(value); 
+  });
+
+  return val::array(converted_values);
+}
+
+// void SEQNUM_to_GEO(const long double pole_lon_deg, const long double pole_lat_deg, const long double azimuth_deg, const unsigned int aperture, const int res, const std::string topology, const std::string projection, unsigned int N, Rcpp::NumericVector in_seqnum, Rcpp::NumericVector out_lon_deg, Rcpp::NumericVector out_lat_deg){
+//   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
+
+//   for(unsigned int i=0;i<N;i++){
+//     const uint64_t tin_seqnum = in_seqnum[i];
+//     long double tout_lon_deg = out_lon_deg[i];
+//     long double tout_lat_deg = out_lat_deg[i];
+//     auto in = dgt.inSEQNUM(tin_seqnum);
+//     dgt.outGEO(in, tout_lon_deg, tout_lat_deg);
+//     out_lon_deg[i] = tout_lon_deg;
+//     out_lat_deg[i] = tout_lat_deg;
+//   }
+// }
+
+
 // void GEO_to_GEO(double pole_lon_deg, double pole_lat_deg, double azimuth_deg, unsigned int aperture, int res, std::string topology, std::string projection, val in_lon_deg, val in_lat_deg)
 // {
 //   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
@@ -552,19 +601,6 @@ val DgGEO_to_SEQNUM(
 //   }
 // }
 
-// void SEQNUM_to_GEO(const long double pole_lon_deg, const long double pole_lat_deg, const long double azimuth_deg, const unsigned int aperture, const int res, const std::string topology, const std::string projection, unsigned int N, Rcpp::NumericVector in_seqnum, Rcpp::NumericVector out_lon_deg, Rcpp::NumericVector out_lat_deg){
-//   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
-
-//   for(unsigned int i=0;i<N;i++){
-//     const uint64_t tin_seqnum = in_seqnum[i];
-//     long double tout_lon_deg = out_lon_deg[i];
-//     long double tout_lat_deg = out_lat_deg[i];
-//     auto in = dgt.inSEQNUM(tin_seqnum);
-//     dgt.outGEO(in, tout_lon_deg, tout_lat_deg);
-//     out_lon_deg[i] = tout_lon_deg;
-//     out_lat_deg[i] = tout_lat_deg;
-//   }
-// }
 
 // void SEQNUM_to_PROJTRI(const long double pole_lon_deg, const long double pole_lat_deg, const long double azimuth_deg, const unsigned int aperture, const int res, const std::string topology, const std::string projection, unsigned int N, Rcpp::NumericVector in_seqnum, Rcpp::NumericVector out_tnum, Rcpp::NumericVector out_tx, Rcpp::NumericVector out_ty){
 //   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
@@ -656,8 +692,10 @@ void appendVector(vector<T> &v1, vector<T> &v2, Args... args)
 
 val test(val coordinates_x_deg, val coordinates_y_deg)
 {
+  emscripten::val a = std::move(coordinates_x_deg);
+  emscripten::val b = std::move(coordinates_y_deg);
 
-  const std::vector<double> &xVectorDouble = convertJSArrayToNumberVector<double>(coordinates_x_deg);
+  const std::vector<double> &xVectorDouble = convertJSArrayToNumberVector<double>(a);
   const std::vector<double> &yVectorDouble = convertJSArrayToNumberVector<double>(coordinates_y_deg);
 
   std::vector<double> newVector;
@@ -665,16 +703,6 @@ val test(val coordinates_x_deg, val coordinates_y_deg)
   newVector.insert(newVector.begin(), xVectorDouble.begin(), xVectorDouble.end());
   newVector.insert(xVectorDouble.end(), yVectorDouble.begin(), yVectorDouble.end());
   return val::array(newVector);
-}
-
-val test2()
-{
-  std::vector<vector<int>> vect{
-      {1, 2, 3},
-      {4, 5, 6},
-      {7, 8, 9}};
-
-  return val::array(vect);
 }
 
 std::string getExceptionMessage(intptr_t exceptionPtr)
@@ -693,10 +721,11 @@ EMSCRIPTEN_BINDINGS(my_module)
   register_vector<double>("DoubleVector");
   emscripten::function("getExceptionMessage", &getExceptionMessage);
   emscripten::function("DgGEO_to_SEQNUM", &DgGEO_to_SEQNUM);
+  emscripten::function("SEQNUM_to_GEO", &SEQNUM_to_GEO);
   emscripten::function("nCells", &nCells);
   emscripten::function("cellAreaKM", &cellAreaKM);
   emscripten::function("cellDistKM", &cellDistKM);
   emscripten::function("gridStatCLS", &gridStatCLS);
   emscripten::function("test", &test);
-  emscripten::function("test2", &test2);
+  // emscripten::function("test2", &test2);
 }
