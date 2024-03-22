@@ -36,11 +36,10 @@
     "prettier": "prettier --config .prettierrc --write .",
     "test": "vitest --watch",
     "test:run": "vitest run",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "gen-docs": "typedoc",
-    "gen-docs-watch": "typedoc --watch"
+    "docs:dev": "npm run publish-typedoc && vitepress dev docs",
+    "docs:build": "npm run publish-typedoc && vitepress build docs",
+    "docs:preview": "npm run publish-typedoc && vitepress preview docs",
+    "publish-typedoc": "typedoc --options typedoc.json"
   },
   "repository": {
     "type": "git",
@@ -77,13 +76,15 @@
     "eslint-plugin-promise": "^6.0.0",
     "glob": "^9.3.0",
     "http-server": "^14.1.1",
-    "jsdoc-to-markdown": "^8.0.0",
     "prettier": "~2.8",
     "rimraf": "~3.0",
     "rollup": "^3.20.2",
     "rollup-plugin-sourcemaps": "^0.6.3",
+    "typedoc": "^0.25.12",
+    "typedoc-plugin-markdown": "^4.0.0-next.54",
+    "typedoc-vitepress-theme": "^1.0.0-next.8",
     "typescript": "5.0.2",
-    "vitepress": "^1.0.0-alpha.64",
+    "vitepress": "^1.0.1",
     "vitest": "^0.29.8",
     "vtest": "^1.1.0",
     "vue": "^3.2.47"

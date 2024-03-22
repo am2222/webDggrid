@@ -182,45 +182,42 @@ val SEQNUM_to_GEO(
   return val::array(converted_values);
 }
 
-// void SEQNUM_to_GEO(const long double pole_lon_deg, const long double pole_lat_deg, const long double azimuth_deg, const unsigned int aperture, const int res, const std::string topology, const std::string projection, unsigned int N, Rcpp::NumericVector in_seqnum, Rcpp::NumericVector out_lon_deg, Rcpp::NumericVector out_lat_deg){
-//   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
 
-//   for(unsigned int i=0;i<N;i++){
-//     const uint64_t tin_seqnum = in_seqnum[i];
-//     long double tout_lon_deg = out_lon_deg[i];
-//     long double tout_lat_deg = out_lat_deg[i];
-//     auto in = dgt.inSEQNUM(tin_seqnum);
-//     dgt.outGEO(in, tout_lon_deg, tout_lat_deg);
-//     out_lon_deg[i] = tout_lon_deg;
-//     out_lat_deg[i] = tout_lat_deg;
-//   }
-// }
+val GEO_to_GEO( double pole_lon_deg,
+    double pole_lat_deg,
+    double azimuth_deg,
+    unsigned int aperture,
+    int res,
+    std::string topology,
+    std::string projection,
+    val coordinates_x_deg,
+    val coordinates_y_deg)
+{
+  dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
 
+  const std::vector<double> &xVectorDouble = convertJSArrayToNumberVector<double>(coordinates_x_deg);
+  const std::vector<double> &yVectorDouble = convertJSArrayToNumberVector<double>(coordinates_y_deg);
 
-// void GEO_to_GEO(double pole_lon_deg, double pole_lat_deg, double azimuth_deg, unsigned int aperture, int res, std::string topology, std::string projection, val in_lon_deg, val in_lat_deg)
-// {
-//   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
+  const unsigned int  inputSize= xVectorDouble.size();
 
-//   const std::vector<double> &xVectorDouble = convertJSArrayToNumberVector<double>(in_lon_deg);
-//   const std::vector<double> &yVectorDouble = convertJSArrayToNumberVector<double>(in_lat_deg);
+  std::vector<long double> xOutVectorDouble(inputSize);
+  std::vector<long double> yOutVectorDouble(inputSize);
+  for (unsigned int i = 0; i < xVectorDouble.size(); i++)
+  {
+    auto in = dgt.inGEO(xVectorDouble.at(i), yVectorDouble.at(i));
+    dgt.outGEO(in, xOutVectorDouble.at(i), yOutVectorDouble.at(i));
+  }
 
-//   unsigned int N = xVectorDouble.size();
+  xOutVectorDouble.insert(std::end(xOutVectorDouble), std::begin(yOutVectorDouble), std::end(yOutVectorDouble));
+  std::vector<double> converted_values;
 
-//   std::vector<double> out_lon_deg(N);
-//   std::vector<double> out_lat_deg(N);
+  std::transform(xOutVectorDouble.begin(), xOutVectorDouble.end(), std::back_inserter(converted_values), [](const double value)
+  { 
+      return static_cast<double>(value); 
+  });
 
-//   for (unsigned int i = 0; i < N; i++)
-//   {
-//     double tin_lon_deg = xVectorDouble[i];
-//     double tin_lat_deg = yVectorDouble[i];
-//     double tout_lon_deg = out_lon_deg[i];
-//     double tout_lat_deg = out_lat_deg[i];
-//     auto in = dgt.inGEO(tin_lon_deg, tin_lat_deg);
-//     dgt.outGEO(in, tout_lon_deg, tout_lat_deg);
-//     out_lon_deg[i] = tout_lon_deg;
-//     out_lat_deg[i] = tout_lat_deg;
-//   }
-// }
+  return val::array(converted_values);
+}
 
 // void GEO_to_PROJTRI(const long double pole_lon_deg, const long double pole_lat_deg, const long double azimuth_deg, const unsigned int aperture, const int res, const std::string topology, const std::string projection, unsigned int N, Rcpp::NumericVector in_lon_deg, Rcpp::NumericVector in_lat_deg, Rcpp::NumericVector out_tnum, Rcpp::NumericVector out_tx, Rcpp::NumericVector out_ty){
 //   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
@@ -722,6 +719,7 @@ EMSCRIPTEN_BINDINGS(my_module)
   emscripten::function("getExceptionMessage", &getExceptionMessage);
   emscripten::function("DgGEO_to_SEQNUM", &DgGEO_to_SEQNUM);
   emscripten::function("SEQNUM_to_GEO", &SEQNUM_to_GEO);
+  emscripten::function("GEO_to_GEO", &GEO_to_GEO);
   emscripten::function("nCells", &nCells);
   emscripten::function("cellAreaKM", &cellAreaKM);
   emscripten::function("cellDistKM", &cellDistKM);

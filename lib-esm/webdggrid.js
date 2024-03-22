@@ -137,6 +137,12 @@ export class Webdggrid {
         const cellCount = this._module.nCells(lat, lng, azimuth, aperture, resolution, topology, projection);
         return cellCount;
     }
+    /**
+     * Converts an array of geography coordinates to the list of the sequence numbers AKA DggId
+     * @param coordinates A 2d array of [[lng, lat]] values
+     * @param resolution  [resolution=DEFAULT_RESOLUTION] The dggs resolution
+     * @returns An array of the DggIds
+     */
     geoToSequenceNum(coordinates, resolution = DEFAULT_RESOLUTION) {
         const { poleCoordinates: { lat, lng }, azimuth, topology, projection, aperture, } = this.dggs;
         const xCoords = coordinates.map((coord) => coord[0]);
@@ -144,10 +150,39 @@ export class Webdggrid {
         const resultArray = this._module.DgGEO_to_SEQNUM(lat, lng, azimuth, aperture, resolution, topology, projection, xCoords, yCoords);
         return resultArray;
     }
+    /**
+     * Convert a sequence number to the [lng,lat] of the center of the related cell
+     * @param sequenceNum
+     * @param resolution  [resolution=DEFAULT_RESOLUTION]
+     * @returns An array of [lng,lat]
+     */
     sequenceNumToGeo(sequenceNum, resolution = DEFAULT_RESOLUTION) {
         const { poleCoordinates: { lat, lng }, azimuth, topology, projection, aperture, } = this.dggs;
         const resultArray = this._module.SEQNUM_to_GEO(lat, lng, azimuth, aperture, resolution, topology, projection, sequenceNum);
-        return resultArray;
+        const size = resultArray.length / 2;
+        const arrayOfArrays = [];
+        for (let i = 0; i < size; i += 1) {
+            arrayOfArrays.push([resultArray[i], resultArray[i + size]]);
+        }
+        return arrayOfArrays;
+    }
+    /**
+     * Converts a set of coordinates to the cell centroid values
+     * @param coordinates A 2d array of lng and lat values
+     * @param resolution  [resolution=DEFAULT_RESOLUTION] The resolution of the dggs
+     * @returns An array of dggs cell centroid coordinates
+     */
+    geoToGeo(coordinates, resolution = DEFAULT_RESOLUTION) {
+        const { poleCoordinates: { lat, lng }, azimuth, topology, projection, aperture, } = this.dggs;
+        const xCoords = coordinates.map((coord) => coord[0]);
+        const yCoords = coordinates.map((coord) => coord[1]);
+        const resultArray = this._module.GEO_to_GEO(lat, lng, azimuth, aperture, resolution, topology, projection, xCoords, yCoords);
+        const size = resultArray.length / 2;
+        const arrayOfArrays = [];
+        for (let i = 0; i < size; i += 1) {
+            arrayOfArrays.push([resultArray[i], resultArray[i + size]]);
+        }
+        return arrayOfArrays;
     }
     _is2dArray(array) { return array.some((item) => Array.isArray(item)); }
     _arrayToVector(array) {

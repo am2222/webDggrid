@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "WebDggrid"
-  text: "A wasm version of Dggrid for Global Grid Systems"
+  text: "A webassembely version of DGGRID"
   tagline: My great project tagline
   actions:
     - theme: brand
@@ -12,7 +12,7 @@ hero:
       link: /markdown-examples
     - theme: alt
       text: API Examples
-      link: /api-examples
+      link: /api
 
 features:
   - title: Feature A

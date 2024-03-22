@@ -89,8 +89,27 @@ export declare class Webdggrid {
     cellAreaKM(resolution?: number): number;
     cellDistKM(resolution?: number): number;
     gridStatCLS(resolution?: number): number;
+    /**
+     * Converts an array of geography coordinates to the list of the sequence numbers AKA DggId
+     * @param coordinates A 2d array of [[lng, lat]] values
+     * @param resolution  [resolution=DEFAULT_RESOLUTION] The dggs resolution
+     * @returns An array of the DggIds
+     */
     geoToSequenceNum(coordinates: number[][], resolution?: number): bigint[];
+    /**
+     * Convert a sequence number to the [lng,lat] of the center of the related cell
+     * @param sequenceNum
+     * @param resolution  [resolution=DEFAULT_RESOLUTION]
+     * @returns An array of [lng,lat]
+     */
     sequenceNumToGeo(sequenceNum: bigint[], resolution?: number): number[][];
+    /**
+     * Converts a set of coordinates to the cell centroid values
+     * @param coordinates A 2d array of lng and lat values
+     * @param resolution  [resolution=DEFAULT_RESOLUTION] The resolution of the dggs
+     * @returns An array of dggs cell centroid coordinates
+     */
+    geoToGeo(coordinates: number[][], resolution?: number): number[][];
     _is2dArray(array: any): boolean;
     _arrayToVector(array: any): any;
     _vectorToArray(vector: any): any[];

@@ -1,0 +1,23 @@
+[
+  {
+    "text": "Enumerations",
+    "collapsed": true,
+    "items": [
+      { "text": "Projection", "link": "/docs/api/enumerations/Projection.md" },
+      { "text": "Topology", "link": "/docs/api/enumerations/Topology.md" }
+    ]
+  },
+  {
+    "text": "Classes",
+    "collapsed": true,
+    "items": [{ "text": "Webdggrid", "link": "/docs/api/classes/Webdggrid.md" }]
+  },
+  {
+    "text": "Interfaces",
+    "collapsed": true,
+    "items": [
+      { "text": "Coordinate", "link": "/docs/api/interfaces/Coordinate.md" },
+      { "text": "IDGGSProps", "link": "/docs/api/interfaces/IDGGSProps.md" }
+    ]
+  }
+]
