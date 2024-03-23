@@ -1,6 +1,6 @@
 {
   "name": "webdggrid",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wasm package for DGGRID ",
   "type": "module",
   "exports": {
@@ -24,22 +24,28 @@
   "files": [
     "dist/*.*",
     "types/*",
-    "src-ts/*.css"
+    "src-ts/*",
+    "lib-wasm/*",
+    "lib-esm/*"
   ],
   "scripts": {
     "prebuild": "node ./utils/Make",
-    "build": "npm run build:types && npm run build:sfx && npm run bundle",
+    "build": "yarn build:types && yarn build:sfx && yarn bundle",
     "build:types": "tsc",
     "build:sfx": "node ./utils/sfx-wasm",
     "bundle": "rollup -c",
     "lint": "eslint src-ts/**/*.ts",
     "prettier": "prettier --config .prettierrc --write .",
-    "test": "vitest --watch",
-    "test:run": "vitest run",
-    "docs:dev": "npm run publish-typedoc && vitepress dev docs",
-    "docs:build": "npm run publish-typedoc && vitepress build docs",
-    "docs:preview": "npm run publish-typedoc && vitepress preview docs",
-    "publish-typedoc": "typedoc --options typedoc.json"
+    "test": "vitest",
+    "docs:dev": "yarn publish-typedoc && vitepress dev docs",
+    "docs:build": "yarn publish-typedoc && vitepress build docs",
+    "publish-typedoc": "typedoc --options typedoc.json",
+    "publish:patch": "yarn version patch",
+    "publish:minor": "yarn version minor",
+    "publish:major": "yarn version major",
+    "preversion": "yarn install && yarn test",
+    "version": "yarn build && yarn docs:build && git add -A dist docs types",
+    "postversion": "echo postversion"
   },
   "repository": {
     "type": "git",
@@ -50,7 +56,18 @@
     "DGGS",
     "GIS"
   ],
-  "author": "Majid Hojati",
+  "maintainers": [
+    {
+      "name": "Majid Hojati",
+      "email": "hoja4090@mylaureir.ca",
+      "url": "https://github.com/am2222"
+    }
+  ],
+  "author": {
+    "name": "Majid Hojati",
+    "email": "hoja4090@mylaureir.ca",
+    "url": "https://github.com/am2222"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/am2222/webDggrid/issues"
