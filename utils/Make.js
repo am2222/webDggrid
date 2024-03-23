@@ -48,7 +48,7 @@ fs.mkdirSync(targetDir);
 
 console.log([...JSFLAGS, ...srcFiles, ...CFLAGS, ...target].join(' '));
 
-const cp = spawn('emsdk_env.sh && emcc', [...JSFLAGS, ...srcFiles, ...CFLAGS, ...target], { shell: true });
+const cp = spawn('emcc', [...JSFLAGS, ...srcFiles, ...CFLAGS, ...target], { shell: true });
 cp.on('error', ex => {console.log(`stdout:\n${ex}`);});
 cp.on('close', code => {console.log(`stdout:\n${code}`);});
 cp.stdout.on('data', (data) => {
