@@ -10,10 +10,10 @@
     <div id="placeholder"></div>
     <script type="module">
         //  Prefer local version (if available)  ---
-        const WebdggridLocal = await import("../dist/index.umd.js").then(m => m.Webdggrid).catch(console.log);
-        // import { Zstd as ZstdExternal } from "https://cdn.jsdelivr.net/npm/@hpcc-js/wasm/dist/index.js";
+        const WebdggridLocal = await import("../dist/index.js").then(m => m.Webdggrid).catch(console.log);
+        import { Webdggrid as WebdggridExternal } from "https://cdn.jsdelivr.net/npm/webDggrid/dist/index.js";
 
-        const Webdggrid = WebdggridLocal ?? ZstdExternal;
+        const Webdggrid = WebdggridLocal ?? WebdggridExternal;
 
         const webdggrid = await Webdggrid.load();
         document.getElementById("placeholder").innerHTML = `Loaded`;
