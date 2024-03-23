@@ -40,9 +40,9 @@
     "docs:dev": "yarn publish-typedoc && vitepress dev docs",
     "docs:build": "yarn publish-typedoc && vitepress build docs",
     "publish-typedoc": "typedoc --options typedoc.json",
-    "publish:patch": "yarn version patch",
-    "publish:minor": "yarn version minor",
-    "publish:major": "yarn version major",
+    "publish:patch": "npm version patch",
+    "publish:minor": "npm version minor",
+    "publish:major": "npm version major",
     "preversion": "yarn install && yarn test",
     "version": "yarn build && yarn docs:build && git add -A dist docs types",
     "postversion": "echo postversion"
