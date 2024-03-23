@@ -18,7 +18,7 @@
 
 #### Source
 
-[webdggrid.ts:54](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L54)
+[webdggrid.ts:54](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L54)
 
 ## Properties
 
@@ -28,7 +28,7 @@
 
 #### Source
 
-[webdggrid.ts:54](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L54)
+[webdggrid.ts:54](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L54)
 
 ***
 
@@ -38,7 +38,7 @@
 
 #### Source
 
-[webdggrid.ts:51](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L51)
+[webdggrid.ts:51](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L51)
 
 ***
 
@@ -48,7 +48,7 @@
 
 #### Source
 
-[webdggrid.ts:52](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L52)
+[webdggrid.ts:52](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L52)
 
 ## Methods
 
@@ -66,7 +66,7 @@
 
 #### Source
 
-[webdggrid.ts:334](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L334)
+[webdggrid.ts:334](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L334)
 
 ***
 
@@ -84,7 +84,7 @@
 
 #### Source
 
-[webdggrid.ts:332](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L332)
+[webdggrid.ts:332](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L332)
 
 ***
 
@@ -104,7 +104,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:120](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L120)
+[webdggrid.ts:120](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L120)
 
 ***
 
@@ -122,7 +122,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:347](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L347)
+[webdggrid.ts:347](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L347)
 
 ***
 
@@ -140,7 +140,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:349](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L349)
+[webdggrid.ts:349](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L349)
 
 ***
 
@@ -158,7 +158,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:153](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L153)
+[webdggrid.ts:153](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L153)
 
 ***
 
@@ -176,7 +176,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:175](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L175)
+[webdggrid.ts:175](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L175)
 
 ***
 
@@ -204,7 +204,7 @@ An array of dggs cell centroid coordinates
 
 #### Source
 
-[webdggrid.ts:296](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L296)
+[webdggrid.ts:296](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L296)
 
 ***
 
@@ -232,7 +232,7 @@ An array of the DggIds
 
 #### Source
 
-[webdggrid.ts:224](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L224)
+[webdggrid.ts:224](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L224)
 
 ***
 
@@ -254,7 +254,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:102](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L102)
+[webdggrid.ts:102](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L102)
 
 ***
 
@@ -272,7 +272,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:197](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L197)
+[webdggrid.ts:197](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L197)
 
 ***
 
@@ -299,7 +299,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:131](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L131)
+[webdggrid.ts:131](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L131)
 
 ***
 
@@ -325,7 +325,7 @@ An array of [lng,lat]
 
 #### Source
 
-[webdggrid.ts:259](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L259)
+[webdggrid.ts:259](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L259)
 
 ***
 
@@ -349,7 +349,7 @@ A dggs object
 
 #### Source
 
-[webdggrid.ts:92](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L92)
+[webdggrid.ts:92](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L92)
 
 ***
 
@@ -375,7 +375,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:110](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L110)
+[webdggrid.ts:110](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L110)
 
 ***
 
@@ -391,7 +391,7 @@ The Webdggrid c++ version
 
 #### Source
 
-[webdggrid.ts:84](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L84)
+[webdggrid.ts:84](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L84)
 
 ***
 
@@ -413,7 +413,7 @@ A promise to an instance of the Webdggrid class.
 
 #### Source
 
-[webdggrid.ts:68](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L68)
+[webdggrid.ts:68](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L68)
 
 ***
 
@@ -429,4 +429,4 @@ Unloades the compiled wasm instance.
 
 #### Source
 
-[webdggrid.ts:77](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L77)
+[webdggrid.ts:77](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L77)

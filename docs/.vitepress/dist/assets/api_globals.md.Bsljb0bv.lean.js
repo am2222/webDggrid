@@ -1,1 +1,0 @@
-import{_ as a,c as e,o as r,a2 as t}from"./chunks/framework.BHw-Gcad.js";const f=JSON.parse('{"title":"webdggrid","description":"","frontmatter":{},"headers":[],"relativePath":"api/globals.md","filePath":"api/globals.md"}'),o={name:"api/globals.md"},i=t("",7),s=[i];function l(n,d,c,h,_,u){return r(),e("div",null,s)}const g=a(o,[["render",l]]);export{f as __pageData,g as default};

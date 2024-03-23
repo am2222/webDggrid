@@ -10,7 +10,7 @@
 
 #### Source
 
-[webdggrid.ts:28](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L28)
+[webdggrid.ts:28](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L28)
 
 ***
 
@@ -20,4 +20,4 @@
 
 #### Source
 
-[webdggrid.ts:29](https://github.com/am2222/webDggrid/blob/15e49ef/src-ts/webdggrid.ts#L29)
+[webdggrid.ts:29](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L29)
