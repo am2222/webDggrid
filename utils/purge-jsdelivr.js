@@ -1,16 +1,16 @@
-import https from "https";
+import https from 'https';
 
 function get(id, url) {
     return new Promise((resolve, reject) => {
         https.get(url, resp => {
-            let data = "";
-            resp.on("data", (chunk) => {
+            let data = '';
+            resp.on('data', (chunk) => {
                 data += chunk;
             });
-            resp.on("end", () => {
+            resp.on('end', () => {
                 resolve(data);
             });
-        }).on("error", (err) => {
+        }).on('error', (err) => {
             reject(err);
         });
     });
@@ -41,7 +41,7 @@ async function purgePackage(id, ver) {
 }
 
 async function purgeAll() {
-    await purgePackage("@hpcc-js/wasm", "")
+    await purgePackage('@hpcc-js/wasm', '')
         .then(console.log)
         .catch(e => console.error(e.message));
 }
