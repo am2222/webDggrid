@@ -7,8 +7,6 @@
 
 </div>
 
-## Mapbox-PmTiles
-
 
 
 ### Under development
