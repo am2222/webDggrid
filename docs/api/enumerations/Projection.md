@@ -14,7 +14,7 @@ Projection type
 
 #### Source
 
-[webdggrid.ts:24](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L24)
+[webdggrid.ts:24](https://github.com/am2222/webDggrid/blob/0144550/src-ts/webdggrid.ts#L24)
 
 ***
 
@@ -24,4 +24,4 @@ Projection type
 
 #### Source
 
-[webdggrid.ts:23](https://github.com/am2222/webDggrid/blob/f799887/src-ts/webdggrid.ts#L23)
+[webdggrid.ts:23](https://github.com/am2222/webDggrid/blob/0144550/src-ts/webdggrid.ts#L23)
