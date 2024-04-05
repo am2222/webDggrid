@@ -1,6 +1,6 @@
 {
   "name": "webdggrid",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Wasm package for DGGRID ",
   "type": "module",
   "exports": {
