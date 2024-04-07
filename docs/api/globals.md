@@ -13,3 +13,7 @@
 
 - [Coordinate](interfaces/Coordinate.md)
 - [IDGGSProps](interfaces/IDGGSProps.md)
+
+## Type Aliases
+
+- [DGGSGeoJsonProperty](type-aliases/DGGSGeoJsonProperty.md)

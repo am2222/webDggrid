@@ -18,7 +18,7 @@
 
 #### Source
 
-[webdggrid.ts:54](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L54)
+[src-ts/webdggrid.ts:70](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L70)
 
 ## Properties
 
@@ -28,7 +28,7 @@
 
 #### Source
 
-[webdggrid.ts:54](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L54)
+[src-ts/webdggrid.ts:70](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L70)
 
 ***
 
@@ -38,7 +38,7 @@
 
 #### Source
 
-[webdggrid.ts:51](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L51)
+[src-ts/webdggrid.ts:67](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L67)
 
 ***
 
@@ -48,45 +48,9 @@
 
 #### Source
 
-[webdggrid.ts:52](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L52)
+[src-ts/webdggrid.ts:68](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L68)
 
 ## Methods
-
-### \_arrayToVector()
-
-> **\_arrayToVector**(`array`): `any`
-
-#### Parameters
-
-• **array**: `any`
-
-#### Returns
-
-`any`
-
-#### Source
-
-[webdggrid.ts:334](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L334)
-
-***
-
-### \_is2dArray()
-
-> **\_is2dArray**(`array`): `boolean`
-
-#### Parameters
-
-• **array**: `any`
-
-#### Returns
-
-`boolean`
-
-#### Source
-
-[webdggrid.ts:332](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L332)
-
-***
 
 ### \_main()
 
@@ -104,43 +68,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:120](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L120)
-
-***
-
-### \_vectorToArray()
-
-> **\_vectorToArray**(`vector`): `any`[]
-
-#### Parameters
-
-• **vector**: `any`
-
-#### Returns
-
-`any`[]
-
-#### Source
-
-[webdggrid.ts:347](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L347)
-
-***
-
-### \_wVectorToArray()
-
-> **\_wVectorToArray**(`vector`): `any`[]
-
-#### Parameters
-
-• **vector**: `any`
-
-#### Returns
-
-`any`[]
-
-#### Source
-
-[webdggrid.ts:349](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L349)
+[src-ts/webdggrid.ts:136](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L136)
 
 ***
 
@@ -158,7 +86,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:153](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L153)
+[src-ts/webdggrid.ts:169](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L169)
 
 ***
 
@@ -176,13 +104,13 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:175](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L175)
+[src-ts/webdggrid.ts:191](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L191)
 
 ***
 
 ### geoToGeo()
 
-> **geoToGeo**(`coordinates`, `resolution`): `number`[][]
+> **geoToGeo**(`coordinates`, `resolution`): `Position`[]
 
 Converts a set of coordinates to the cell centroid values
 
@@ -198,13 +126,13 @@ A 2d array of lng and lat values
 
 #### Returns
 
-`number`[][]
+`Position`[]
 
 An array of dggs cell centroid coordinates
 
 #### Source
 
-[webdggrid.ts:296](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L296)
+[src-ts/webdggrid.ts:312](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L312)
 
 ***
 
@@ -232,7 +160,7 @@ An array of the DggIds
 
 #### Source
 
-[webdggrid.ts:224](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L224)
+[src-ts/webdggrid.ts:240](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L240)
 
 ***
 
@@ -254,7 +182,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:102](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L102)
+[src-ts/webdggrid.ts:118](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L118)
 
 ***
 
@@ -272,7 +200,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:197](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L197)
+[src-ts/webdggrid.ts:213](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L213)
 
 ***
 
@@ -299,13 +227,13 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:131](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L131)
+[src-ts/webdggrid.ts:147](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L147)
 
 ***
 
 ### sequenceNumToGeo()
 
-> **sequenceNumToGeo**(`sequenceNum`, `resolution`): `number`[][]
+> **sequenceNumToGeo**(`sequenceNum`, `resolution`): `Position`[]
 
 Convert a sequence number to the [lng,lat] of the center of the related cell
 
@@ -319,13 +247,60 @@ Convert a sequence number to the [lng,lat] of the center of the related cell
 
 #### Returns
 
-`number`[][]
+`Position`[]
 
 An array of [lng,lat]
 
 #### Source
 
-[webdggrid.ts:259](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L259)
+[src-ts/webdggrid.ts:275](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L275)
+
+***
+
+### sequenceNumToGrid()
+
+> **sequenceNumToGrid**(`sequenceNum`, `resolution`): `Position`[][]
+
+Convert an array of sequence numbers to the grid coordinates with format of `[lng,lat]`. The output is an array with the same
+size as input `sequenceNum` and it includes an array of `CoordinateLike` objects.
+
+#### Parameters
+
+• **sequenceNum**: `bigint`[]
+
+• **resolution**: `number`= `DEFAULT_RESOLUTION`
+
+[resolution=DEFAULT_RESOLUTION]
+
+#### Returns
+
+`Position`[][]
+
+An array of [lng,lat]
+
+#### Source
+
+[src-ts/webdggrid.ts:355](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L355)
+
+***
+
+### sequenceNumToGridFeatureCollection()
+
+> **sequenceNumToGridFeatureCollection**(`sequenceNum`, `resolution`): `FeatureCollection`\<`Polygon`, `Object` & `Object`\>
+
+#### Parameters
+
+• **sequenceNum**: `bigint`[]
+
+• **resolution**: `number`= `DEFAULT_RESOLUTION`
+
+#### Returns
+
+`FeatureCollection`\<`Polygon`, `Object` & `Object`\>
+
+#### Source
+
+[src-ts/webdggrid.ts:414](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L414)
 
 ***
 
@@ -349,7 +324,7 @@ A dggs object
 
 #### Source
 
-[webdggrid.ts:92](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L92)
+[src-ts/webdggrid.ts:108](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L108)
 
 ***
 
@@ -375,7 +350,7 @@ WebDggrid
 
 #### Source
 
-[webdggrid.ts:110](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L110)
+[src-ts/webdggrid.ts:126](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L126)
 
 ***
 
@@ -391,7 +366,7 @@ The Webdggrid c++ version
 
 #### Source
 
-[webdggrid.ts:84](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L84)
+[src-ts/webdggrid.ts:100](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L100)
 
 ***
 
@@ -413,7 +388,7 @@ A promise to an instance of the Webdggrid class.
 
 #### Source
 
-[webdggrid.ts:68](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L68)
+[src-ts/webdggrid.ts:84](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L84)
 
 ***
 
@@ -429,4 +404,4 @@ Unloades the compiled wasm instance.
 
 #### Source
 
-[webdggrid.ts:77](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L77)
+[src-ts/webdggrid.ts:93](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L93)

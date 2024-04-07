@@ -2,6 +2,8 @@
 
 # Interface: Coordinate
 
+A geographic coordinate
+
 ## Properties
 
 ### lat
@@ -10,7 +12,7 @@
 
 #### Source
 
-[webdggrid.ts:28](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L28)
+[src-ts/webdggrid.ts:31](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L31)
 
 ***
 
@@ -20,4 +22,4 @@
 
 #### Source
 
-[webdggrid.ts:29](https://github.com/am2222/webDggrid/blob/cd7f74a/src-ts/webdggrid.ts#L29)
+[src-ts/webdggrid.ts:32](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L32)
