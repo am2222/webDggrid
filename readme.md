@@ -1,7 +1,5 @@
 ## Web Assembly version of DGGRID
 
-==============
-
 A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed by Dr. Kevin
 
 
