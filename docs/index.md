@@ -5,13 +5,13 @@ layout: home
 hero:
   name: "WebDggrid"
   text: "A webassembely version of DGGRID"
-  tagline: My great project tagline
+  tagline: A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed by Dr. Kevin Sahr
   actions:
     - theme: brand
-      text: Markdown Examples
+      text: Demo Page
       link: /markdown-examples
     - theme: alt
-      text: API Examples
+      text: API Docs
       link: /api/
 
 features:

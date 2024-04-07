@@ -45,7 +45,8 @@
     "publish:major": "npm version major",
     "preversion": "yarn install && yarn test",
     "version": "yarn build && yarn docs:build && git add -A dist docs types",
-    "postversion": "echo postversion"
+    "postversion": "echo postversion",
+    "serve": "npx http-server -o ./lib-wasm "
   },
   "repository": {
     "type": "git",
@@ -81,6 +82,7 @@
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.0",
+    "@types/geojson": "^7946.0.14",
     "@types/node": "~18",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "~5.44",

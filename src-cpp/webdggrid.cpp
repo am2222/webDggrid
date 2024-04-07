@@ -123,6 +123,43 @@ double gridStatCLS(std::string projection, std::string topology, int aperture, i
 //   );
 // }
 
+
+
+val SeqNumGrid(
+  const double pole_lon_deg,
+  const double pole_lat_deg,
+  const double azimuth_deg,
+  const unsigned int aperture,
+  const int res,
+  const std::string topology,
+  const std::string projection,
+  val seqnum
+){
+  
+  const std::vector<uint64_t> &seqnumVector = convertJSArrayToNumberVector<uint64_t>(seqnum);
+  dglib::SeqNumGridGenerator sngg(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection, seqnumVector);
+
+  const unsigned int  inputSize= seqnumVector.size();
+  
+  std::vector<double> x;
+  std::vector<double> y;
+  std::vector<double> vertexArray;
+
+  while(sngg.good()){
+    std::vector<long double> tempx, tempy;
+    const auto sn = sngg(tempx,tempy);
+    x.insert(x.end(),tempx.begin(),tempx.end());
+    y.insert(y.end(),tempy.begin(),tempy.end());
+
+    const unsigned int vertexes= tempx.size();
+    vertexArray.push_back(vertexes);
+  }
+
+  vertexArray.insert(std::end(vertexArray), std::begin(x), std::end(x));
+  vertexArray.insert(std::end(vertexArray), std::begin(y), std::end(y));
+  return val::array(vertexArray);
+}
+
 val DgGEO_to_SEQNUM(
     double pole_lon_deg,
     double pole_lat_deg,
@@ -218,6 +255,7 @@ val GEO_to_GEO( double pole_lon_deg,
 
   return val::array(converted_values);
 }
+
 
 // void GEO_to_PROJTRI(const long double pole_lon_deg, const long double pole_lat_deg, const long double azimuth_deg, const unsigned int aperture, const int res, const std::string topology, const std::string projection, unsigned int N, Rcpp::NumericVector in_lon_deg, Rcpp::NumericVector in_lat_deg, Rcpp::NumericVector out_tnum, Rcpp::NumericVector out_tx, Rcpp::NumericVector out_ty){
 //   dglib::Transformer dgt(pole_lon_deg, pole_lat_deg, azimuth_deg, aperture, res, topology, projection);
@@ -720,10 +758,10 @@ EMSCRIPTEN_BINDINGS(my_module)
   emscripten::function("DgGEO_to_SEQNUM", &DgGEO_to_SEQNUM);
   emscripten::function("SEQNUM_to_GEO", &SEQNUM_to_GEO);
   emscripten::function("GEO_to_GEO", &GEO_to_GEO);
+  emscripten::function("SeqNumGrid", &SeqNumGrid);
   emscripten::function("nCells", &nCells);
   emscripten::function("cellAreaKM", &cellAreaKM);
   emscripten::function("cellDistKM", &cellDistKM);
   emscripten::function("gridStatCLS", &gridStatCLS);
   emscripten::function("test", &test);
-  // emscripten::function("test2", &test2);
 }

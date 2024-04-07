@@ -1,6 +1,6 @@
 // @ts-ignore
 import { loadWasm, unloadWasm } from './libdggrid.wasm.js';
-
+import { Feature, FeatureCollection, GeoJsonProperties, Polygon, Position } from 'geojson';
 /**
  * Cell Topology
  *
@@ -24,9 +24,25 @@ export enum Projection {
     'FULLER' = 'FULLER',
 }
 
+/**
+ * A geographic coordinate
+ */
 export interface Coordinate {
     lat: number;
     lng: number;
+}
+
+/**
+ * Geojson properties type.
+ * TODO: Better handeling the types
+ */
+export type DGGSGeoJsonProperty = GeoJsonProperties & {
+    /**
+     * It stores the seq number if exists
+     */
+    id?: BigInt;
+    i?: BigInt;
+    j?: BigInt;
 }
 
 export interface IDGGSProps {
@@ -259,7 +275,7 @@ export class Webdggrid {
     sequenceNumToGeo(
         sequenceNum: bigint[],
         resolution: number = DEFAULT_RESOLUTION
-    ): number[][] {
+    ): Position[] {
         const {
             poleCoordinates: { lat, lng },
             azimuth,
@@ -279,10 +295,10 @@ export class Webdggrid {
             sequenceNum
         );
 
-        const size = resultArray.length/2;
-        const arrayOfArrays:number[][] = [];
+        const size = resultArray.length / 2;
+        const arrayOfArrays: number[][] = [];
         for (let i = 0; i < size; i += 1) {
-            arrayOfArrays.push([resultArray[i], resultArray[i+size]]);
+            arrayOfArrays.push([resultArray[i], resultArray[i + size]]);
         }
 
         return arrayOfArrays;
@@ -296,7 +312,7 @@ export class Webdggrid {
     geoToGeo(
         coordinates: number[][],
         resolution: number = DEFAULT_RESOLUTION
-    ): number[][] {
+    ): Position[] {
         const {
             poleCoordinates: { lat, lng },
             azimuth,
@@ -320,47 +336,106 @@ export class Webdggrid {
             yCoords
         );
 
-        const size = resultArray.length/2;
-        const arrayOfArrays:number[][] = [];
+        const size = resultArray.length / 2;
+        const arrayOfArrays: number[][] = [];
         for (let i = 0; i < size; i += 1) {
-            arrayOfArrays.push([resultArray[i], resultArray[i+size]]);
+            arrayOfArrays.push([resultArray[i], resultArray[i + size]]);
         }
 
         return arrayOfArrays;
     }
 
-    _is2dArray(array: any): boolean { return array.some((item: any) => Array.isArray(item)); }
+    /**
+     * Convert an array of sequence numbers to the grid coordinates with format of `[lng,lat]`. The output is an array with the same
+     * size as input `sequenceNum` and it includes an array of `CoordinateLike` objects.
+     * @param sequenceNum 
+     * @param resolution  [resolution=DEFAULT_RESOLUTION]
+     * @returns An array of [lng,lat]
+     */
+    sequenceNumToGrid(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): Position[][] {
+        const {
+            poleCoordinates: { lat, lng },
+            azimuth,
+            topology,
+            projection,
+            aperture,
+        } = this.dggs;
 
-    _arrayToVector(array: any) {
-        const is2d = this._is2dArray(array);
-        if (is2d) {
-            const dDVector = new this._module.DoubleVectorVector();
-            array.forEach((item: any) => {
-                const dVector = new this._module.DoubleVector();
-                dVector.push_back(item[0]);
-                dVector.push_back(item[1]);
-                dDVector.push_back(dVector);
-            });
-            return dDVector;
+        let resultArray = [];
+        try {
+            resultArray = this._module.SeqNumGrid(
+                lat,
+                lng,
+                azimuth,
+                aperture,
+                resolution,
+                topology,
+                projection,
+                sequenceNum
+            );
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw(e);
         }
+
+        const inputSize = sequenceNum.length;
+
+        const allShapeVertexes = resultArray.slice(0, inputSize);
+
+        const sumVertexes = allShapeVertexes.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue;
+        }, 0);
+
+        const featureSet: Position[][] = [];
+
+        let xOffset = inputSize;
+        let yOffset = inputSize + sumVertexes;
+        for (let i = 0; i < allShapeVertexes.length; i += 1) {
+            const numVertexes = allShapeVertexes[i];
+
+            const currentShapeXVertexes = resultArray.slice(xOffset, xOffset + numVertexes);
+            const currentShapeYVertexes = resultArray.slice(yOffset, yOffset + numVertexes);
+
+            const coordinates: Position[] = [];
+            for (let i = 0; i < numVertexes; i += 1) {
+                coordinates.push([currentShapeXVertexes[i], currentShapeYVertexes[i]]);
+            }
+            featureSet.push(coordinates);
+            xOffset += numVertexes;
+            yOffset += numVertexes;
+        }
+
+        return featureSet;
     }
-    _vectorToArray(vector: any) { return new Array(vector.size()).fill(0).map((_, id) => vector.get(id)); }
 
-    _wVectorToArray = (vector: any) => {
-        if (vector.size() === 0) {
-            return [];
-        }
+    sequenceNumToGridFeatureCollection(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): FeatureCollection<Polygon, DGGSGeoJsonProperty> {
 
-        const objectType = vector.$$.ptrType.name;
+        const coordinatesArray = this.sequenceNumToGrid(sequenceNum, resolution);
 
-        switch (objectType) {
-            case 'BigIntegerVector*':
-                return this._vectorToArray(vector);
+        const features = coordinatesArray.map((coordinates, index) => {
+            const seqNum = sequenceNum[index];
+            return {
+                type: 'Feature',
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [coordinates]
+                },
+                id: seqNum as unknown as number,
+                properties: {
+                    id: seqNum
+                } as DGGSGeoJsonProperty
+            } as Feature<Polygon, DGGSGeoJsonProperty>;
+        });
 
-            default:
-                return [];
-        }
-    };
-
-    // _extractColumn(arr: any, column: number) { return arr.map((x: any) => x[column]); }
+        return {
+            type: 'FeatureCollection',
+            features,
+        };
+    }
 }

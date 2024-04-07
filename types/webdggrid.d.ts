@@ -1,3 +1,4 @@
+import { FeatureCollection, GeoJsonProperties, Polygon, Position } from 'geojson';
 /**
  * Cell Topology
  *
@@ -20,10 +21,25 @@ export declare enum Projection {
     'ISEA' = "ISEA",
     'FULLER' = "FULLER"
 }
+/**
+ * A geographic coordinate
+ */
 export interface Coordinate {
     lat: number;
     lng: number;
 }
+/**
+ * Geojson properties type.
+ * TODO: Better handeling the types
+ */
+export type DGGSGeoJsonProperty = GeoJsonProperties & {
+    /**
+     * It stores the seq number if exists
+     */
+    id?: BigInt;
+    i?: BigInt;
+    j?: BigInt;
+};
 export interface IDGGSProps {
     poleCoordinates: Coordinate;
     azimuth: number;
@@ -102,17 +118,22 @@ export declare class Webdggrid {
      * @param resolution  [resolution=DEFAULT_RESOLUTION]
      * @returns An array of [lng,lat]
      */
-    sequenceNumToGeo(sequenceNum: bigint[], resolution?: number): number[][];
+    sequenceNumToGeo(sequenceNum: bigint[], resolution?: number): Position[];
     /**
      * Converts a set of coordinates to the cell centroid values
      * @param coordinates A 2d array of lng and lat values
      * @param resolution  [resolution=DEFAULT_RESOLUTION] The resolution of the dggs
      * @returns An array of dggs cell centroid coordinates
      */
-    geoToGeo(coordinates: number[][], resolution?: number): number[][];
-    _is2dArray(array: any): boolean;
-    _arrayToVector(array: any): any;
-    _vectorToArray(vector: any): any[];
-    _wVectorToArray: (vector: any) => any[];
+    geoToGeo(coordinates: number[][], resolution?: number): Position[];
+    /**
+     * Convert an array of sequence numbers to the grid coordinates with format of `[lng,lat]`. The output is an array with the same
+     * size as input `sequenceNum` and it includes an array of `CoordinateLike` objects.
+     * @param sequenceNum
+     * @param resolution  [resolution=DEFAULT_RESOLUTION]
+     * @returns An array of [lng,lat]
+     */
+    sequenceNumToGrid(sequenceNum: bigint[], resolution?: number): Position[][];
+    sequenceNumToGridFeatureCollection(sequenceNum: bigint[], resolution?: number): FeatureCollection<Polygon, DGGSGeoJsonProperty>;
 }
 //# sourceMappingURL=webdggrid.d.ts.map

@@ -37,18 +37,6 @@ export class Webdggrid {
         this._module = _module;
         this.dggs = DEFAULT_DGGS;
         this.resolution = DEFAULT_RESOLUTION;
-        this._wVectorToArray = (vector) => {
-            if (vector.size() === 0) {
-                return [];
-            }
-            const objectType = vector.$$.ptrType.name;
-            switch (objectType) {
-                case 'BigIntegerVector*':
-                    return this._vectorToArray(vector);
-                default:
-                    return [];
-            }
-        };
         this._module = _module;
     }
     /**
@@ -184,20 +172,64 @@ export class Webdggrid {
         }
         return arrayOfArrays;
     }
-    _is2dArray(array) { return array.some((item) => Array.isArray(item)); }
-    _arrayToVector(array) {
-        const is2d = this._is2dArray(array);
-        if (is2d) {
-            const dDVector = new this._module.DoubleVectorVector();
-            array.forEach((item) => {
-                const dVector = new this._module.DoubleVector();
-                dVector.push_back(item[0]);
-                dVector.push_back(item[1]);
-                dDVector.push_back(dVector);
-            });
-            return dDVector;
+    /**
+     * Convert an array of sequence numbers to the grid coordinates with format of `[lng,lat]`. The output is an array with the same
+     * size as input `sequenceNum` and it includes an array of `CoordinateLike` objects.
+     * @param sequenceNum
+     * @param resolution  [resolution=DEFAULT_RESOLUTION]
+     * @returns An array of [lng,lat]
+     */
+    sequenceNumToGrid(sequenceNum, resolution = DEFAULT_RESOLUTION) {
+        const { poleCoordinates: { lat, lng }, azimuth, topology, projection, aperture, } = this.dggs;
+        let resultArray = [];
+        try {
+            resultArray = this._module.SeqNumGrid(lat, lng, azimuth, aperture, resolution, topology, projection, sequenceNum);
         }
+        catch (e) {
+            throw (this._module.getExceptionMessage(e).toString());
+        }
+        const inputSize = sequenceNum.length;
+        const allShapeVertexes = resultArray.slice(0, inputSize);
+        const sumVertexes = allShapeVertexes.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue;
+        }, 0);
+        const featureSet = [];
+        let xOffset = inputSize;
+        let yOffset = inputSize + sumVertexes;
+        for (let i = 0; i < allShapeVertexes.length; i += 1) {
+            const numVertexes = allShapeVertexes[i];
+            const currentShapeXVertexes = resultArray.slice(xOffset, xOffset + numVertexes);
+            const currentShapeYVertexes = resultArray.slice(yOffset, yOffset + numVertexes);
+            const coordinates = [];
+            for (let i = 0; i < numVertexes; i += 1) {
+                coordinates.push([currentShapeXVertexes[i], currentShapeYVertexes[i]]);
+            }
+            featureSet.push(coordinates);
+            xOffset += numVertexes;
+            yOffset += numVertexes;
+        }
+        return featureSet;
     }
-    _vectorToArray(vector) { return new Array(vector.size()).fill(0).map((_, id) => vector.get(id)); }
+    sequenceNumToGridFeatureCollection(sequenceNum, resolution = DEFAULT_RESOLUTION) {
+        const coordinatesArray = this.sequenceNumToGrid(sequenceNum, resolution);
+        const features = coordinatesArray.map((coordinates, index) => {
+            const seqNum = sequenceNum[index];
+            return {
+                type: 'Feature',
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [coordinates]
+                },
+                id: seqNum,
+                properties: {
+                    id: seqNum
+                }
+            };
+        });
+        return {
+            type: 'FeatureCollection',
+            features,
+        };
+    }
 }
 //# sourceMappingURL=webdggrid.js.map
