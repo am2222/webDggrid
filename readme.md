@@ -1,5 +1,5 @@
 ## Web Assembly version of DGGRID
-
+------------
 A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed by Dr. Kevin
 
 
@@ -66,8 +66,6 @@ const seqNum = dggs.geoToSequenceNum([[0, 0]]);
 - [sequenceNumToGrid](https://am2222.github.io/webDggrid/api/classes/Webdggrid.html#sequenceNumToGrid)
 
 ## Changes
-
-------------
 
 Slow development pace.
 
