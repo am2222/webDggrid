@@ -1,5 +1,5 @@
 ## Web Assembly version of DGGRID
-------------
+
 A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed by Dr. Kevin
 
 
@@ -13,7 +13,7 @@ A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed
 <p align="center">
   <img src="https://github.com/am2222/pydggrid/blob/master/docs/L6kmP.jpg?raw=true" alt="SPyDGGRID"/>
 </p>
-
+------------
 
 ## How to use
 
