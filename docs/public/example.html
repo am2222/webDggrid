@@ -71,6 +71,30 @@
             grid-template-columns: 1fr 1fr;
             gap: 6px;
         }
+        .field-inline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #555;
+            cursor: pointer;
+        }
+        .field-inline input[type=checkbox] {
+            width: 14px;
+            height: 14px;
+            accent-color: #0066cc;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .ylorbr-swatch {
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 2px;
+            background: linear-gradient(to right,
+                #ffffe5, #fff7bc, #fee391, #fec44f,
+                #fe9929, #ec7014, #cc4c02, #993404, #662506);
+        }
 
         #generateBtn {
             width: 100%;
@@ -188,6 +212,14 @@
             </div>
         </div>
 
+        <h4>Display</h4>
+
+        <label class="field-inline">
+            <input type="checkbox" id="colorCells" />
+            Color cells (YlOrBr)
+        </label>
+        <div class="ylorbr-swatch"></div>
+
         <button id="generateBtn" disabled>Loading WASM…</button>
     </div>
 
@@ -211,9 +243,35 @@
         const azimuthEl   = document.getElementById('azimuth');
         const poleLngEl   = document.getElementById('poleLng');
         const poleLatEl   = document.getElementById('poleLat');
+        const colorCellsEl = document.getElementById('colorCells');
 
         resSlider.addEventListener('input', () => {
             resValueEl.textContent = resSlider.value;
+        });
+
+        // YlOrBr 9-stop color ramp (ColorBrewer sequential)
+        const YLORBR = [
+            0,     '#ffffe5',
+            0.125, '#fff7bc',
+            0.25,  '#fee391',
+            0.375, '#fec44f',
+            0.5,   '#fe9929',
+            0.625, '#ec7014',
+            0.75,  '#cc4c02',
+            0.875, '#993404',
+            1,     '#662506',
+        ];
+
+        function fillPaint(colored) {
+            return colored
+                ? { 'fill-color': ['interpolate', ['linear'], ['get', 'colorValue'], ...YLORBR], 'fill-opacity': 0.7 }
+                : { 'fill-color': '#3388ff', 'fill-opacity': 0.18 };
+        }
+
+        colorCellsEl.addEventListener('change', () => {
+            if (!mapReady) return;
+            map.setPaintProperty('dggrid-fill', 'fill-color',   fillPaint(colorCellsEl.checked)['fill-color']);
+            map.setPaintProperty('dggrid-fill', 'fill-opacity', fillPaint(colorCellsEl.checked)['fill-opacity']);
         });
 
         // Only hexagon supports multiple apertures
@@ -289,7 +347,7 @@
                 id: 'dggrid-fill',
                 type: 'fill',
                 source: 'dggrid',
-                paint: { 'fill-color': '#3388ff', 'fill-opacity': 0.18 },
+                paint: fillPaint(false),
             });
 
             map.addLayer({
@@ -385,15 +443,26 @@
                         });
                     }
 
+                    const totalCells = webdggrid.nCells(resolution);
                     const fc = webdggrid.sequenceNumToGridFeatureCollection(seqNums, resolution);
                     fc.features.forEach(f => {
                         if (typeof f.id === 'bigint') f.id = f.id.toString();
                         const p = f.properties;
-                        if (p) for (const k of Object.keys(p))
-                            if (typeof p[k] === 'bigint') p[k] = p[k].toString();
+                        if (p) {
+                            for (const k of Object.keys(p))
+                                if (typeof p[k] === 'bigint') p[k] = p[k].toString();
+                            // Normalised position in the sequence [0, 1] for YlOrBr mapping
+                            p.colorValue = totalCells > 1
+                                ? (Number(BigInt(p.id) - 1n) / (totalCells - 1))
+                                : 0;
+                        }
                     });
 
                     map.getSource('dggrid').setData(fc);
+                    // Re-apply paint so color mode is honoured after each regeneration
+                    const paint = fillPaint(colorCellsEl.checked);
+                    map.setPaintProperty('dggrid-fill', 'fill-color',   paint['fill-color']);
+                    map.setPaintProperty('dggrid-fill', 'fill-opacity', paint['fill-opacity']);
                     console.log('GeoJSON FeatureCollection:', JSON.stringify(fc, null, 2));
                     statusEl.textContent = `${seqNums.length} cells · res ${resolution} · ${topology}`;
                 } catch (err) {
