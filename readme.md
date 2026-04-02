@@ -16,6 +16,7 @@ A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed
 <p align="center">
   <img src="screenshot.png" alt="Webdggrid demo screenshot"/>
 </p>
+
 ------------
 
 ## How to use
