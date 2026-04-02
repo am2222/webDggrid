@@ -1,3 +1,0 @@
-/Users/majid/webDggrid/lib-wasm-py/CMakeFiles/libdggrid.dir
-/Users/majid/webDggrid/lib-wasm-py/CMakeFiles/edit_cache.dir
-/Users/majid/webDggrid/lib-wasm-py/CMakeFiles/rebuild_cache.dir
