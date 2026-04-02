@@ -1,0 +1,3 @@
+/Users/majid/webDggrid/lib-wasm/CMakeFiles/libdggrid.dir
+/Users/majid/webDggrid/lib-wasm/CMakeFiles/edit_cache.dir
+/Users/majid/webDggrid/lib-wasm/CMakeFiles/rebuild_cache.dir

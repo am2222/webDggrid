@@ -14,9 +14,11 @@ set(DGLIB_INC  "${DGGRID_DIR}/src/lib/dglib/include")
 set(DGLIB_LIB  "${DGGRID_DIR}/src/lib/dglib/lib")
 set(PROJ4_INC  "${DGGRID_DIR}/src/lib/proj4lib/include")
 set(PROJ4_LIB  "${DGGRID_DIR}/src/lib/proj4lib/lib")
-# shapefil.h lives at shapelib/include/shapelib/shapefil.h;
-# include the inner shapelib/ dir so <shapefil.h> resolves directly.
-set(SHAPE_INC  "${DGGRID_DIR}/src/lib/shapelib/include/shapelib")
+# shapefil.h lives at shapelib/include/shapelib/shapefil.h.
+# dglib headers use  #include <shapefil.h>       → needs .../include/shapelib
+# shapelib .c files use #include "shapelib/shapefil.h" → needs .../include
+set(SHAPE_INC  "${DGGRID_DIR}/src/lib/shapelib/include/shapelib"
+               "${DGGRID_DIR}/src/lib/shapelib/include")
 set(SHAPE_LIB  "${DGGRID_DIR}/src/lib/shapelib/lib")
 
 # ── Source files ──────────────────────────────────────────────────────────
@@ -67,7 +69,6 @@ if(EMSCRIPTEN)
         "-sWASM_BIGINT=1"
         "-sBINARYEN_ASYNC_COMPILATION=1"
         "-sDYNAMIC_EXECUTION=0"
-        "-sUSE_ES6_IMPORT_META=0"
     )
 
     if(STANDALONE_WASM)

@@ -1,0 +1,2692 @@
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineSystem.cmake:12 (find_program)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_UNAME"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "uname"
+    candidate_directories:
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+    searched_directories:
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/uname"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/uname"
+      - "/opt/local/bin/uname"
+      - "/opt/local/sbin/uname"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/uname"
+      - "/Users/majid/.pyenv/shims/uname"
+      - "/opt/homebrew/opt/jpeg/bin/uname"
+      - "/Users/majid/.volta/bin/uname"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/uname"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/uname"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/uname"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/uname"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/uname"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/uname"
+      - "/opt/homebrew/bin/uname"
+      - "/opt/homebrew/sbin/uname"
+      - "/usr/local/bin/uname"
+      - "/System/Cryptexes/App/usr/bin/uname"
+    found: "/usr/bin/uname"
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineSystem.cmake:207 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The target system is: Emscripten - 1 - x86
+      The host system is: Darwin - 25.3.0 - arm64
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeUnixFindMake.cmake:5 (find_program)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_MAKE_PROGRAM"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gmake"
+      - "make"
+      - "smake"
+    candidate_directories:
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/gmake"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/gmake"
+      - "/opt/local/bin/gmake"
+      - "/opt/local/sbin/gmake"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/gmake"
+      - "/Users/majid/.pyenv/shims/gmake"
+      - "/opt/homebrew/opt/jpeg/bin/gmake"
+      - "/Users/majid/.volta/bin/gmake"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/gmake"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/gmake"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/gmake"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/gmake"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/gmake"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/gmake"
+      - "/opt/homebrew/bin/gmake"
+      - "/opt/homebrew/sbin/gmake"
+      - "/usr/local/bin/gmake"
+      - "/System/Cryptexes/App/usr/bin/gmake"
+      - "/usr/bin/gmake"
+      - "/bin/gmake"
+      - "/usr/sbin/gmake"
+      - "/sbin/gmake"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/gmake"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/gmake"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/gmake"
+      - "/opt/pmk/env/global/bin/gmake"
+      - "/Library/Apple/usr/bin/gmake"
+      - "/Library/TeX/texbin/gmake"
+      - "/Applications/VMware Fusion.app/Contents/Public/gmake"
+      - "/usr/local/go/bin/gmake"
+      - "/opt/podman/bin/gmake"
+      - "/Users/majid/.cargo/bin/gmake"
+      - "/Users/majid/Library/Android/sdk/emulator/gmake"
+      - "/Users/majid/Library/Android/sdk/platform-tools/gmake"
+      - "/Users/majid/.local/bin/gmake"
+      - "/Users/majid/.nvm/gmake"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/gmake"
+      - "/opt/homebrew/opt/postgresql@17/bin/gmake"
+      - "/bin/gmake"
+      - "/sbin/gmake"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/make"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/make"
+      - "/opt/local/bin/make"
+      - "/opt/local/sbin/make"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/make"
+      - "/Users/majid/.pyenv/shims/make"
+      - "/opt/homebrew/opt/jpeg/bin/make"
+      - "/Users/majid/.volta/bin/make"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/make"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/make"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/make"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/make"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/make"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/make"
+      - "/opt/homebrew/bin/make"
+      - "/opt/homebrew/sbin/make"
+      - "/usr/local/bin/make"
+      - "/System/Cryptexes/App/usr/bin/make"
+    found: "/usr/bin/make"
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:462 (find_file)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:500 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCXXCompilerId.cpp.in"
+    candidate_directories:
+      - "/opt/homebrew/share/cmake/Modules/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules/"
+    found: "/opt/homebrew/share/cmake/Modules/CMakeCXXCompilerId.cpp.in"
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/em++ 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out.js"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out.wasm"
+      
+      The CXX compiler identification could not be found in:
+        /Users/majid/webDggrid/lib-wasm/CMakeFiles/4.1.2/CompilerIdCXX/a.out.js
+      
+      The CXX compiler identification is Clang, found in:
+        /Users/majid/webDggrid/lib-wasm/CMakeFiles/4.1.2/CompilerIdCXX/a.out.wasm
+      
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_STRIP"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "llvm-strip"
+      - "strip"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/llvm-strip"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/llvm-strip"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/llvm-strip"
+      - "/opt/local/bin/llvm-strip"
+      - "/opt/local/sbin/llvm-strip"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/llvm-strip"
+      - "/Users/majid/.pyenv/shims/llvm-strip"
+      - "/opt/homebrew/opt/jpeg/bin/llvm-strip"
+      - "/Users/majid/.volta/bin/llvm-strip"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/llvm-strip"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/llvm-strip"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/llvm-strip"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/llvm-strip"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/llvm-strip"
+      - "/opt/homebrew/bin/llvm-strip"
+      - "/opt/homebrew/sbin/llvm-strip"
+      - "/usr/local/bin/llvm-strip"
+      - "/System/Cryptexes/App/usr/bin/llvm-strip"
+      - "/usr/bin/llvm-strip"
+      - "/bin/llvm-strip"
+      - "/usr/sbin/llvm-strip"
+      - "/sbin/llvm-strip"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/llvm-strip"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/llvm-strip"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/llvm-strip"
+      - "/opt/pmk/env/global/bin/llvm-strip"
+      - "/Library/Apple/usr/bin/llvm-strip"
+      - "/Library/TeX/texbin/llvm-strip"
+      - "/Applications/VMware Fusion.app/Contents/Public/llvm-strip"
+      - "/usr/local/go/bin/llvm-strip"
+      - "/opt/podman/bin/llvm-strip"
+      - "/Users/majid/.cargo/bin/llvm-strip"
+      - "/Users/majid/Library/Android/sdk/emulator/llvm-strip"
+      - "/Users/majid/Library/Android/sdk/platform-tools/llvm-strip"
+      - "/Users/majid/.local/bin/llvm-strip"
+      - "/Users/majid/.nvm/llvm-strip"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/llvm-strip"
+      - "/opt/homebrew/opt/postgresql@17/bin/llvm-strip"
+      - "/bin/llvm-strip"
+      - "/sbin/llvm-strip"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/strip"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/strip"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/strip"
+      - "/opt/local/bin/strip"
+      - "/opt/local/sbin/strip"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/strip"
+      - "/Users/majid/.pyenv/shims/strip"
+      - "/opt/homebrew/opt/jpeg/bin/strip"
+      - "/Users/majid/.volta/bin/strip"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/strip"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/strip"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/strip"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/strip"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/strip"
+      - "/opt/homebrew/bin/strip"
+      - "/opt/homebrew/sbin/strip"
+      - "/usr/local/bin/strip"
+      - "/System/Cryptexes/App/usr/bin/strip"
+    found: "/usr/bin/strip"
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_LINKER"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ld.lld"
+      - "ld"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/ld.lld"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/ld.lld"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/ld.lld"
+      - "/opt/local/bin/ld.lld"
+      - "/opt/local/sbin/ld.lld"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/ld.lld"
+      - "/Users/majid/.pyenv/shims/ld.lld"
+      - "/opt/homebrew/opt/jpeg/bin/ld.lld"
+      - "/Users/majid/.volta/bin/ld.lld"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/ld.lld"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/ld.lld"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/ld.lld"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/ld.lld"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/ld.lld"
+      - "/opt/homebrew/bin/ld.lld"
+      - "/opt/homebrew/sbin/ld.lld"
+      - "/usr/local/bin/ld.lld"
+      - "/System/Cryptexes/App/usr/bin/ld.lld"
+      - "/usr/bin/ld.lld"
+      - "/bin/ld.lld"
+      - "/usr/sbin/ld.lld"
+      - "/sbin/ld.lld"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/ld.lld"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/ld.lld"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/ld.lld"
+      - "/opt/pmk/env/global/bin/ld.lld"
+      - "/Library/Apple/usr/bin/ld.lld"
+      - "/Library/TeX/texbin/ld.lld"
+      - "/Applications/VMware Fusion.app/Contents/Public/ld.lld"
+      - "/usr/local/go/bin/ld.lld"
+      - "/opt/podman/bin/ld.lld"
+      - "/Users/majid/.cargo/bin/ld.lld"
+      - "/Users/majid/Library/Android/sdk/emulator/ld.lld"
+      - "/Users/majid/Library/Android/sdk/platform-tools/ld.lld"
+      - "/Users/majid/.local/bin/ld.lld"
+      - "/Users/majid/.nvm/ld.lld"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/ld.lld"
+      - "/opt/homebrew/opt/postgresql@17/bin/ld.lld"
+      - "/bin/ld.lld"
+      - "/sbin/ld.lld"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/ld"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/ld"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/ld"
+      - "/opt/local/bin/ld"
+      - "/opt/local/sbin/ld"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/ld"
+      - "/Users/majid/.pyenv/shims/ld"
+      - "/opt/homebrew/opt/jpeg/bin/ld"
+      - "/Users/majid/.volta/bin/ld"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/ld"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/ld"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/ld"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/ld"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/ld"
+      - "/opt/homebrew/bin/ld"
+      - "/opt/homebrew/sbin/ld"
+      - "/usr/local/bin/ld"
+      - "/System/Cryptexes/App/usr/bin/ld"
+    found: "/usr/bin/ld"
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_OBJDUMP"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "llvm-objdump"
+      - "objdump"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/llvm-objdump"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/llvm-objdump"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/llvm-objdump"
+      - "/opt/local/bin/llvm-objdump"
+      - "/opt/local/sbin/llvm-objdump"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/llvm-objdump"
+      - "/Users/majid/.pyenv/shims/llvm-objdump"
+      - "/opt/homebrew/opt/jpeg/bin/llvm-objdump"
+      - "/Users/majid/.volta/bin/llvm-objdump"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/llvm-objdump"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/llvm-objdump"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/llvm-objdump"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/llvm-objdump"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/llvm-objdump"
+      - "/opt/homebrew/bin/llvm-objdump"
+      - "/opt/homebrew/sbin/llvm-objdump"
+      - "/usr/local/bin/llvm-objdump"
+      - "/System/Cryptexes/App/usr/bin/llvm-objdump"
+      - "/usr/bin/llvm-objdump"
+      - "/bin/llvm-objdump"
+      - "/usr/sbin/llvm-objdump"
+      - "/sbin/llvm-objdump"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/llvm-objdump"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/llvm-objdump"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/llvm-objdump"
+      - "/opt/pmk/env/global/bin/llvm-objdump"
+      - "/Library/Apple/usr/bin/llvm-objdump"
+      - "/Library/TeX/texbin/llvm-objdump"
+      - "/Applications/VMware Fusion.app/Contents/Public/llvm-objdump"
+      - "/usr/local/go/bin/llvm-objdump"
+      - "/opt/podman/bin/llvm-objdump"
+      - "/Users/majid/.cargo/bin/llvm-objdump"
+      - "/Users/majid/Library/Android/sdk/emulator/llvm-objdump"
+      - "/Users/majid/Library/Android/sdk/platform-tools/llvm-objdump"
+      - "/Users/majid/.local/bin/llvm-objdump"
+      - "/Users/majid/.nvm/llvm-objdump"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/llvm-objdump"
+      - "/opt/homebrew/opt/postgresql@17/bin/llvm-objdump"
+      - "/bin/llvm-objdump"
+      - "/sbin/llvm-objdump"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/objdump"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/objdump"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/objdump"
+      - "/opt/local/bin/objdump"
+      - "/opt/local/sbin/objdump"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/objdump"
+      - "/Users/majid/.pyenv/shims/objdump"
+      - "/opt/homebrew/opt/jpeg/bin/objdump"
+      - "/Users/majid/.volta/bin/objdump"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/objdump"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/objdump"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/objdump"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/objdump"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/objdump"
+      - "/opt/homebrew/bin/objdump"
+      - "/opt/homebrew/sbin/objdump"
+      - "/usr/local/bin/objdump"
+      - "/System/Cryptexes/App/usr/bin/objdump"
+    found: "/usr/bin/objdump"
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_OBJCOPY"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "llvm-objcopy"
+      - "objcopy"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/llvm-objcopy"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/llvm-objcopy"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/llvm-objcopy"
+      - "/opt/local/bin/llvm-objcopy"
+      - "/opt/local/sbin/llvm-objcopy"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/llvm-objcopy"
+      - "/Users/majid/.pyenv/shims/llvm-objcopy"
+      - "/opt/homebrew/opt/jpeg/bin/llvm-objcopy"
+      - "/Users/majid/.volta/bin/llvm-objcopy"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/llvm-objcopy"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/llvm-objcopy"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/llvm-objcopy"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/llvm-objcopy"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/llvm-objcopy"
+      - "/opt/homebrew/bin/llvm-objcopy"
+      - "/opt/homebrew/sbin/llvm-objcopy"
+      - "/usr/local/bin/llvm-objcopy"
+      - "/System/Cryptexes/App/usr/bin/llvm-objcopy"
+      - "/usr/bin/llvm-objcopy"
+      - "/bin/llvm-objcopy"
+      - "/usr/sbin/llvm-objcopy"
+      - "/sbin/llvm-objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/llvm-objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/llvm-objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/llvm-objcopy"
+      - "/opt/pmk/env/global/bin/llvm-objcopy"
+      - "/Library/Apple/usr/bin/llvm-objcopy"
+      - "/Library/TeX/texbin/llvm-objcopy"
+      - "/Applications/VMware Fusion.app/Contents/Public/llvm-objcopy"
+      - "/usr/local/go/bin/llvm-objcopy"
+      - "/opt/podman/bin/llvm-objcopy"
+      - "/Users/majid/.cargo/bin/llvm-objcopy"
+      - "/Users/majid/Library/Android/sdk/emulator/llvm-objcopy"
+      - "/Users/majid/Library/Android/sdk/platform-tools/llvm-objcopy"
+      - "/Users/majid/.local/bin/llvm-objcopy"
+      - "/Users/majid/.nvm/llvm-objcopy"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/llvm-objcopy"
+      - "/opt/homebrew/opt/postgresql@17/bin/llvm-objcopy"
+      - "/bin/llvm-objcopy"
+      - "/sbin/llvm-objcopy"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/objcopy"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/objcopy"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/objcopy"
+      - "/opt/local/bin/objcopy"
+      - "/opt/local/sbin/objcopy"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/objcopy"
+      - "/Users/majid/.pyenv/shims/objcopy"
+      - "/opt/homebrew/opt/jpeg/bin/objcopy"
+      - "/Users/majid/.volta/bin/objcopy"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/objcopy"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/objcopy"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/objcopy"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/objcopy"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/objcopy"
+      - "/opt/homebrew/bin/objcopy"
+      - "/opt/homebrew/sbin/objcopy"
+      - "/usr/local/bin/objcopy"
+      - "/System/Cryptexes/App/usr/bin/objcopy"
+      - "/usr/bin/objcopy"
+      - "/bin/objcopy"
+      - "/usr/sbin/objcopy"
+      - "/sbin/objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/objcopy"
+      - "/opt/pmk/env/global/bin/objcopy"
+      - "/Library/Apple/usr/bin/objcopy"
+      - "/Library/TeX/texbin/objcopy"
+      - "/Applications/VMware Fusion.app/Contents/Public/objcopy"
+      - "/usr/local/go/bin/objcopy"
+      - "/opt/podman/bin/objcopy"
+      - "/Users/majid/.cargo/bin/objcopy"
+      - "/Users/majid/Library/Android/sdk/emulator/objcopy"
+      - "/Users/majid/Library/Android/sdk/platform-tools/objcopy"
+      - "/Users/majid/.local/bin/objcopy"
+      - "/Users/majid/.nvm/objcopy"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/objcopy"
+      - "/opt/homebrew/opt/postgresql@17/bin/objcopy"
+      - "/bin/objcopy"
+      - "/sbin/objcopy"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_READELF"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "llvm-readelf"
+      - "readelf"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/llvm-readelf"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/llvm-readelf"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/llvm-readelf"
+      - "/opt/local/bin/llvm-readelf"
+      - "/opt/local/sbin/llvm-readelf"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/llvm-readelf"
+      - "/Users/majid/.pyenv/shims/llvm-readelf"
+      - "/opt/homebrew/opt/jpeg/bin/llvm-readelf"
+      - "/Users/majid/.volta/bin/llvm-readelf"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/llvm-readelf"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/llvm-readelf"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/llvm-readelf"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/llvm-readelf"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/llvm-readelf"
+      - "/opt/homebrew/bin/llvm-readelf"
+      - "/opt/homebrew/sbin/llvm-readelf"
+      - "/usr/local/bin/llvm-readelf"
+      - "/System/Cryptexes/App/usr/bin/llvm-readelf"
+      - "/usr/bin/llvm-readelf"
+      - "/bin/llvm-readelf"
+      - "/usr/sbin/llvm-readelf"
+      - "/sbin/llvm-readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/llvm-readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/llvm-readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/llvm-readelf"
+      - "/opt/pmk/env/global/bin/llvm-readelf"
+      - "/Library/Apple/usr/bin/llvm-readelf"
+      - "/Library/TeX/texbin/llvm-readelf"
+      - "/Applications/VMware Fusion.app/Contents/Public/llvm-readelf"
+      - "/usr/local/go/bin/llvm-readelf"
+      - "/opt/podman/bin/llvm-readelf"
+      - "/Users/majid/.cargo/bin/llvm-readelf"
+      - "/Users/majid/Library/Android/sdk/emulator/llvm-readelf"
+      - "/Users/majid/Library/Android/sdk/platform-tools/llvm-readelf"
+      - "/Users/majid/.local/bin/llvm-readelf"
+      - "/Users/majid/.nvm/llvm-readelf"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/llvm-readelf"
+      - "/opt/homebrew/opt/postgresql@17/bin/llvm-readelf"
+      - "/bin/llvm-readelf"
+      - "/sbin/llvm-readelf"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/readelf"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/readelf"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/readelf"
+      - "/opt/local/bin/readelf"
+      - "/opt/local/sbin/readelf"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/readelf"
+      - "/Users/majid/.pyenv/shims/readelf"
+      - "/opt/homebrew/opt/jpeg/bin/readelf"
+      - "/Users/majid/.volta/bin/readelf"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/readelf"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/readelf"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/readelf"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/readelf"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/readelf"
+      - "/opt/homebrew/bin/readelf"
+      - "/opt/homebrew/sbin/readelf"
+      - "/usr/local/bin/readelf"
+      - "/System/Cryptexes/App/usr/bin/readelf"
+      - "/usr/bin/readelf"
+      - "/bin/readelf"
+      - "/usr/sbin/readelf"
+      - "/sbin/readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/readelf"
+      - "/opt/pmk/env/global/bin/readelf"
+      - "/Library/Apple/usr/bin/readelf"
+      - "/Library/TeX/texbin/readelf"
+      - "/Applications/VMware Fusion.app/Contents/Public/readelf"
+      - "/usr/local/go/bin/readelf"
+      - "/opt/podman/bin/readelf"
+      - "/Users/majid/.cargo/bin/readelf"
+      - "/Users/majid/Library/Android/sdk/emulator/readelf"
+      - "/Users/majid/Library/Android/sdk/platform-tools/readelf"
+      - "/Users/majid/.local/bin/readelf"
+      - "/Users/majid/.nvm/readelf"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/readelf"
+      - "/opt/homebrew/opt/postgresql@17/bin/readelf"
+      - "/bin/readelf"
+      - "/sbin/readelf"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_DLLTOOL"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "llvm-dlltool"
+      - "dlltool"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/llvm-dlltool"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/llvm-dlltool"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/llvm-dlltool"
+      - "/opt/local/bin/llvm-dlltool"
+      - "/opt/local/sbin/llvm-dlltool"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/llvm-dlltool"
+      - "/Users/majid/.pyenv/shims/llvm-dlltool"
+      - "/opt/homebrew/opt/jpeg/bin/llvm-dlltool"
+      - "/Users/majid/.volta/bin/llvm-dlltool"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/llvm-dlltool"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/llvm-dlltool"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/llvm-dlltool"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/llvm-dlltool"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/llvm-dlltool"
+      - "/opt/homebrew/bin/llvm-dlltool"
+      - "/opt/homebrew/sbin/llvm-dlltool"
+      - "/usr/local/bin/llvm-dlltool"
+      - "/System/Cryptexes/App/usr/bin/llvm-dlltool"
+      - "/usr/bin/llvm-dlltool"
+      - "/bin/llvm-dlltool"
+      - "/usr/sbin/llvm-dlltool"
+      - "/sbin/llvm-dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/llvm-dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/llvm-dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/llvm-dlltool"
+      - "/opt/pmk/env/global/bin/llvm-dlltool"
+      - "/Library/Apple/usr/bin/llvm-dlltool"
+      - "/Library/TeX/texbin/llvm-dlltool"
+      - "/Applications/VMware Fusion.app/Contents/Public/llvm-dlltool"
+      - "/usr/local/go/bin/llvm-dlltool"
+      - "/opt/podman/bin/llvm-dlltool"
+      - "/Users/majid/.cargo/bin/llvm-dlltool"
+      - "/Users/majid/Library/Android/sdk/emulator/llvm-dlltool"
+      - "/Users/majid/Library/Android/sdk/platform-tools/llvm-dlltool"
+      - "/Users/majid/.local/bin/llvm-dlltool"
+      - "/Users/majid/.nvm/llvm-dlltool"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/llvm-dlltool"
+      - "/opt/homebrew/opt/postgresql@17/bin/llvm-dlltool"
+      - "/bin/llvm-dlltool"
+      - "/sbin/llvm-dlltool"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/dlltool"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/dlltool"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/dlltool"
+      - "/opt/local/bin/dlltool"
+      - "/opt/local/sbin/dlltool"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/dlltool"
+      - "/Users/majid/.pyenv/shims/dlltool"
+      - "/opt/homebrew/opt/jpeg/bin/dlltool"
+      - "/Users/majid/.volta/bin/dlltool"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/dlltool"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/dlltool"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/dlltool"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/dlltool"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/dlltool"
+      - "/opt/homebrew/bin/dlltool"
+      - "/opt/homebrew/sbin/dlltool"
+      - "/usr/local/bin/dlltool"
+      - "/System/Cryptexes/App/usr/bin/dlltool"
+      - "/usr/bin/dlltool"
+      - "/bin/dlltool"
+      - "/usr/sbin/dlltool"
+      - "/sbin/dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/dlltool"
+      - "/opt/pmk/env/global/bin/dlltool"
+      - "/Library/Apple/usr/bin/dlltool"
+      - "/Library/TeX/texbin/dlltool"
+      - "/Applications/VMware Fusion.app/Contents/Public/dlltool"
+      - "/usr/local/go/bin/dlltool"
+      - "/opt/podman/bin/dlltool"
+      - "/Users/majid/.cargo/bin/dlltool"
+      - "/Users/majid/Library/Android/sdk/emulator/dlltool"
+      - "/Users/majid/Library/Android/sdk/platform-tools/dlltool"
+      - "/Users/majid/.local/bin/dlltool"
+      - "/Users/majid/.nvm/dlltool"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/dlltool"
+      - "/opt/homebrew/opt/postgresql@17/bin/dlltool"
+      - "/bin/dlltool"
+      - "/sbin/dlltool"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_ADDR2LINE"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "llvm-addr2line"
+      - "addr2line"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/llvm-addr2line"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/llvm-addr2line"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/llvm-addr2line"
+      - "/opt/local/bin/llvm-addr2line"
+      - "/opt/local/sbin/llvm-addr2line"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/llvm-addr2line"
+      - "/Users/majid/.pyenv/shims/llvm-addr2line"
+      - "/opt/homebrew/opt/jpeg/bin/llvm-addr2line"
+      - "/Users/majid/.volta/bin/llvm-addr2line"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/llvm-addr2line"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/llvm-addr2line"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/llvm-addr2line"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/llvm-addr2line"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/llvm-addr2line"
+      - "/opt/homebrew/bin/llvm-addr2line"
+      - "/opt/homebrew/sbin/llvm-addr2line"
+      - "/usr/local/bin/llvm-addr2line"
+      - "/System/Cryptexes/App/usr/bin/llvm-addr2line"
+      - "/usr/bin/llvm-addr2line"
+      - "/bin/llvm-addr2line"
+      - "/usr/sbin/llvm-addr2line"
+      - "/sbin/llvm-addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/llvm-addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/llvm-addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/llvm-addr2line"
+      - "/opt/pmk/env/global/bin/llvm-addr2line"
+      - "/Library/Apple/usr/bin/llvm-addr2line"
+      - "/Library/TeX/texbin/llvm-addr2line"
+      - "/Applications/VMware Fusion.app/Contents/Public/llvm-addr2line"
+      - "/usr/local/go/bin/llvm-addr2line"
+      - "/opt/podman/bin/llvm-addr2line"
+      - "/Users/majid/.cargo/bin/llvm-addr2line"
+      - "/Users/majid/Library/Android/sdk/emulator/llvm-addr2line"
+      - "/Users/majid/Library/Android/sdk/platform-tools/llvm-addr2line"
+      - "/Users/majid/.local/bin/llvm-addr2line"
+      - "/Users/majid/.nvm/llvm-addr2line"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/llvm-addr2line"
+      - "/opt/homebrew/opt/postgresql@17/bin/llvm-addr2line"
+      - "/bin/llvm-addr2line"
+      - "/sbin/llvm-addr2line"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/addr2line"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/addr2line"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/addr2line"
+      - "/opt/local/bin/addr2line"
+      - "/opt/local/sbin/addr2line"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/addr2line"
+      - "/Users/majid/.pyenv/shims/addr2line"
+      - "/opt/homebrew/opt/jpeg/bin/addr2line"
+      - "/Users/majid/.volta/bin/addr2line"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/addr2line"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/addr2line"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/addr2line"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/addr2line"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/addr2line"
+      - "/opt/homebrew/bin/addr2line"
+      - "/opt/homebrew/sbin/addr2line"
+      - "/usr/local/bin/addr2line"
+      - "/System/Cryptexes/App/usr/bin/addr2line"
+      - "/usr/bin/addr2line"
+      - "/bin/addr2line"
+      - "/usr/sbin/addr2line"
+      - "/sbin/addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/addr2line"
+      - "/opt/pmk/env/global/bin/addr2line"
+      - "/Library/Apple/usr/bin/addr2line"
+      - "/Library/TeX/texbin/addr2line"
+      - "/Applications/VMware Fusion.app/Contents/Public/addr2line"
+      - "/usr/local/go/bin/addr2line"
+      - "/opt/podman/bin/addr2line"
+      - "/Users/majid/.cargo/bin/addr2line"
+      - "/Users/majid/Library/Android/sdk/emulator/addr2line"
+      - "/Users/majid/Library/Android/sdk/platform-tools/addr2line"
+      - "/Users/majid/.local/bin/addr2line"
+      - "/Users/majid/.nvm/addr2line"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/addr2line"
+      - "/opt/homebrew/opt/postgresql@17/bin/addr2line"
+      - "/bin/addr2line"
+      - "/sbin/addr2line"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_TAPI"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "tapi"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/tapi"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/tapi"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/tapi"
+      - "/opt/local/bin/tapi"
+      - "/opt/local/sbin/tapi"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/tapi"
+      - "/Users/majid/.pyenv/shims/tapi"
+      - "/opt/homebrew/opt/jpeg/bin/tapi"
+      - "/Users/majid/.volta/bin/tapi"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/tapi"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/tapi"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/tapi"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/tapi"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/tapi"
+      - "/opt/homebrew/bin/tapi"
+      - "/opt/homebrew/sbin/tapi"
+      - "/usr/local/bin/tapi"
+      - "/System/Cryptexes/App/usr/bin/tapi"
+      - "/usr/bin/tapi"
+      - "/bin/tapi"
+      - "/usr/sbin/tapi"
+      - "/sbin/tapi"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/tapi"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/tapi"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/tapi"
+      - "/opt/pmk/env/global/bin/tapi"
+      - "/Library/Apple/usr/bin/tapi"
+      - "/Library/TeX/texbin/tapi"
+      - "/Applications/VMware Fusion.app/Contents/Public/tapi"
+      - "/usr/local/go/bin/tapi"
+      - "/opt/podman/bin/tapi"
+      - "/Users/majid/.cargo/bin/tapi"
+      - "/Users/majid/Library/Android/sdk/emulator/tapi"
+      - "/Users/majid/Library/Android/sdk/platform-tools/tapi"
+      - "/Users/majid/.local/bin/tapi"
+      - "/Users/majid/.nvm/tapi"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/tapi"
+      - "/opt/homebrew/opt/postgresql@17/bin/tapi"
+      - "/bin/tapi"
+      - "/sbin/tapi"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:462 (find_file)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:500 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCCompilerId.c.in"
+    candidate_directories:
+      - "/opt/homebrew/share/cmake/Modules/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules/"
+    found: "/opt/homebrew/share/cmake/Modules/CMakeCCompilerId.c.in"
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/emcc 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out.js"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out.wasm"
+      
+      The C compiler identification could not be found in:
+        /Users/majid/webDggrid/lib-wasm/CMakeFiles/4.1.2/CompilerIdC/a.out.js
+      
+      The C compiler identification is Clang, found in:
+        /Users/majid/webDggrid/lib-wasm/CMakeFiles/4.1.2/CompilerIdC/a.out.wasm
+      
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/Compiler/Clang-FindBinUtils.cmake:50 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCCompiler.cmake:201 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_C_COMPILER_CLANG_SCAN_DEPS"
+    description: "`clang-scan-deps` dependency scanner"
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "clang-scan-deps-21.0"
+      - "clang-scan-deps-21"
+      - "clang-scan-deps21"
+      - "clang-scan-deps"
+    candidate_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+      - "/Users/majid/.pyenv/shims/"
+      - "/opt/homebrew/opt/jpeg/bin/"
+      - "/Users/majid/.volta/bin/"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/opt/pmk/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Library/TeX/texbin/"
+      - "/Applications/VMware Fusion.app/Contents/Public/"
+      - "/usr/local/go/bin/"
+      - "/opt/podman/bin/"
+      - "/Users/majid/.cargo/bin/"
+      - "/Users/majid/Library/Android/sdk/emulator/"
+      - "/Users/majid/Library/Android/sdk/platform-tools/"
+      - "/Users/majid/.local/bin/"
+      - "/Users/majid/.nvm/"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/"
+      - "/opt/homebrew/opt/postgresql@17/bin/"
+      - "/bin/"
+      - "/sbin/"
+    searched_directories:
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/clang-scan-deps-21.0"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/clang-scan-deps-21.0"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/clang-scan-deps-21.0"
+      - "/opt/local/bin/clang-scan-deps-21.0"
+      - "/opt/local/sbin/clang-scan-deps-21.0"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/clang-scan-deps-21.0"
+      - "/Users/majid/.pyenv/shims/clang-scan-deps-21.0"
+      - "/opt/homebrew/opt/jpeg/bin/clang-scan-deps-21.0"
+      - "/Users/majid/.volta/bin/clang-scan-deps-21.0"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/clang-scan-deps-21.0"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/clang-scan-deps-21.0"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/clang-scan-deps-21.0"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/clang-scan-deps-21.0"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/clang-scan-deps-21.0"
+      - "/opt/homebrew/bin/clang-scan-deps-21.0"
+      - "/opt/homebrew/sbin/clang-scan-deps-21.0"
+      - "/usr/local/bin/clang-scan-deps-21.0"
+      - "/System/Cryptexes/App/usr/bin/clang-scan-deps-21.0"
+      - "/usr/bin/clang-scan-deps-21.0"
+      - "/bin/clang-scan-deps-21.0"
+      - "/usr/sbin/clang-scan-deps-21.0"
+      - "/sbin/clang-scan-deps-21.0"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/clang-scan-deps-21.0"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/clang-scan-deps-21.0"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/clang-scan-deps-21.0"
+      - "/opt/pmk/env/global/bin/clang-scan-deps-21.0"
+      - "/Library/Apple/usr/bin/clang-scan-deps-21.0"
+      - "/Library/TeX/texbin/clang-scan-deps-21.0"
+      - "/Applications/VMware Fusion.app/Contents/Public/clang-scan-deps-21.0"
+      - "/usr/local/go/bin/clang-scan-deps-21.0"
+      - "/opt/podman/bin/clang-scan-deps-21.0"
+      - "/Users/majid/.cargo/bin/clang-scan-deps-21.0"
+      - "/Users/majid/Library/Android/sdk/emulator/clang-scan-deps-21.0"
+      - "/Users/majid/Library/Android/sdk/platform-tools/clang-scan-deps-21.0"
+      - "/Users/majid/.local/bin/clang-scan-deps-21.0"
+      - "/Users/majid/.nvm/clang-scan-deps-21.0"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/clang-scan-deps-21.0"
+      - "/opt/homebrew/opt/postgresql@17/bin/clang-scan-deps-21.0"
+      - "/bin/clang-scan-deps-21.0"
+      - "/sbin/clang-scan-deps-21.0"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/clang-scan-deps-21"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/clang-scan-deps-21"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/clang-scan-deps-21"
+      - "/opt/local/bin/clang-scan-deps-21"
+      - "/opt/local/sbin/clang-scan-deps-21"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/clang-scan-deps-21"
+      - "/Users/majid/.pyenv/shims/clang-scan-deps-21"
+      - "/opt/homebrew/opt/jpeg/bin/clang-scan-deps-21"
+      - "/Users/majid/.volta/bin/clang-scan-deps-21"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/clang-scan-deps-21"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/clang-scan-deps-21"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/clang-scan-deps-21"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/clang-scan-deps-21"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/clang-scan-deps-21"
+      - "/opt/homebrew/bin/clang-scan-deps-21"
+      - "/opt/homebrew/sbin/clang-scan-deps-21"
+      - "/usr/local/bin/clang-scan-deps-21"
+      - "/System/Cryptexes/App/usr/bin/clang-scan-deps-21"
+      - "/usr/bin/clang-scan-deps-21"
+      - "/bin/clang-scan-deps-21"
+      - "/usr/sbin/clang-scan-deps-21"
+      - "/sbin/clang-scan-deps-21"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/clang-scan-deps-21"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/clang-scan-deps-21"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/clang-scan-deps-21"
+      - "/opt/pmk/env/global/bin/clang-scan-deps-21"
+      - "/Library/Apple/usr/bin/clang-scan-deps-21"
+      - "/Library/TeX/texbin/clang-scan-deps-21"
+      - "/Applications/VMware Fusion.app/Contents/Public/clang-scan-deps-21"
+      - "/usr/local/go/bin/clang-scan-deps-21"
+      - "/opt/podman/bin/clang-scan-deps-21"
+      - "/Users/majid/.cargo/bin/clang-scan-deps-21"
+      - "/Users/majid/Library/Android/sdk/emulator/clang-scan-deps-21"
+      - "/Users/majid/Library/Android/sdk/platform-tools/clang-scan-deps-21"
+      - "/Users/majid/.local/bin/clang-scan-deps-21"
+      - "/Users/majid/.nvm/clang-scan-deps-21"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/clang-scan-deps-21"
+      - "/opt/homebrew/opt/postgresql@17/bin/clang-scan-deps-21"
+      - "/bin/clang-scan-deps-21"
+      - "/sbin/clang-scan-deps-21"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/clang-scan-deps21"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/clang-scan-deps21"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/clang-scan-deps21"
+      - "/opt/local/bin/clang-scan-deps21"
+      - "/opt/local/sbin/clang-scan-deps21"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/clang-scan-deps21"
+      - "/Users/majid/.pyenv/shims/clang-scan-deps21"
+      - "/opt/homebrew/opt/jpeg/bin/clang-scan-deps21"
+      - "/Users/majid/.volta/bin/clang-scan-deps21"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/clang-scan-deps21"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/clang-scan-deps21"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/clang-scan-deps21"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/clang-scan-deps21"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/clang-scan-deps21"
+      - "/opt/homebrew/bin/clang-scan-deps21"
+      - "/opt/homebrew/sbin/clang-scan-deps21"
+      - "/usr/local/bin/clang-scan-deps21"
+      - "/System/Cryptexes/App/usr/bin/clang-scan-deps21"
+      - "/usr/bin/clang-scan-deps21"
+      - "/bin/clang-scan-deps21"
+      - "/usr/sbin/clang-scan-deps21"
+      - "/sbin/clang-scan-deps21"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/clang-scan-deps21"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/clang-scan-deps21"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/clang-scan-deps21"
+      - "/opt/pmk/env/global/bin/clang-scan-deps21"
+      - "/Library/Apple/usr/bin/clang-scan-deps21"
+      - "/Library/TeX/texbin/clang-scan-deps21"
+      - "/Applications/VMware Fusion.app/Contents/Public/clang-scan-deps21"
+      - "/usr/local/go/bin/clang-scan-deps21"
+      - "/opt/podman/bin/clang-scan-deps21"
+      - "/Users/majid/.cargo/bin/clang-scan-deps21"
+      - "/Users/majid/Library/Android/sdk/emulator/clang-scan-deps21"
+      - "/Users/majid/Library/Android/sdk/platform-tools/clang-scan-deps21"
+      - "/Users/majid/.local/bin/clang-scan-deps21"
+      - "/Users/majid/.nvm/clang-scan-deps21"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/clang-scan-deps21"
+      - "/opt/homebrew/opt/postgresql@17/bin/clang-scan-deps21"
+      - "/bin/clang-scan-deps21"
+      - "/sbin/clang-scan-deps21"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/clang-scan-deps"
+      - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin/clang-scan-deps"
+      - "/Users/majid/.volta/tools/image/node/22.20.0/bin/clang-scan-deps"
+      - "/opt/local/bin/clang-scan-deps"
+      - "/opt/local/sbin/clang-scan-deps"
+      - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/clang-scan-deps"
+      - "/Users/majid/.pyenv/shims/clang-scan-deps"
+      - "/opt/homebrew/opt/jpeg/bin/clang-scan-deps"
+      - "/Users/majid/.volta/bin/clang-scan-deps"
+      - "/Users/majid/.nvm/versions/node/v24.4.1/bin/clang-scan-deps"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/clang-scan-deps"
+      - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/clang-scan-deps"
+      - "/Users/majid/Ready/Apps/tests/personal/emsdk/clang-scan-deps"
+      - "/Library/Frameworks/Python.framework/Versions/3.12/bin/clang-scan-deps"
+      - "/opt/homebrew/bin/clang-scan-deps"
+      - "/opt/homebrew/sbin/clang-scan-deps"
+      - "/usr/local/bin/clang-scan-deps"
+      - "/System/Cryptexes/App/usr/bin/clang-scan-deps"
+      - "/usr/bin/clang-scan-deps"
+      - "/bin/clang-scan-deps"
+      - "/usr/sbin/clang-scan-deps"
+      - "/sbin/clang-scan-deps"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/clang-scan-deps"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/clang-scan-deps"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/clang-scan-deps"
+      - "/opt/pmk/env/global/bin/clang-scan-deps"
+      - "/Library/Apple/usr/bin/clang-scan-deps"
+      - "/Library/TeX/texbin/clang-scan-deps"
+      - "/Applications/VMware Fusion.app/Contents/Public/clang-scan-deps"
+      - "/usr/local/go/bin/clang-scan-deps"
+      - "/opt/podman/bin/clang-scan-deps"
+      - "/Users/majid/.cargo/bin/clang-scan-deps"
+      - "/Users/majid/Library/Android/sdk/emulator/clang-scan-deps"
+      - "/Users/majid/Library/Android/sdk/platform-tools/clang-scan-deps"
+      - "/Users/majid/.local/bin/clang-scan-deps"
+      - "/Users/majid/.nvm/clang-scan-deps"
+      - "/Users/majid/Ready/Apps/google-cloud-sdk/bin/clang-scan-deps"
+      - "/opt/homebrew/opt/postgresql@17/bin/clang-scan-deps"
+      - "/bin/clang-scan-deps"
+      - "/sbin/clang-scan-deps"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Users/majid/.volta/tools/image/yarn/4.10.3/bin"
+        - "/Users/majid/.volta/tools/image/node/22.20.0/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/Users/majid/.pyenv/shims"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk"
+        - "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Library/Frameworks/Python.framework/Versions/3.12/bin"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/opt/pmk/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/Library/TeX/texbin"
+        - "/Applications/VMware Fusion.app/Contents/Public"
+        - "/usr/local/go/bin"
+        - "/opt/podman/bin"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/majid/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/local/Library/Frameworks/Python.framework/Versions/3.13/bin/"
+        - "/opt/homebrew/opt/jpeg/bin"
+        - "/Users/majid/.volta/bin"
+        - "/Users/majid/.nvm/versions/node/v24.4.1/bin"
+        - "/Users/majid/.cargo/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+        - "/Users/majid/.local/bin"
+        - "/Users/majid/Library/Android/sdk/emulator"
+        - "/Users/majid/Library/Android/sdk/platform-tools"
+        - "/Users/majid/.nvm"
+        - "/Users/majid/Ready/Apps/google-cloud-sdk/bin"
+        - "/Users/majid/.local/bin"
+        - "/opt/homebrew/opt/postgresql@17/bin"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/"
+        - "/"
+      CMAKE_FIND_ROOT_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-Fh5an5"
+      binary: "/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-Fh5an5"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/emscan-deps"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-Fh5an5'
+        
+        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_c4c5a/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_c4c5a.dir/build.make CMakeFiles/cmTC_c4c5a.dir/build
+        Building CXX object CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o
+        /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/em++   -v -MD -MT CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+         "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang++" -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr --sysroot=/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot -DEMSCRIPTEN -Xclang -iwithsysroot/include/fakesdl -Xclang -iwithsysroot/include/compat -v -MD -MT CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o.d -oCMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        clang version 21.0.0git (https:/github.com/llvm/llvm-project 57025b42c43b2f14f7e58692bc19cd53d1b8a45e)
+        Target: wasm32-unknown-emscripten
+        Thread model: posix
+        InstalledDir: /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin
+         (in-process)
+         "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang-21" -cc1 -triple wasm32-unknown-emscripten -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=none -ffp-contract=on -fno-rounding-math -mconstructor-aliases -target-cpu generic -fvisibility=hidden -debugger-tuning=gdb -fdebug-compilation-dir=/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-Fh5an5 -v -fcoverage-compilation-dir=/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-Fh5an5 -resource-dir /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21 -dependency-file CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -D EMSCRIPTEN -isysroot /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten/c++/v1 -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1 -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include -fdeprecated-macro -ferror-limit 19 -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fignore-exceptions -fexceptions -iwithsysroot/include/fakesdl -iwithsysroot/include/compat -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr -o CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -x c++ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        clang -cc1 version 21.0.0git based upon LLVM 21.0.0git default target x86_64-apple-darwin25.3.0
+        ignoring nonexistent directory "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten/c++/v1"
+        ignoring nonexistent directory "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include
+        End of search list.
+        Linking CXX executable cmTC_c4c5a.js
+        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c4c5a.dir/link.txt --verbose=1
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang --version
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/wasm-ld -o cmTC_c4c5a.wasm CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten -L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib -lGL-getprocaddr -lal -lhtml5 -lstubs-debug -lnoexit -lc-debug -ldlmalloc-debug -lcompiler_rt -lc++-noexcept -lc++abi-debug-noexcept -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr /var/folders/jg/lk8tp1cn63z8sf0xv_tws6y00000gn/T/tmp7lfb15tzlibemscripten_js_symbols.so --strip-debug --export=emscripten_stack_get_end --export=emscripten_stack_get_free --export=emscripten_stack_get_base --export=emscripten_stack_get_current --export=emscripten_stack_init --export=_emscripten_stack_alloc --export=__wasm_call_ctors --export=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-if-defined=main --export-if-defined=__main_argc_argv --export-if-defined=fflush --export-table -z stack-size=65536 --no-growable-memory --initial-heap=16777216 --no-entry --stack-first --table-base=1
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/llvm-objcopy cmTC_c4c5a.wasm cmTC_c4c5a.wasm --remove-section=.debug* --remove-section=producers --remove-section=name
+         /Users/majid/Ready/Apps/tests/personal/emsdk/node/20.18.0_64bit/bin/node /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/tools/compiler.mjs -
+        /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/em++  -v @CMakeFiles/cmTC_c4c5a.dir/objects1.rsp -o cmTC_c4c5a.js
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:217 (message)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl]
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat]
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1]
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include]
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include]
+        end of search list found
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl]
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat]
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1]
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include]
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include]
+        implicit include dirs: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
+        ignore line: [Change Dir: '/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-Fh5an5']
+        ignore line: []
+        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_c4c5a/fast]
+        ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_c4c5a.dir/build.make CMakeFiles/cmTC_c4c5a.dir/build]
+        ignore line: [Building CXX object CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/em++   -v -MD -MT CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [ "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang++" -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr --sysroot=/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot -DEMSCRIPTEN -Xclang -iwithsysroot/include/fakesdl -Xclang -iwithsysroot/include/compat -v -MD -MT CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o.d -oCMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [clang version 21.0.0git (https:/github.com/llvm/llvm-project 57025b42c43b2f14f7e58692bc19cd53d1b8a45e)]
+        ignore line: [Target: wasm32-unknown-emscripten]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin]
+        ignore line: [ (in-process)]
+        ignore line: [ "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang-21" -cc1 -triple wasm32-unknown-emscripten -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=none -ffp-contract=on -fno-rounding-math -mconstructor-aliases -target-cpu generic -fvisibility=hidden -debugger-tuning=gdb -fdebug-compilation-dir=/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-Fh5an5 -v -fcoverage-compilation-dir=/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-Fh5an5 -resource-dir /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21 -dependency-file CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -D EMSCRIPTEN -isysroot /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten/c++/v1 -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1 -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include -fdeprecated-macro -ferror-limit 19 -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fignore-exceptions -fexceptions -iwithsysroot/include/fakesdl -iwithsysroot/include/compat -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr -o CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -x c++ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [clang -cc1 version 21.0.0git based upon LLVM 21.0.0git default target x86_64-apple-darwin25.3.0]
+        ignore line: [ignoring nonexistent directory "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten/c++/v1"]
+        ignore line: [ignoring nonexistent directory "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include]
+        ignore line: [End of search list.]
+        ignore line: [Linking CXX executable cmTC_c4c5a.js]
+        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c4c5a.dir/link.txt --verbose=1]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang --version]
+        link line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/wasm-ld -o cmTC_c4c5a.wasm CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o -L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten -L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib -lGL-getprocaddr -lal -lhtml5 -lstubs-debug -lnoexit -lc-debug -ldlmalloc-debug -lcompiler_rt -lc++-noexcept -lc++abi-debug-noexcept -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr /var/folders/jg/lk8tp1cn63z8sf0xv_tws6y00000gn/T/tmp7lfb15tzlibemscripten_js_symbols.so --strip-debug --export=emscripten_stack_get_end --export=emscripten_stack_get_free --export=emscripten_stack_get_base --export=emscripten_stack_get_current --export=emscripten_stack_init --export=_emscripten_stack_alloc --export=__wasm_call_ctors --export=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-if-defined=main --export-if-defined=__main_argc_argv --export-if-defined=fflush --export-table -z stack-size=65536 --no-growable-memory --initial-heap=16777216 --no-entry --stack-first --table-base=1]
+          arg [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/wasm-ld] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_c4c5a.wasm] ==> ignore
+          arg [CMakeFiles/cmTC_c4c5a.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [-L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten] ==> dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten]
+          arg [-L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib] ==> dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib]
+          arg [-lGL-getprocaddr] ==> lib [GL-getprocaddr]
+          arg [-lal] ==> lib [al]
+          arg [-lhtml5] ==> lib [html5]
+          arg [-lstubs-debug] ==> lib [stubs-debug]
+          arg [-lnoexit] ==> lib [noexit]
+          arg [-lc-debug] ==> lib [c-debug]
+          arg [-ldlmalloc-debug] ==> lib [dlmalloc-debug]
+          arg [-lcompiler_rt] ==> lib [compiler_rt]
+          arg [-lc++-noexcept] ==> lib [c++-noexcept]
+          arg [-lc++abi-debug-noexcept] ==> lib [c++abi-debug-noexcept]
+          arg [-lsockets] ==> lib [sockets]
+          arg [-mllvm] ==> ignore
+          arg [-combiner-global-alias-analysis=false] ==> ignore
+          arg [-mllvm] ==> ignore
+          arg [-enable-emscripten-sjlj] ==> ignore
+          arg [-mllvm] ==> ignore
+          arg [-disable-lsr] ==> ignore
+          arg [/var/folders/jg/lk8tp1cn63z8sf0xv_tws6y00000gn/T/tmp7lfb15tzlibemscripten_js_symbols.so] ==> ignore
+          arg [--strip-debug] ==> ignore
+          arg [--export=emscripten_stack_get_end] ==> ignore
+          arg [--export=emscripten_stack_get_free] ==> ignore
+          arg [--export=emscripten_stack_get_base] ==> ignore
+          arg [--export=emscripten_stack_get_current] ==> ignore
+          arg [--export=emscripten_stack_init] ==> ignore
+          arg [--export=_emscripten_stack_alloc] ==> ignore
+          arg [--export=__wasm_call_ctors] ==> ignore
+          arg [--export=_emscripten_stack_restore] ==> ignore
+          arg [--export-if-defined=__start_em_asm] ==> ignore
+          arg [--export-if-defined=__stop_em_asm] ==> ignore
+          arg [--export-if-defined=__start_em_lib_deps] ==> ignore
+          arg [--export-if-defined=__stop_em_lib_deps] ==> ignore
+          arg [--export-if-defined=__start_em_js] ==> ignore
+          arg [--export-if-defined=__stop_em_js] ==> ignore
+          arg [--export-if-defined=main] ==> ignore
+          arg [--export-if-defined=__main_argc_argv] ==> ignore
+          arg [--export-if-defined=fflush] ==> ignore
+          arg [--export-table] ==> ignore
+          arg [-zstack-size=65536] ==> ignore
+          arg [--no-growable-memory] ==> ignore
+          arg [--initial-heap=16777216] ==> ignore
+          arg [--no-entry] ==> ignore
+          arg [--stack-first] ==> ignore
+          arg [--table-base=1] ==> ignore
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/llvm-objcopy cmTC_c4c5a.wasm cmTC_c4c5a.wasm --remove-section=.debug* --remove-section=producers --remove-section=name]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/node/20.18.0_64bit/bin/node /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/tools/compiler.mjs -]
+        ignore line: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/em++  -v @CMakeFiles/cmTC_c4c5a.dir/objects1.rsp -o cmTC_c4c5a.js]
+        ignore line: []
+        ignore line: []
+        collapse library dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten]
+        collapse library dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib]
+        implicit libs: [GL-getprocaddr;al;html5;stubs-debug;noexit;c-debug;dlmalloc-debug;compiler_rt;c++-noexcept;c++abi-debug-noexcept;sockets]
+        implicit objs: []
+        implicit dirs: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-tYiaMy"
+      binary: "/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-tYiaMy"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/emscan-deps"
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cmake/Modules"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-tYiaMy'
+        
+        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_5e34f/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_5e34f.dir/build.make CMakeFiles/cmTC_5e34f.dir/build
+        Building C object CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o
+        /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/emcc   -v -MD -MT CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr --sysroot=/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot -DEMSCRIPTEN -Xclang -iwithsysroot/include/fakesdl -Xclang -iwithsysroot/include/compat -v -MD -MT CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o.d -oCMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c
+        clang version 21.0.0git (https:/github.com/llvm/llvm-project 57025b42c43b2f14f7e58692bc19cd53d1b8a45e)
+        Target: wasm32-unknown-emscripten
+        Thread model: posix
+        InstalledDir: /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin
+         (in-process)
+         "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang-21" -cc1 -triple wasm32-unknown-emscripten -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model static -mframe-pointer=none -ffp-contract=on -fno-rounding-math -mconstructor-aliases -target-cpu generic -fvisibility=hidden -debugger-tuning=gdb -fdebug-compilation-dir=/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-tYiaMy -v -fcoverage-compilation-dir=/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-tYiaMy -resource-dir /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21 -dependency-file CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -sys-header-deps -D EMSCRIPTEN -isysroot /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include -ferror-limit 19 -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fignore-exceptions -iwithsysroot/include/fakesdl -iwithsysroot/include/compat -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr -o CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -x c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c
+        clang -cc1 version 21.0.0git based upon LLVM 21.0.0git default target x86_64-apple-darwin25.3.0
+        ignoring nonexistent directory "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include
+        End of search list.
+        Linking C executable cmTC_5e34f.js
+        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5e34f.dir/link.txt --verbose=1
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang --version
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/wasm-ld -o cmTC_5e34f.wasm CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten -L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib -lGL-getprocaddr -lal -lhtml5 -lstubs-debug -lnoexit -lc-debug -ldlmalloc-debug -lcompiler_rt -lc++-noexcept -lc++abi-debug-noexcept -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr /var/folders/jg/lk8tp1cn63z8sf0xv_tws6y00000gn/T/tmppmjdbqvxlibemscripten_js_symbols.so --strip-debug --export=emscripten_stack_get_end --export=emscripten_stack_get_free --export=emscripten_stack_get_base --export=emscripten_stack_get_current --export=emscripten_stack_init --export=_emscripten_stack_alloc --export=__wasm_call_ctors --export=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-if-defined=main --export-if-defined=__main_argc_argv --export-if-defined=fflush --export-table -z stack-size=65536 --no-growable-memory --initial-heap=16777216 --no-entry --stack-first --table-base=1
+         /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/llvm-objcopy cmTC_5e34f.wasm cmTC_5e34f.wasm --remove-section=.debug* --remove-section=producers --remove-section=name
+         /Users/majid/Ready/Apps/tests/personal/emsdk/node/20.18.0_64bit/bin/node /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/tools/compiler.mjs -
+        /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/emcc  -v @CMakeFiles/cmTC_5e34f.dir/objects1.rsp -o cmTC_5e34f.js
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:217 (message)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl]
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat]
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include]
+          add: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include]
+        end of search list found
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl]
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat]
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include]
+        collapse include dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include]
+        implicit include dirs: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
+        ignore line: [Change Dir: '/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-tYiaMy']
+        ignore line: []
+        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_5e34f/fast]
+        ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_5e34f.dir/build.make CMakeFiles/cmTC_5e34f.dir/build]
+        ignore line: [Building C object CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/emcc   -v -MD -MT CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr --sysroot=/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot -DEMSCRIPTEN -Xclang -iwithsysroot/include/fakesdl -Xclang -iwithsysroot/include/compat -v -MD -MT CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o.d -oCMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [clang version 21.0.0git (https:/github.com/llvm/llvm-project 57025b42c43b2f14f7e58692bc19cd53d1b8a45e)]
+        ignore line: [Target: wasm32-unknown-emscripten]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin]
+        ignore line: [ (in-process)]
+        ignore line: [ "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang-21" -cc1 -triple wasm32-unknown-emscripten -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model static -mframe-pointer=none -ffp-contract=on -fno-rounding-math -mconstructor-aliases -target-cpu generic -fvisibility=hidden -debugger-tuning=gdb -fdebug-compilation-dir=/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-tYiaMy -v -fcoverage-compilation-dir=/Users/majid/webDggrid/lib-wasm/CMakeFiles/CMakeScratch/TryCompile-tYiaMy -resource-dir /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21 -dependency-file CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -sys-header-deps -D EMSCRIPTEN -isysroot /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten -internal-isystem /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include -ferror-limit 19 -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fignore-exceptions -iwithsysroot/include/fakesdl -iwithsysroot/include/compat -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr -o CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -x c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [clang -cc1 version 21.0.0git based upon LLVM 21.0.0git default target x86_64-apple-darwin25.3.0]
+        ignore line: [ignoring nonexistent directory "/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/wasm32-emscripten"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/fakesdl]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include/compat]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/lib/clang/21/include]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/include]
+        ignore line: [End of search list.]
+        ignore line: [Linking C executable cmTC_5e34f.js]
+        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5e34f.dir/link.txt --verbose=1]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/clang --version]
+        link line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/wasm-ld -o cmTC_5e34f.wasm CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o -L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten -L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib -lGL-getprocaddr -lal -lhtml5 -lstubs-debug -lnoexit -lc-debug -ldlmalloc-debug -lcompiler_rt -lc++-noexcept -lc++abi-debug-noexcept -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr /var/folders/jg/lk8tp1cn63z8sf0xv_tws6y00000gn/T/tmppmjdbqvxlibemscripten_js_symbols.so --strip-debug --export=emscripten_stack_get_end --export=emscripten_stack_get_free --export=emscripten_stack_get_base --export=emscripten_stack_get_current --export=emscripten_stack_init --export=_emscripten_stack_alloc --export=__wasm_call_ctors --export=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-if-defined=main --export-if-defined=__main_argc_argv --export-if-defined=fflush --export-table -z stack-size=65536 --no-growable-memory --initial-heap=16777216 --no-entry --stack-first --table-base=1]
+          arg [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/wasm-ld] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_5e34f.wasm] ==> ignore
+          arg [CMakeFiles/cmTC_5e34f.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [-L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten] ==> dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten]
+          arg [-L/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib] ==> dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib]
+          arg [-lGL-getprocaddr] ==> lib [GL-getprocaddr]
+          arg [-lal] ==> lib [al]
+          arg [-lhtml5] ==> lib [html5]
+          arg [-lstubs-debug] ==> lib [stubs-debug]
+          arg [-lnoexit] ==> lib [noexit]
+          arg [-lc-debug] ==> lib [c-debug]
+          arg [-ldlmalloc-debug] ==> lib [dlmalloc-debug]
+          arg [-lcompiler_rt] ==> lib [compiler_rt]
+          arg [-lc++-noexcept] ==> lib [c++-noexcept]
+          arg [-lc++abi-debug-noexcept] ==> lib [c++abi-debug-noexcept]
+          arg [-lsockets] ==> lib [sockets]
+          arg [-mllvm] ==> ignore
+          arg [-combiner-global-alias-analysis=false] ==> ignore
+          arg [-mllvm] ==> ignore
+          arg [-enable-emscripten-sjlj] ==> ignore
+          arg [-mllvm] ==> ignore
+          arg [-disable-lsr] ==> ignore
+          arg [/var/folders/jg/lk8tp1cn63z8sf0xv_tws6y00000gn/T/tmppmjdbqvxlibemscripten_js_symbols.so] ==> ignore
+          arg [--strip-debug] ==> ignore
+          arg [--export=emscripten_stack_get_end] ==> ignore
+          arg [--export=emscripten_stack_get_free] ==> ignore
+          arg [--export=emscripten_stack_get_base] ==> ignore
+          arg [--export=emscripten_stack_get_current] ==> ignore
+          arg [--export=emscripten_stack_init] ==> ignore
+          arg [--export=_emscripten_stack_alloc] ==> ignore
+          arg [--export=__wasm_call_ctors] ==> ignore
+          arg [--export=_emscripten_stack_restore] ==> ignore
+          arg [--export-if-defined=__start_em_asm] ==> ignore
+          arg [--export-if-defined=__stop_em_asm] ==> ignore
+          arg [--export-if-defined=__start_em_lib_deps] ==> ignore
+          arg [--export-if-defined=__stop_em_lib_deps] ==> ignore
+          arg [--export-if-defined=__start_em_js] ==> ignore
+          arg [--export-if-defined=__stop_em_js] ==> ignore
+          arg [--export-if-defined=main] ==> ignore
+          arg [--export-if-defined=__main_argc_argv] ==> ignore
+          arg [--export-if-defined=fflush] ==> ignore
+          arg [--export-table] ==> ignore
+          arg [-zstack-size=65536] ==> ignore
+          arg [--no-growable-memory] ==> ignore
+          arg [--initial-heap=16777216] ==> ignore
+          arg [--no-entry] ==> ignore
+          arg [--stack-first] ==> ignore
+          arg [--table-base=1] ==> ignore
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/bin/llvm-objcopy cmTC_5e34f.wasm cmTC_5e34f.wasm --remove-section=.debug* --remove-section=producers --remove-section=name]
+        ignore line: [ /Users/majid/Ready/Apps/tests/personal/emsdk/node/20.18.0_64bit/bin/node /Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/tools/compiler.mjs -]
+        ignore line: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/emcc  -v @CMakeFiles/cmTC_5e34f.dir/objects1.rsp -o cmTC_5e34f.js]
+        ignore line: []
+        ignore line: []
+        collapse library dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten]
+        collapse library dir [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib] ==> [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib]
+        implicit libs: [GL-getprocaddr;al;html5;stubs-debug;noexit;c-debug;dlmalloc-debug;compiler_rt;c++-noexcept;c++abi-debug-noexcept;sockets]
+        implicit objs: []
+        implicit dirs: [/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten;/Users/majid/Ready/Apps/tests/personal/emsdk/upstream/emscripten/src/lib]
+        implicit fwks: []
+      
+      
+...

@@ -69,12 +69,6 @@ uint64_t              maxCell(const DggsParams& p, int res = -1);
 std::string           info(const DggsParams& p);
 
 // ---------------------------------------------------------------------------
-// Cell polygon vertices
-// Returns a closed ring: [lon0,lat0, lon1,lat1, ..., lon0,lat0]
-// ---------------------------------------------------------------------------
-std::vector<double>   seqNumToVertices(const DggsParams& p, SeqNum seqnum);
-
-// ---------------------------------------------------------------------------
 // FROM GEO
 // ---------------------------------------------------------------------------
 GeoCoord     geoToGeo    (const DggsParams& p, double lon_deg, double lat_deg);

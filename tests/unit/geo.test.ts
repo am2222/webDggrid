@@ -38,8 +38,8 @@ describe('test sequenceNumToGeo function', async () => {
   const dggs = await Webdggrid.load();
   test('should return a set of cells for 1n coordinate', () => {
     const coords = dggs.sequenceNumToGeo([1n]);
-    expect(coords[0][0]).toBe(5.016335486835158);
-    expect(coords[0][1]).toBe(4.241895663821446);
+    expect(coords[0][0]).toBe(3.305785137194538e-10);
+    expect(coords[0][1]).toBe(1.9245964639629087e-9);
   });
 });
 

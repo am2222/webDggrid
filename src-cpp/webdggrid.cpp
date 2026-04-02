@@ -2,7 +2,21 @@
 #include "dggrid_transform.hpp"
 #include <emscripten/bind.h>
 
+// DGGRID v8 headers needed for cell polygon generation (SeqNumGrid)
+#include <dglib/DgIDGGBase.h>
+#include <dglib/DgBoundedIDGG.h>
+#include <dglib/DgIDGGS.h>
+#include <dglib/DgGeoSphRF.h>
+#include <dglib/DgEllipsoidRF.h>
+#include <dglib/DgRFNetwork.h>
+#include <dglib/DgIDGGutil.h>
+#include <dglib/DgGridTopo.h>
+#include <dglib/DgPolygon.h>
+#include <dglib/DgCell.h>
+#include <dglib/DgLocation.h>
+
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -64,6 +78,44 @@ double gridStatCLS(std::string projection, std::string topology,
   return dggrid::getRes(p)[static_cast<std::size_t>(res)].cls_km;
 }
 
+// ---------------------------------------------------------------------------
+// cellVertices — build a closed geographic polygon ring for one cell.
+// Uses DGGRID v8 DgIDGGBase::setVertices + DgCell geo conversion.
+// Returns [lon0,lat0, lon1,lat1, ..., lon0,lat0].
+// ---------------------------------------------------------------------------
+static std::vector<double> cellVertices(
+    const DgIDGGBase   &dgg,
+    const DgBoundedIDGG &bndRF,
+    uint64_t sn)
+{
+    // seqnum → Q2DICoord → DgLocation in Q2DI (dgg) frame
+    DgQ2DICoord q2di = bndRF.addFromSeqNum(
+        static_cast<unsigned long long int>(sn));
+    std::unique_ptr<DgLocation> loc(dgg.makeLocation(q2di));
+
+    // Polygon in Q2DI frame
+    DgPolygon verts(dgg);
+    dgg.setVertices(*loc, verts, 0);
+
+    // DgCell constructor converts both node and polygon to the given RF.
+    // Passing geoRF converts Q2DI vertices into geographic coordinates.
+    const std::string label = std::to_string(sn);
+    DgCell cell(dgg.geoRF(), label, *loc, new DgPolygon(verts));
+
+    const DgPolygon  &reg   = cell.region();
+    const DgGeoSphRF &geoRF = dgg.geoRF();
+    const int n = reg.size();
+
+    std::vector<double> result;
+    result.reserve(static_cast<std::size_t>((n + 1) * 2));
+    for (int i = 0; i < n + 1; i++) {
+        const DgGeoCoord *c = geoRF.getAddress(reg[i % n]);
+        result.push_back(static_cast<double>(c->lonDegs()));
+        result.push_back(static_cast<double>(c->latDegs()));
+    }
+    return result;
+}
+
 val SeqNumGrid(
   const double pole_lon_deg,
   const double pole_lat_deg,
@@ -79,25 +131,50 @@ val SeqNumGrid(
   const std::vector<uint64_t> seqnumVector =
       convertJSArrayToNumberVector<uint64_t>(seqnum);
 
+  // Build a temporary IDGGS to access DgIDGGBase and DgBoundedIDGG.
+  DgRFNetwork net;
+  const DgGeoSphRF *geoRF = DgGeoSphRF::makeRF(net, "GEO");
+  const DgGeoCoord vert0(
+      static_cast<long double>(pole_lon_deg),
+      static_cast<long double>(pole_lat_deg), false);
+
+  using namespace dgg::topo;
+  DgGridTopology topo;
+  DgGridMetric   metric;
+  if      (topology == "HEXAGON")  { topo = Hexagon;  metric = D6; }
+  else if (topology == "TRIANGLE") { topo = Triangle; metric = D4; }
+  else                             { topo = Diamond;  metric = D4; }
+
+  const DgIDGGSBase *idggs = DgIDGGS::makeRF(
+      net, *geoRF, vert0,
+      static_cast<long double>(azimuth_deg),
+      aperture, res + 1, topo, metric, "IDGGS", projection);
+
+  const DgIDGGBase   &dgg   = idggs->idggBase(res);
+  const DgBoundedIDGG &bndRF = dgg.bndRF();
+
+  std::vector<double> counts;
   std::vector<double> x;
   std::vector<double> y;
-  std::vector<double> vertexArray;
 
   for (const auto sn : seqnumVector) {
-    // verts is a closed ring: [lon0,lat0, lon1,lat1, ..., lon0,lat0]
-    auto verts = dggrid::seqNumToVertices(p, sn);
+    auto verts = cellVertices(dgg, bndRF, sn);
+    // verts is [lon0,lat0, lon1,lat1, ..., lon0,lat0]
     const unsigned int vertexes =
         static_cast<unsigned int>(verts.size() / 2);
-    seqnum.call<void>("push", vertexes);
+    counts.push_back(static_cast<double>(vertexes));
     for (std::size_t i = 0; i < verts.size(); i += 2) {
       x.push_back(verts[i]);
       y.push_back(verts[i + 1]);
     }
   }
 
-  vertexArray.insert(std::end(vertexArray), std::begin(x), std::end(x));
-  vertexArray.insert(std::end(vertexArray), std::begin(y), std::end(y));
-  return val::array(vertexArray);
+  // Result format: [count0, count1, ..., x0_v0, x0_v1, ..., y0_v0, y0_v1, ...]
+  std::vector<double> result;
+  result.insert(result.end(), counts.begin(), counts.end());
+  result.insert(result.end(), x.begin(), x.end());
+  result.insert(result.end(), y.begin(), y.end());
+  return val::array(result);
 }
 
 val DgGEO_to_SEQNUM(

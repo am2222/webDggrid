@@ -30,7 +30,7 @@ const DEFAULT_DGGS = {
     azimuth: 0,
     topology: Topology.HEXAGON,
     projection: Projection.ISEA,
-    aperture: 7
+    aperture: 4
 };
 export class Webdggrid {
     constructor(_module) {
@@ -181,14 +181,15 @@ export class Webdggrid {
      */
     sequenceNumToGrid(sequenceNum, resolution = DEFAULT_RESOLUTION) {
         const { poleCoordinates: { lat, lng }, azimuth, topology, projection, aperture, } = this.dggs;
+        const inputSize = sequenceNum.length;
         let resultArray = [];
         try {
             resultArray = this._module.SeqNumGrid(lat, lng, azimuth, aperture, resolution, topology, projection, sequenceNum);
         }
         catch (e) {
-            throw (this._module.getExceptionMessage(e).toString());
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw (e);
         }
-        const inputSize = sequenceNum.length;
         const allShapeVertexes = resultArray.slice(0, inputSize);
         const sumVertexes = allShapeVertexes.reduce((accumulator, currentValue) => {
             return accumulator + currentValue;

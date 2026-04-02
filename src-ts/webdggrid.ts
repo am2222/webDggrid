@@ -59,7 +59,7 @@ const DEFAULT_DGGS = {
     azimuth: 0,
     topology: Topology.HEXAGON,
     projection: Projection.ISEA,
-    aperture: 7
+    aperture: 4
 } as IDGGSProps;
 
 export class Webdggrid {
@@ -364,6 +364,8 @@ export class Webdggrid {
             aperture,
         } = this.dggs;
 
+        const inputSize = sequenceNum.length;
+
         let resultArray = [];
         try {
             resultArray = this._module.SeqNumGrid(
@@ -380,8 +382,6 @@ export class Webdggrid {
             console.error(this._module.getExceptionMessage(e).toString());
             throw(e);
         }
-
-        const inputSize = sequenceNum.length;
 
         const allShapeVertexes = resultArray.slice(0, inputSize);
 

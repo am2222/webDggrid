@@ -57,8 +57,6 @@
 #include <dglib/DgIVec2D.h>         // DgIVec2D (.i(), .j())
 #include <dglib/DgDVec2D.h>         // DgDVec2D (.x(), .y())
 #include <dglib/DgConstants.h>      // M_PIl, M_ZERO
-#include <dglib/DgPolygon.h>        // DgPolygon (cell boundary vertices)
-#include <dglib/DgCell.h>           // DgCell (converts polygon to geoRF)
 
 #include <cmath>
 #include <memory>
@@ -402,41 +400,6 @@ std::string info(const DggsParams &p) {
        << "  spacing_km: " << row.spacing_km << "\n"
        << "  cls_km:     " << row.cls_km     << "\n";
     return os.str();
-}
-
-// ===========================================================================
-// Cell polygon vertex generation
-// ===========================================================================
-
-std::vector<double> seqNumToVertices(const DggsParams &p, SeqNum seqnum) {
-    auto t = getTransformer(p);
-    auto loc = t->inSEQNUM(seqnum);
-
-    // Compute cell polygon in the Q2DI (dgg) frame
-    DgPolygon verts(*t->dgg);
-    t->dgg->setVertices(*loc, verts, 0);
-
-    // DgCell constructor converts both the node location and the polygon
-    // vertices into the reference frame passed as the first argument.
-    // Passing geoRF converts the Q2DI polygon vertices into geographic
-    // (lon/lat degrees) coordinates.
-    const DgQ2DICoord *q2di = t->dgg->getAddress(*loc);
-    const std::string label = std::to_string(
-        static_cast<uint64_t>(t->bndRF->seqNumAddress(*q2di)));
-    DgCell cell(t->dgg->geoRF(), label, *loc, new DgPolygon(verts));
-
-    const DgPolygon &reg    = cell.region();
-    const DgGeoSphRF &geoRF = t->dgg->geoRF();
-
-    const int n = reg.size();
-    std::vector<double> result;
-    result.reserve(static_cast<std::size_t>((n + 1) * 2));  // closed ring
-    for (int i = 0; i < n + 1; i++) {
-        const DgGeoCoord *c = geoRF.getAddress(reg[i % n]);
-        result.push_back(static_cast<double>(c->lonDegs()));
-        result.push_back(static_cast<double>(c->latDegs()));
-    }
-    return result;
 }
 
 // ===========================================================================
