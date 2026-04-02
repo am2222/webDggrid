@@ -76,6 +76,7 @@ export default defineConfig({
       { text: 'Guide', link: '/getting-started' },
       { text: 'API', link: '/api/' },
       { text: 'Demo', link: '/demo' },
+      { text: 'Contributing', link: '/contributing' },
     ],
 
     sidebar: [
@@ -84,6 +85,12 @@ export default defineConfig({
         items: [
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Geometry Notes', link: '/getting-started#geometry-notes' },
+        ],
+      },
+      {
+        text: 'Project',
+        items: [
+          { text: 'Contributing', link: '/contributing' },
         ],
       },
       {
