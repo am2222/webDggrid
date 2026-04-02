@@ -214,6 +214,7 @@ val SeqNumGrid(
     DgGridMetric   metric;
     if      (topology == "HEXAGON")  { topo = Hexagon;  metric = D6; }
     else if (topology == "TRIANGLE") { topo = Triangle; metric = D4; }
+    else if (topology == "SQUARE")   { topo = Square;   metric = D4; }
     else                             { topo = Diamond;  metric = D4; }
 
     const DgIDGGSBase *idggs = DgIDGGS::makeRF(
