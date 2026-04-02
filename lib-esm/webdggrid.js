@@ -23,8 +23,6 @@ export var Topology;
     Topology["HEXAGON"] = "HEXAGON";
     /** Three-sided cells. */
     Topology["TRIANGLE"] = "TRIANGLE";
-    /** Four-sided square cells. */
-    Topology["SQUARE"] = "SQUARE";
     /** Four-sided diamond cells (squares rotated 45°). */
     Topology["DIAMOND"] = "DIAMOND";
 })(Topology || (Topology = {}));

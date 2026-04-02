@@ -1,0 +1,1 @@
+import{_ as e,o as i,c as a,ae as t}from"./chunks/framework.DGofPIF8.js";const k=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"api/index.md","filePath":"api/index.md"}'),r={name:"api/index.md"};function l(n,s,h,p,d,o){return i(),a("div",null,[...s[0]||(s[0]=[t("",32)])])}const c=e(r,[["render",l]]);export{k as __pageData,c as default};
