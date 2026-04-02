@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/am2222/webDggrid/compare/v1.1.0...v1.1.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* Update npm package badge link in README to point to the correct workflow ([554e20d](https://github.com/am2222/webDggrid/commit/554e20daf2f2e193d226dc73591243008b62a036))
+
 ## [1.1.0](https://github.com/am2222/webDggrid/compare/v1.0.9...v1.1.0) (2026-04-02)
 
 
