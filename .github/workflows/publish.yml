@@ -41,14 +41,21 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Rename WASM assets to avoid name collisions
+        run: |
+          cp lib-wasm/libdggrid.js    lib-wasm-libdggrid.js
+          cp lib-wasm/libdggrid.wasm  lib-wasm-libdggrid.wasm
+          cp lib-wasm-py/libdggrid.js   lib-wasm-py-libdggrid.js
+          cp lib-wasm-py/libdggrid.wasm lib-wasm-py-libdggrid.wasm
+
       - name: Upload WASM assets to release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            lib-wasm/libdggrid.js
-            lib-wasm/libdggrid.wasm
-            lib-wasm-py/libdggrid.js
-            lib-wasm-py/libdggrid.wasm
+            lib-wasm-libdggrid.js
+            lib-wasm-libdggrid.wasm
+            lib-wasm-py-libdggrid.js
+            lib-wasm-py-libdggrid.wasm
 
   deploy-docs:
     needs: build-publish-release
