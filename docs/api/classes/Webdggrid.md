@@ -1,21 +1,23 @@
-[webdggrid](../index.md) / Webdggrid
+[webdggrid](../globals.md) / Webdggrid
 
 # Class: Webdggrid
+
+Defined in: [webdggrid.ts:211](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L211)
 
 Main entry point for the WebDggrid library.
 
 `Webdggrid` wraps the DGGRID C++ library compiled to WebAssembly and exposes
 methods for:
 - **Grid configuration** — choose topology, projection, aperture, and
-  resolution via [setDggs](Webdggrid.md#setdggs) / [setResolution](Webdggrid.md#setresolution).
+  resolution via [setDggs](#setdggs) / [setResolution](#setresolution).
 - **Coordinate conversion** — convert between geographic coordinates and
-  DGGS cell IDs (sequence numbers) with [geoToSequenceNum](Webdggrid.md#geotosequencenum) and
-  [sequenceNumToGeo](Webdggrid.md#sequencenumtogeo).
+  DGGS cell IDs (sequence numbers) with [geoToSequenceNum](#geotosequencenum) and
+  [sequenceNumToGeo](#sequencenumtogeo).
 - **Grid geometry** — retrieve the polygon boundary of any cell with
-  [sequenceNumToGrid](Webdggrid.md#sequencenumtogrid) or export a ready-to-render GeoJSON
-  `FeatureCollection` with [sequenceNumToGridFeatureCollection](Webdggrid.md#sequencenumtogridfeaturecollection).
+  [sequenceNumToGrid](#sequencenumtogrid) or export a ready-to-render GeoJSON
+  `FeatureCollection` with [sequenceNumToGridFeatureCollection](#sequencenumtogridfeaturecollection).
 - **Grid statistics** — query cell counts, areas, and spacings with
-  [nCells](Webdggrid.md#ncells), [cellAreaKM](Webdggrid.md#cellareakm), and [cellDistKM](Webdggrid.md#celldistkm).
+  [nCells](#ncells), [cellAreaKM](#cellareakm), and [cellDistKM](#celldistkm).
 
 ## Quick start
 
@@ -33,37 +35,17 @@ const geojson = dggs.sequenceNumToGridFeatureCollection([cellId], 5);
 
 ## Lifecycle
 
-The WASM module is a singleton. Call [Webdggrid.load](Webdggrid.md#load) once and reuse
+The WASM module is a singleton. Call [Webdggrid.load](#load) once and reuse
 the returned instance throughout your application. Call
-[Webdggrid.unload](Webdggrid.md#unload) when you are completely done to free memory.
-
-## Constructors
-
-### new Webdggrid(_module)
-
-> **`private`** **new Webdggrid**(`_module`): [`Webdggrid`](Webdggrid.md)
-
-#### Parameters
-
-• **\_module**: `any`
-
-#### Returns
-
-[`Webdggrid`](Webdggrid.md)
-
-#### Source
-
-[src-ts/webdggrid.ts:234](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L234)
+[Webdggrid.unload](#unload) when you are completely done to free memory.
 
 ## Properties
 
 ### \_module
 
-> **`protected`** **\_module**: `any`
+> `protected` **\_module**: `any`
 
-#### Source
-
-[src-ts/webdggrid.ts:234](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L234)
+Defined in: [webdggrid.ts:234](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L234)
 
 ***
 
@@ -71,15 +53,13 @@ the returned instance throughout your application. Call
 
 > **dggs**: [`IDGGSProps`](../interfaces/IDGGSProps.md) = `DEFAULT_DGGS`
 
+Defined in: [webdggrid.ts:220](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L220)
+
 The active DGGS configuration used by all conversion and statistics
-methods. Change it at any time via [setDggs](Webdggrid.md#setdggs).
+methods. Change it at any time via [setDggs](#setdggs).
 
 Defaults to ISEA4H (ISEA projection, aperture 4, hexagon topology,
 pole at 0° N 0° E, azimuth 0°).
-
-#### Source
-
-[src-ts/webdggrid.ts:220](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L220)
 
 ***
 
@@ -87,26 +67,26 @@ pole at 0° N 0° E, azimuth 0°).
 
 > **resolution**: `number` = `DEFAULT_RESOLUTION`
 
+Defined in: [webdggrid.ts:232](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L232)
+
 The active grid resolution. Higher values produce finer, smaller cells.
 The valid range depends on the aperture — for aperture 4 the practical
 limit is around resolution 15 before cell counts become unwieldy.
 
-Change via [setResolution](Webdggrid.md#setresolution) or pass an explicit `resolution`
+Change via [setResolution](#setresolution) or pass an explicit `resolution`
 argument to any conversion method.
 
 Defaults to `1`.
-
-#### Source
-
-[src-ts/webdggrid.ts:232](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L232)
 
 ## Methods
 
 ### \_main()
 
-`Internal`
-
 > **\_main**(): `any`
+
+Defined in: [webdggrid.ts:345](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L345)
+
+**`Internal`**
 
 Internal test helper that invokes the WASM module's `_main` entry point.
 Not intended for production use.
@@ -115,15 +95,13 @@ Not intended for production use.
 
 `any`
 
-#### Source
-
-[src-ts/webdggrid.ts:345](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L345)
-
 ***
 
 ### cellAreaKM()
 
-> **cellAreaKM**(`resolution`): `number`
+> **cellAreaKM**(`resolution?`): `number`
+
+Defined in: [webdggrid.ts:410](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L410)
 
 Returns the average area of a single cell in square kilometres at the
 given resolution.
@@ -137,10 +115,12 @@ const areakm2 = dggs.cellAreaKM(5);
 
 #### Parameters
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution level to query. Defaults to the instance's
-  current resolution.
+  current [resolution](#cellareakm).
 
 #### Returns
 
@@ -148,15 +128,13 @@ Resolution level to query. Defaults to the instance's
 
 Average cell area in km².
 
-#### Source
-
-[src-ts/webdggrid.ts:410](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L410)
-
 ***
 
 ### cellDistKM()
 
-> **cellDistKM**(`resolution`): `number`
+> **cellDistKM**(`resolution?`): `number`
+
+Defined in: [webdggrid.ts:447](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L447)
 
 Returns the average centre-to-centre distance between neighbouring cells
 in kilometres at the given resolution.
@@ -170,10 +148,12 @@ const spacingKm = dggs.cellDistKM(5);
 
 #### Parameters
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution level to query. Defaults to the instance's
-  current resolution.
+  current [resolution](#celldistkm).
 
 #### Returns
 
@@ -181,21 +161,19 @@ Resolution level to query. Defaults to the instance's
 
 Average cell spacing in km.
 
-#### Source
-
-[src-ts/webdggrid.ts:447](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L447)
-
 ***
 
 ### geoToGeo()
 
-> **geoToGeo**(`coordinates`, `resolution`): `Position`[]
+> **geoToGeo**(`coordinates`, `resolution?`): `Position`[]
+
+Defined in: [webdggrid.ts:643](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L643)
 
 Snaps an array of geographic coordinates to the centroid of the DGGS
 cell that contains each point.
 
-This is equivalent to calling [geoToSequenceNum](Webdggrid.md#geotosequencenum) followed by
-[sequenceNumToGeo](Webdggrid.md#sequencenumtogeo) but is more efficient because it avoids
+This is equivalent to calling [geoToSequenceNum](#geotosequencenum) followed by
+[sequenceNumToGeo](#sequencenumtogeo) but is more efficient because it avoids
 returning the intermediate sequence numbers.
 
 Useful for spatial aggregation: all points that fall within the same
@@ -213,14 +191,18 @@ const snapped = dggs.geoToGeo(
 
 #### Parameters
 
-• **coordinates**: `number`[][]
+##### coordinates
+
+`number`[][]
 
 Array of `[lng, lat]` pairs in decimal degrees.
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution at which to perform the snapping. Defaults
-  to the instance's current resolution.
+  to the instance's current [resolution](#geotogeo).
 
 #### Returns
 
@@ -229,15 +211,13 @@ Resolution at which to perform the snapping. Defaults
 Array of `[lng, lat]` cell centroid positions, one per input
   coordinate, in the same order.
 
-#### Source
-
-[src-ts/webdggrid.ts:643](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L643)
-
 ***
 
 ### geoToSequenceNum()
 
-> **geoToSequenceNum**(`coordinates`, `resolution`): `bigint`[]
+> **geoToSequenceNum**(`coordinates`, `resolution?`): `bigint`[]
+
+Defined in: [webdggrid.ts:536](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L536)
 
 Converts an array of geographic coordinates to their corresponding DGGS
 cell sequence numbers (cell IDs) at the given resolution.
@@ -263,14 +243,18 @@ const ids2 = dggs.geoToSequenceNum(
 
 #### Parameters
 
-• **coordinates**: `number`[][]
+##### coordinates
+
+`number`[][]
 
 Array of `[lng, lat]` pairs in decimal degrees.
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution at which to perform the lookup. Defaults
-  to the instance's current resolution.
+  to the instance's current [resolution](#geotosequencenum).
 
 #### Returns
 
@@ -279,15 +263,13 @@ Resolution at which to perform the lookup. Defaults
 Array of `BigInt` sequence numbers, one per input coordinate,
   in the same order.
 
-#### Source
-
-[src-ts/webdggrid.ts:536](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L536)
-
 ***
 
 ### getResolution()
 
 > **getResolution**(): `number`
+
+Defined in: [webdggrid.ts:321](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L321)
 
 Returns the currently active grid resolution.
 
@@ -302,15 +284,13 @@ console.log(dggs.getResolution()); // 7
 
 The current resolution level.
 
-#### Source
-
-[src-ts/webdggrid.ts:321](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L321)
-
 ***
 
 ### gridStatCLS()
 
-> **gridStatCLS**(`resolution`): `number`
+> **gridStatCLS**(`resolution?`): `number`
+
+Defined in: [webdggrid.ts:485](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L485)
 
 Returns the characteristic length scale (CLS) of the grid at the given
 resolution — defined as the square root of the average cell area.
@@ -325,10 +305,12 @@ const cls = dggs.gridStatCLS(4);
 
 #### Parameters
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution level to query. Defaults to the instance's
-  current resolution.
+  current [resolution](#gridstatcls).
 
 #### Returns
 
@@ -336,15 +318,13 @@ Resolution level to query. Defaults to the instance's
 
 Grid CLS value.
 
-#### Source
-
-[src-ts/webdggrid.ts:485](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L485)
-
 ***
 
 ### nCells()
 
-> **nCells**(`resolution`): `number`
+> **nCells**(`resolution?`): `number`
+
+Defined in: [webdggrid.ts:373](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L373)
 
 Returns the total number of cells that tile the entire globe at the
 given resolution under the current DGGS configuration.
@@ -367,10 +347,12 @@ const total = dggs.nCells(3); // 642
 
 #### Parameters
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution level to query. Defaults to the instance's
-  current resolution.
+  current [resolution](#ncells).
 
 #### Returns
 
@@ -378,15 +360,13 @@ Resolution level to query. Defaults to the instance's
 
 Total number of cells at the given resolution.
 
-#### Source
-
-[src-ts/webdggrid.ts:373](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L373)
-
 ***
 
 ### sequenceNumToGeo()
 
-> **sequenceNumToGeo**(`sequenceNum`, `resolution`): `Position`[]
+> **sequenceNumToGeo**(`sequenceNum`, `resolution?`): `Position`[]
+
+Defined in: [webdggrid.ts:584](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L584)
 
 Converts an array of DGGS cell sequence numbers to the geographic
 coordinates of their centroids.
@@ -401,14 +381,18 @@ const centroids = dggs.sequenceNumToGeo([1n, 2n, 3n], 3);
 
 #### Parameters
 
-• **sequenceNum**: `bigint`[]
+##### sequenceNum
+
+`bigint`[]
 
 Array of `BigInt` cell IDs to look up.
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution at which the IDs were generated. Defaults
-  to the instance's current resolution.
+  to the instance's current [resolution](#sequencenumtogeo).
 
 #### Returns
 
@@ -417,15 +401,13 @@ Resolution at which the IDs were generated. Defaults
 Array of `[lng, lat]` centroid positions, one per input ID, in
   the same order.
 
-#### Source
-
-[src-ts/webdggrid.ts:584](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L584)
-
 ***
 
 ### sequenceNumToGrid()
 
-> **sequenceNumToGrid**(`sequenceNum`, `resolution`): `Position`[][]
+> **sequenceNumToGrid**(`sequenceNum`, `resolution?`): `Position`[][]
+
+Defined in: [webdggrid.ts:702](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L702)
 
 Returns the polygon boundary vertices for each cell in `sequenceNum`.
 
@@ -433,7 +415,7 @@ Each cell is represented as an array of `[lng, lat]` vertex positions.
 The ring is **not** automatically closed (the first and last vertex are
 different) — close it yourself if your renderer requires it.
 
-Prefer [sequenceNumToGridFeatureCollection](Webdggrid.md#sequencenumtogridfeaturecollection) when you need
+Prefer [sequenceNumToGridFeatureCollection](#sequencenumtogridfeaturecollection) when you need
 GeoJSON output ready for a mapping library.
 
 ```ts
@@ -443,15 +425,19 @@ const rings = dggs.sequenceNumToGrid([1n, 2n], 3);
 
 #### Parameters
 
-• **sequenceNum**: `bigint`[]
+##### sequenceNum
+
+`bigint`[]
 
 Array of `BigInt` cell IDs whose boundaries to
   retrieve.
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution at which the IDs were generated. Defaults
-  to the instance's current resolution.
+  to the instance's current [resolution](#sequencenumtogrid).
 
 #### Returns
 
@@ -464,15 +450,13 @@ A 2-D array: `result[i]` is the vertex ring of `sequenceNum[i]`.
 
 If the WASM module encounters an invalid cell ID.
 
-#### Source
-
-[src-ts/webdggrid.ts:702](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L702)
-
 ***
 
 ### sequenceNumToGridFeatureCollection()
 
-> **sequenceNumToGridFeatureCollection**(`sequenceNum`, `resolution`): `FeatureCollection`\<`Polygon`, `Object` & `Object`\>
+> **sequenceNumToGridFeatureCollection**(`sequenceNum`, `resolution?`): `FeatureCollection`\<`Polygon`, `object` & `object`\>
+
+Defined in: [webdggrid.ts:794](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L794)
 
 Converts an array of DGGS cell IDs into a GeoJSON `FeatureCollection`
 where each `Feature` is a `Polygon` representing the cell boundary.
@@ -502,31 +486,33 @@ map.getSource('grid').setData(fc);
 
 #### Parameters
 
-• **sequenceNum**: `bigint`[]
+##### sequenceNum
+
+`bigint`[]
 
 Array of `BigInt` cell IDs to convert.
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 Resolution at which the IDs were generated. Defaults
-  to the instance's current resolution.
+  to the instance's current [resolution](#sequencenumtogridfeaturecollection).
 
 #### Returns
 
-`FeatureCollection`\<`Polygon`, `Object` & `Object`\>
+`FeatureCollection`\<`Polygon`, `object` & `object`\>
 
 A GeoJSON `FeatureCollection` of `Polygon` features, one per
   input cell ID.
-
-#### Source
-
-[src-ts/webdggrid.ts:794](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L794)
 
 ***
 
 ### setDggs()
 
-> **setDggs**(`dggs`, `resolution`): `void`
+> **setDggs**(`dggs?`, `resolution?`): `void`
+
+Defined in: [webdggrid.ts:306](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L306)
 
 Sets both the DGGS configuration and the resolution in one call.
 
@@ -545,11 +531,15 @@ dggs.setDggs({
 
 #### Parameters
 
-• **dggs**: [`IDGGSProps`](../interfaces/IDGGSProps.md)= `DEFAULT_DGGS`
+##### dggs?
+
+[`IDGGSProps`](../interfaces/IDGGSProps.md) = `DEFAULT_DGGS`
 
 The new DGGS configuration. Defaults to ISEA4H at pole (0,0).
 
-• **resolution**: `number`= `DEFAULT_RESOLUTION`
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
 
 The new resolution level. Defaults to `1`.
 
@@ -557,15 +547,13 @@ The new resolution level. Defaults to `1`.
 
 `void`
 
-#### Source
-
-[src-ts/webdggrid.ts:306](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L306)
-
 ***
 
 ### setResolution()
 
 > **setResolution**(`resolution`): `void`
+
+Defined in: [webdggrid.ts:336](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L336)
 
 Sets the grid resolution used by default in all conversion and
 statistics methods.
@@ -577,7 +565,9 @@ const count = dggs.nCells(); // uses resolution 5
 
 #### Parameters
 
-• **resolution**: `number`
+##### resolution
+
+`number`
 
 The new resolution level. Must be a positive integer.
 
@@ -585,15 +575,13 @@ The new resolution level. Must be a positive integer.
 
 `void`
 
-#### Source
-
-[src-ts/webdggrid.ts:336](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L336)
-
 ***
 
 ### version()
 
 > **version**(): `string`
+
+Defined in: [webdggrid.ts:283](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L283)
 
 Returns the version string of the underlying DGGRID C++ library.
 
@@ -607,15 +595,13 @@ console.log(dggs.version()); // e.g. "8.3b"
 
 The DGGRID C++ library version string.
 
-#### Source
-
-[src-ts/webdggrid.ts:283](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L283)
-
 ***
 
 ### load()
 
-> **`static`** **load**(): `Promise`\<*typeof* [`Webdggrid`](Webdggrid.md)\>
+> `static` **load**(): `Promise`\<*typeof* `Webdggrid`\>
+
+Defined in: [webdggrid.ts:257](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L257)
 
 Compiles and instantiates the DGGRID WebAssembly module.
 
@@ -635,30 +621,24 @@ asynchronous.
 
 #### Returns
 
-`Promise`\<*typeof* [`Webdggrid`](Webdggrid.md)\>
+`Promise`\<*typeof* `Webdggrid`\>
 
 A promise that resolves to a fully initialised `Webdggrid` instance.
-
-#### Source
-
-[src-ts/webdggrid.ts:257](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L257)
 
 ***
 
 ### unload()
 
-> **`static`** **unload**(): `void`
+> `static` **unload**(): `void`
+
+Defined in: [webdggrid.ts:270](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L270)
 
 Releases the compiled WASM instance and frees its memory.
 
 Call this when your application no longer needs the library. After
 calling `unload`, any existing `Webdggrid` instances become unusable —
-you must call [load](Webdggrid.md#load) again to create a new one.
+you must call [load](#load) again to create a new one.
 
 #### Returns
 
 `void`
-
-#### Source
-
-[src-ts/webdggrid.ts:270](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L270)

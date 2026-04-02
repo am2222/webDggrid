@@ -1,8 +1,10 @@
-[webdggrid](../index.md) / unwrapAntimeridianRing
+[webdggrid](../globals.md) / unwrapAntimeridianRing
 
 # Function: unwrapAntimeridianRing()
 
 > **unwrapAntimeridianRing**(`ring`): `Position`[]
+
+Defined in: [webdggrid.ts:158](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L158)
 
 Rewraps a polygon ring that crosses the antimeridian so that all longitudes
 are in a contiguous range (some may exceed 180°).  This is the format
@@ -12,12 +14,10 @@ output from [Webdggrid.sequenceNumToGrid](../classes/Webdggrid.md#sequencenumtog
 
 ## Parameters
 
-• **ring**: `Position`[]
+### ring
+
+`Position`[]
 
 ## Returns
 
 `Position`[]
-
-## Source
-
-[src-ts/webdggrid.ts:158](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L158)

@@ -1,8 +1,10 @@
-[webdggrid](../index.md) / DGGSGeoJsonProperty
+[webdggrid](../globals.md) / DGGSGeoJsonProperty
 
-# Type alias: DGGSGeoJsonProperty
+# Type Alias: DGGSGeoJsonProperty
 
-> **DGGSGeoJsonProperty**: `GeoJsonProperties` & `Object`
+> **DGGSGeoJsonProperty** = `GeoJsonProperties` & `object`
+
+Defined in: [webdggrid.ts:85](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L85)
 
 GeoJSON `properties` object attached to every cell feature returned by
 [Webdggrid.sequenceNumToGridFeatureCollection](../classes/Webdggrid.md#sequencenumtogridfeaturecollection).
@@ -14,27 +16,23 @@ can exceed the safe integer range of IEEE-754 doubles at high resolutions.
 > by these libraries' Web Workers) cannot serialise `BigInt`. Convert `id`
 > to a string before calling `source.setData()`.
 
-## Type declaration
+## Type Declaration
 
 ### i?
 
-> **`optional`** **i**: `BigInt`
+> `optional` **i?**: `BigInt`
 
 Column index in an (i, j) address scheme, if available.
 
 ### id?
 
-> **`optional`** **id**: `BigInt`
+> `optional` **id?**: `BigInt`
 
 The DGGS sequence number (cell ID) of this feature.
 Unique within a given DGGS configuration and resolution.
 
 ### j?
 
-> **`optional`** **j**: `BigInt`
+> `optional` **j?**: `BigInt`
 
 Row index in an (i, j) address scheme, if available.
-
-## Source
-
-[src-ts/webdggrid.ts:85](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L85)

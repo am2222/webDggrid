@@ -1,6 +1,8 @@
-[webdggrid](../index.md) / Projection
+[webdggrid](../globals.md) / Projection
 
 # Enumeration: Projection
+
+Defined in: [webdggrid.ts:51](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L51)
 
 The map projection used to place the polyhedron faces onto the sphere.
 
@@ -25,11 +27,9 @@ dggs.setDggs({ projection: Projection.ISEA, ... }, 4);
 
 > **FULLER**: `"FULLER"`
 
+Defined in: [webdggrid.ts:55](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L55)
+
 Fuller/Dymaxion projection — shape-preserving cells.
-
-#### Source
-
-[src-ts/webdggrid.ts:55](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L55)
 
 ***
 
@@ -37,8 +37,6 @@ Fuller/Dymaxion projection — shape-preserving cells.
 
 > **ISEA**: `"ISEA"`
 
+Defined in: [webdggrid.ts:53](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L53)
+
 Icosahedral Snyder Equal Area projection — equal-area cells.
-
-#### Source
-
-[src-ts/webdggrid.ts:53](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L53)

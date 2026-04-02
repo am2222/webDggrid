@@ -1,1 +1,0 @@
-import{_ as a,o as e,c as r,a2 as t}from"./chunks/framework.DgxA5mlk.js";const f=JSON.parse('{"title":"webdggrid","description":"","frontmatter":{},"headers":[],"relativePath":"api/globals.md","filePath":"api/globals.md"}'),s={name:"api/globals.md"},l=t("",9),i=[l];function o(n,d,h,c,u,_){return e(),r("div",null,i)}const p=a(s,[["render",o]]);export{f as __pageData,p as default};

@@ -1,6 +1,8 @@
-[webdggrid](../index.md) / Topology
+[webdggrid](../globals.md) / Topology
 
 # Enumeration: Topology
+
+Defined in: [webdggrid.ts:22](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L22)
 
 The shape of each cell in the Discrete Global Grid System.
 
@@ -24,11 +26,9 @@ dggs.setDggs({ topology: Topology.HEXAGON, ... }, 4);
 
 > **DIAMOND**: `"DIAMOND"`
 
+Defined in: [webdggrid.ts:30](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L30)
+
 Four-sided diamond cells (squares rotated 45°).
-
-#### Source
-
-[src-ts/webdggrid.ts:30](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L30)
 
 ***
 
@@ -36,11 +36,9 @@ Four-sided diamond cells (squares rotated 45°).
 
 > **HEXAGON**: `"HEXAGON"`
 
+Defined in: [webdggrid.ts:24](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L24)
+
 Six-sided cells — the default and most widely used topology.
-
-#### Source
-
-[src-ts/webdggrid.ts:24](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L24)
 
 ***
 
@@ -48,11 +46,9 @@ Six-sided cells — the default and most widely used topology.
 
 > **SQUARE**: `"SQUARE"`
 
+Defined in: [webdggrid.ts:28](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L28)
+
 Four-sided square cells.
-
-#### Source
-
-[src-ts/webdggrid.ts:28](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L28)
 
 ***
 
@@ -60,8 +56,6 @@ Four-sided square cells.
 
 > **TRIANGLE**: `"TRIANGLE"`
 
+Defined in: [webdggrid.ts:26](https://github.com/am2222/webDggrid/blob/c7cf69c5175afdde226a5d2551125aeddfcbf081/src-ts/webdggrid.ts#L26)
+
 Three-sided cells.
-
-#### Source
-
-[src-ts/webdggrid.ts:26](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L26)
