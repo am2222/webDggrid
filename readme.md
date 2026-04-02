@@ -1,6 +1,6 @@
 ## Web Assembly version of DGGRID
 
-A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed by Dr. Kevin
+A WebAssembly wrapper for [DGGRID](https://github.com/sahrk/DGGRID), the C++ library for working with Discrete Global Grid Systems.
 
 
 <div align="center">
