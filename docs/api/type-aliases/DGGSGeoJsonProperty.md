@@ -4,8 +4,15 @@
 
 > **DGGSGeoJsonProperty**: `GeoJsonProperties` & `Object`
 
-Geojson properties type.
-TODO: Better handeling the types
+GeoJSON `properties` object attached to every cell feature returned by
+[Webdggrid.sequenceNumToGridFeatureCollection](../classes/Webdggrid.md#sequencenumtogridfeaturecollection).
+
+All numeric identifiers are `BigInt` because DGGRID cell sequence numbers
+can exceed the safe integer range of IEEE-754 doubles at high resolutions.
+
+> **Note for MapLibre / Mapbox users:** structured-clone (used internally
+> by these libraries' Web Workers) cannot serialise `BigInt`. Convert `id`
+> to a string before calling `source.setData()`.
 
 ## Type declaration
 
@@ -13,16 +20,21 @@ TODO: Better handeling the types
 
 > **`optional`** **i**: `BigInt`
 
+Column index in an (i, j) address scheme, if available.
+
 ### id?
 
 > **`optional`** **id**: `BigInt`
 
-It stores the seq number if exists
+The DGGS sequence number (cell ID) of this feature.
+Unique within a given DGGS configuration and resolution.
 
 ### j?
 
 > **`optional`** **j**: `BigInt`
 
+Row index in an (i, j) address scheme, if available.
+
 ## Source
 
-[src-ts/webdggrid.ts:39](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L39)
+[src-ts/webdggrid.ts:85](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L85)

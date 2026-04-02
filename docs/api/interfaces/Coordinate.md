@@ -2,7 +2,14 @@
 
 # Interface: Coordinate
 
-A geographic coordinate
+A simple geographic coordinate expressed as latitude and longitude in
+decimal degrees (WGS-84).
+
+## Example
+
+```ts
+const coord: Coordinate = { lat: 51.5, lng: -0.1 };
+```
 
 ## Properties
 
@@ -10,9 +17,11 @@ A geographic coordinate
 
 > **lat**: `number`
 
+Latitude in decimal degrees. Range: −90 to 90.
+
 #### Source
 
-[src-ts/webdggrid.ts:31](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L31)
+[src-ts/webdggrid.ts:69](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L69)
 
 ***
 
@@ -20,6 +29,8 @@ A geographic coordinate
 
 > **lng**: `number`
 
+Longitude in decimal degrees. Range: −180 to 180.
+
 #### Source
 
-[src-ts/webdggrid.ts:32](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L32)
+[src-ts/webdggrid.ts:71](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L71)

@@ -2,9 +2,21 @@
 
 # Enumeration: Topology
 
-Cell Topology
+The shape of each cell in the Discrete Global Grid System.
+
+DGGRID supports four cell topologies. The most common choice for geospatial
+analysis is `HEXAGON` because hexagonal cells have equal adjacency (every
+neighbour shares an edge), uniform area, and minimal boundary-to-area ratio.
 
 ## Export
+
+## Example
+
+```ts
+import { Topology } from 'webdggrid';
+
+dggs.setDggs({ topology: Topology.HEXAGON, ... }, 4);
+```
 
 ## Enumeration Members
 
@@ -12,9 +24,11 @@ Cell Topology
 
 > **DIAMOND**: `"DIAMOND"`
 
+Four-sided diamond cells (squares rotated 45°).
+
 #### Source
 
-[src-ts/webdggrid.ts:14](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L14)
+[src-ts/webdggrid.ts:30](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L30)
 
 ***
 
@@ -22,9 +36,11 @@ Cell Topology
 
 > **HEXAGON**: `"HEXAGON"`
 
+Six-sided cells — the default and most widely used topology.
+
 #### Source
 
-[src-ts/webdggrid.ts:11](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L11)
+[src-ts/webdggrid.ts:24](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L24)
 
 ***
 
@@ -32,9 +48,11 @@ Cell Topology
 
 > **SQUARE**: `"SQUARE"`
 
+Four-sided square cells.
+
 #### Source
 
-[src-ts/webdggrid.ts:13](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L13)
+[src-ts/webdggrid.ts:28](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L28)
 
 ***
 
@@ -42,6 +60,8 @@ Cell Topology
 
 > **TRIANGLE**: `"TRIANGLE"`
 
+Three-sided cells.
+
 #### Source
 
-[src-ts/webdggrid.ts:12](https://github.com/am2222/webDggrid/blob/a437321/src-ts/webdggrid.ts#L12)
+[src-ts/webdggrid.ts:26](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L26)

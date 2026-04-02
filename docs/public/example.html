@@ -3,50 +3,52 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Webdggrid + Leaflet</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>Webdggrid Globe</title>
+    <link href="https://unpkg.com/maplibre-gl@5.21.1/dist/maplibre-gl.css" rel="stylesheet" />
     <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; font-family: sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: sans-serif; }
         #map { height: 100vh; width: 100%; }
         #controls {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 12px 16px;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-            min-width: 200px;
+            top: 12px;
+            right: 12px;
+            z-index: 10;
+            background: rgba(255,255,255,0.95);
+            padding: 14px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            min-width: 210px;
         }
-        #controls h3 { margin: 0 0 10px; font-size: 14px; }
-        #controls label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; margin-bottom: 10px; }
-        #controls input[type=range] { width: 100%; }
+        #controls h3 { font-size: 13px; margin-bottom: 10px; color: #333; letter-spacing: 0.03em; text-transform: uppercase; }
+        #controls label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #444; margin-bottom: 10px; }
+        #controls input[type=range] { width: 100%; accent-color: #0066cc; }
         #controls button {
             width: 100%;
-            padding: 7px;
+            padding: 8px;
             background: #0066cc;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
             font-size: 13px;
+            font-weight: 600;
         }
-        #controls button:hover { background: #0055aa; }
+        #controls button:hover:not(:disabled) { background: #0052a3; }
         #controls button:disabled { background: #aaa; cursor: default; }
         #status {
             position: absolute;
-            bottom: 24px;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 1000;
-            background: white;
-            padding: 6px 14px;
+            z-index: 10;
+            background: rgba(255,255,255,0.92);
+            padding: 6px 16px;
             border-radius: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             font-size: 13px;
             white-space: nowrap;
+            color: #333;
         }
     </style>
 </head>
@@ -65,101 +67,187 @@
 
     <div id="status">Loading WASM…</div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/maplibre-gl@5.21.1/dist/maplibre-gl.js"></script>
     <script type="module">
         import { Webdggrid } from "/dist/index.js";
 
-        // --- Map setup ---
-        const map = L.map('map').setView([37.5, -96], 4);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19
-        }).addTo(map);
+        // BigInt → string so MapLibre can serialize GeoJSON properties
+        BigInt.prototype.toJSON = function () { return this.toString(); };
 
-        // --- UI refs ---
-        const statusEl   = document.getElementById('status');
-        const resSlider  = document.getElementById('resolution');
-        const resValueEl = document.getElementById('resValue');
+        // --- UI ---
+        const statusEl    = document.getElementById('status');
+        const resSlider   = document.getElementById('resolution');
+        const resValueEl  = document.getElementById('resValue');
         const generateBtn = document.getElementById('generateBtn');
 
         resSlider.addEventListener('input', () => {
             resValueEl.textContent = resSlider.value;
         });
 
-        // --- Load WASM ---
-        const webdggrid = await Webdggrid.load();
-        statusEl.textContent = 'WASM loaded — click "Generate Grid"';
-        generateBtn.textContent = 'Generate Grid';
-        generateBtn.disabled = false;
+        // Fetch Carto style and inject globe projection before passing to MapLibre
+        const styleJson = await fetch('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json').then(r => r.json());
+        styleJson.projection = { type: 'globe' };
 
-        // --- Grid layer ---
-        let gridLayer = null;
+        // --- Map ---
+        const map = new maplibregl.Map({
+            container: 'map',
+            style:  {
+            'version': 8,
+            'projection': {
+                'type': 'globe'
+            },
+            'sources': {
+                'satellite': {
+                    'tiles': ['https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg'],
+                    'type': 'raster'
+                },
+            },
+            'layers': [
+                {
+                    'id': 'Satellite',
+                    'type': 'raster',
+                    'source': 'satellite',
+                },
+            ],
+            'sky': {
+                'atmosphere-blend': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    0, 1,
+                    5, 1,
+                    7, 0
+                ]
+            },
+            'light': {
+                'anchor': 'map',
+                'position': [1.5, 90, 80]
+            }
+        },
+            center: [0, 20],
+            zoom: 1.8,
+        });
+
+        // --- State ---
+        let webdggrid = null;
+        let mapReady  = false;
+
+        // Load WASM and wait for map in parallel
+        const wasmPromise = Webdggrid.load().then(w => {
+            webdggrid = w;
+        });
+
+        const mapPromise = new Promise(resolve => map.on('load', () => {
+            // Belt-and-suspenders: also call setProjection after load
+            try { map.setProjection({ type: 'globe' }); } catch (e) { /* older builds */ }
+            resolve();
+        }));
+
+        Promise.all([wasmPromise, mapPromise]).then(() => {
+            // Set up GeoJSON source + layers once
+            map.addSource('dggrid', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.addLayer({
+                id: 'dggrid-fill',
+                type: 'fill',
+                source: 'dggrid',
+                paint: {
+                    'fill-color': '#3388ff',
+                    'fill-opacity': 0.18
+                }
+            });
+
+            map.addLayer({
+                id: 'dggrid-line',
+                type: 'line',
+                source: 'dggrid',
+                paint: {
+                    'line-color': '#0055cc',
+                    'line-width': 1.2
+                }
+            });
+
+            // Hover tooltip
+            const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+            map.on('mouseenter', 'dggrid-fill', (e) => {
+                map.getCanvas().style.cursor = 'pointer';
+                const id = e.features[0].properties.id;
+                popup.setLngLat(e.lngLat).setHTML(`<b>Cell ID:</b> ${id}`).addTo(map);
+            });
+            map.on('mouseleave', 'dggrid-fill', () => {
+                map.getCanvas().style.cursor = '';
+                popup.remove();
+            });
+
+            mapReady = true;
+            statusEl.textContent = 'WASM loaded — click "Generate Grid"';
+            generateBtn.textContent = 'Generate Grid';
+            generateBtn.disabled = false;
+
+            // Auto-generate on load
+            generateGrid();
+        });
+
+        generateBtn.addEventListener('click', generateGrid);
 
         function generateGrid() {
-            if (!webdggrid) return;
+            if (!mapReady || !webdggrid) return;
 
             const resolution = parseInt(resSlider.value, 10);
-            const bounds = map.getBounds();
-            const minLat = Math.max(bounds.getSouth(), -85);
-            const maxLat = Math.min(bounds.getNorth(),  85);
-            const minLng = bounds.getWest();
-            const maxLng = bounds.getEast();
-
             statusEl.textContent = 'Generating grid…';
             generateBtn.disabled = true;
 
-            // Use setTimeout so the status text renders before the (synchronous) WASM work
             setTimeout(() => {
                 try {
-                    // Sample a regular grid of points across the visible bounds
-                    const steps = 25;
-                    const latStep = (maxLat - minLat) / steps;
-                    const lngStep = (maxLng - minLng) / steps;
-                    const coordinates = [];
+                    let seqNums;
 
-                    for (let i = 0; i <= steps; i++) {
-                        for (let j = 0; j <= steps; j++) {
-                            coordinates.push([
-                                minLng + j * lngStep,  // lng first
-                                minLat + i * latStep   // then lat
-                            ]);
+                    if (resolution <= 3) {
+                        // At low resolution, render all cells globally — looks great on a globe
+                        const total = webdggrid.nCells(resolution);
+                        seqNums = Array.from({ length: total }, (_, i) => BigInt(i + 1));
+                    } else {
+                        // At higher resolution, sample points within the current viewport
+                        const bounds = map.getBounds();
+                        const minLat = Math.max(bounds.getSouth(), -85);
+                        const maxLat = Math.min(bounds.getNorth(),  85);
+                        const minLng = bounds.getWest();
+                        const maxLng = bounds.getEast();
+                        const steps  = 25;
+                        const latStep = (maxLat - minLat) / steps;
+                        const lngStep = (maxLng - minLng) / steps;
+
+                        const coords = [];
+                        for (let i = 0; i <= steps; i++) {
+                            for (let j = 0; j <= steps; j++) {
+                                coords.push([minLng + j * lngStep, minLat + i * latStep]);
+                            }
+                        }
+
+                        const raw = webdggrid.geoToSequenceNum(coords, resolution);
+                        const seen = new Set();
+                        seqNums = [];
+                        for (const n of raw) {
+                            const k = n.toString();
+                            if (!seen.has(k)) { seen.add(k); seqNums.push(n); }
                         }
                     }
 
-                    // Convert sample points → DGGS cell IDs
-                    const seqNums = webdggrid.geoToSequenceNum(coordinates, resolution);
-
-                    // Deduplicate (BigInt-safe via string key)
-                    const seen = new Set();
-                    const uniqueSeqNums = [];
-                    for (const n of seqNums) {
-                        const key = n.toString();
-                        if (!seen.has(key)) { seen.add(key); uniqueSeqNums.push(n); }
-                    }
-
-                    // Convert cell IDs → GeoJSON FeatureCollection
-                    const featureCollection = webdggrid.sequenceNumToGridFeatureCollection(uniqueSeqNums, resolution);
-
-                    // Swap old layer for new
-                    if (gridLayer) map.removeLayer(gridLayer);
-
-                    gridLayer = L.geoJSON(featureCollection, {
-                        style: {
-                            color: '#0055aa',
-                            weight: 1.5,
-                            fillColor: '#4499ff',
-                            fillOpacity: 0.18
-                        },
-                        onEachFeature(feature, layer) {
-                            layer.bindTooltip(`Cell ID: ${feature.properties.id}`, { sticky: true });
-                            layer.on('click', () => {
-                                layer.setStyle({ fillOpacity: 0.55, fillColor: '#ff7700' });
-                                setTimeout(() => layer.setStyle({ fillOpacity: 0.18, fillColor: '#4499ff' }), 800);
-                            });
+                    const fc = webdggrid.sequenceNumToGridFeatureCollection(seqNums, resolution);
+                    // Structured clone (used by MapLibre workers) can't handle BigInt —
+                    // convert top-level feature id AND all BigInt properties to strings.
+                    fc.features.forEach(f => {
+                        if (typeof f.id === 'bigint') f.id = f.id.toString();
+                        const p = f.properties;
+                        if (p) for (const k of Object.keys(p)) {
+                            if (typeof p[k] === 'bigint') p[k] = p[k].toString();
                         }
-                    }).addTo(map);
-
-                    statusEl.textContent = `${uniqueSeqNums.length} cells at resolution ${resolution}`;
+                    });
+                    map.getSource('dggrid').setData(fc);
+                    statusEl.textContent = `${seqNums.length} cells · resolution ${resolution}`;
                 } catch (err) {
                     statusEl.textContent = `Error: ${err.message}`;
                     console.error(err);
@@ -168,11 +256,6 @@
                 }
             }, 20);
         }
-
-        generateBtn.addEventListener('click', generateGrid);
-
-        // Auto-generate on initial load
-        generateGrid();
     </script>
 </body>
 

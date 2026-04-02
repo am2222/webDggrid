@@ -655,7 +655,7 @@ function createExportWrapper(name, nargs) {
 var wasmBinaryFile;
 
 function findWasmBinary() {
-    return locateFile('cmTC_05ec9.wasm');
+    return locateFile('cmTC_b3784.wasm');
 }
 
 function getBinarySync(file) {

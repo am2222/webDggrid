@@ -19,11 +19,18 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Guide', link: '/getting-started' },
       { text: 'API', link: '/api/' },
       { text: 'Demo', link: 'example.html' }
     ],
 
     sidebar: [
+      {
+        text: 'Guide',
+        items: [
+          { text: 'Getting Started', link: '/getting-started' },
+        ],
+      },
       {
         text: 'API',
         items: sidebarModified,
