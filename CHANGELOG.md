@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/am2222/webDggrid/compare/v1.2.0...v1.2.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* Update documentation badge links in README for accuracy ([c3491df](https://github.com/am2222/webDggrid/commit/c3491dfc423ed842b969691223ade55c26ce8d7d))
+
 ## [1.2.0](https://github.com/am2222/webDggrid/compare/v1.1.1...v1.2.0) (2026-04-02)
 
 
