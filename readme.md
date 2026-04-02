@@ -10,8 +10,9 @@ A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed
 
 </div>
 
+
 <p align="center">
-  <img src="https://github.com/am2222/pydggrid/blob/master/docs/L6kmP.jpg?raw=true" alt="SPyDGGRID"/>
+  <img src="screenshot.png" alt="Webdggrid demo screenshot"/>
 </p>
 ------------
 
