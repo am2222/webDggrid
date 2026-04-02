@@ -365,8 +365,8 @@ export class Webdggrid {
         } = this.dggs;
 
         const cellCount = this._module.nCells(
-            lat,
             lng,
+            lat,
             azimuth,
             aperture,
             resolution,
@@ -401,9 +401,9 @@ export class Webdggrid {
             aperture,
         } = this.dggs;
 
-        const cellCount = this._module.nCells(
-            lat,
+        const cellCount = this._module.cellAreaKM(
             lng,
+            lat,
             azimuth,
             aperture,
             resolution,
@@ -438,9 +438,9 @@ export class Webdggrid {
             aperture,
         } = this.dggs;
 
-        const cellCount = this._module.nCells(
-            lat,
+        const cellCount = this._module.cellDistKM(
             lng,
+            lat,
             azimuth,
             aperture,
             resolution,
@@ -476,9 +476,9 @@ export class Webdggrid {
             aperture,
         } = this.dggs;
 
-        const cellCount = this._module.nCells(
-            lat,
+        const cellCount = this._module.gridStatCLS(
             lng,
+            lat,
             azimuth,
             aperture,
             resolution,
@@ -534,8 +534,8 @@ export class Webdggrid {
         const yCoords = coordinates.map((coord) => coord[1]);
 
         const resultArray = this._module.DgGEO_to_SEQNUM(
-            lat,
             lng,
+            lat,
             azimuth,
             aperture,
             resolution,
@@ -579,8 +579,8 @@ export class Webdggrid {
         } = this.dggs;
 
         const resultArray = this._module.SEQNUM_to_GEO(
-            lat,
             lng,
+            lat,
             azimuth,
             aperture,
             resolution,
