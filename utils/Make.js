@@ -27,13 +27,31 @@ const getArgs = () =>
 
 const runCMD = (
   targetDir,
+  srcFiles,
   libName = 'libdggrid',
   standAloneWasm = true,
   debug = false
 ) => {
   const target = [`-o ${targetDir}/${libName}.html`];
 
-  const CFLAGS = ['-I src-cpp'];
+  // ── Include paths ────────────────────────────────────────────────────────
+  // Paths are relative to the project root (where emcc is invoked).
+  //
+  //   submodules/DGGRID/src/lib/dglib/include
+  //       provides  <dglib/Dg*.h>
+  //   submodules/DGGRID/src/lib/proj4lib/include
+  //       provides  "proj4.h"  (included by DgProjGnomonicRF.cpp)
+  //   submodules/DGGRID/src/lib/shapelib/include/shapelib
+  //       provides  <shapefil.h>  (included by DgInShapefile.h etc.)
+  //   copy_to_src
+  //       provides  "dggrid_transform.hpp"
+  const CFLAGS = [
+    '-I submodules/DGGRID/src/lib/dglib/include',
+    '-I submodules/DGGRID/src/lib/proj4lib/include',
+    '-I submodules/DGGRID/src/lib/shapelib/include/shapelib',
+    '-I copy_to_src',
+  ];
+
   const JSFLAGS = [
     '-lembind',
     `-sEXPORT_NAME=${libName}`,
@@ -57,7 +75,6 @@ const runCMD = (
 
   if (standAloneWasm) {
     JSFLAGS.push('-sSTANDALONE_WASM=1');
-  } else {
   }
 
   if (debug) {
@@ -103,9 +120,21 @@ const args = getArgs();
 
 const debug = args['debug'] || false;
 
-const targetDir = './lib-wasm';
-const srcFiles = await glob('./src-cpp/*.c*');
+// ── Source files ─────────────────────────────────────────────────────────
+// Collect all .cpp/.c sources from the DGGRID v8 submodule libraries plus
+// the wrapper and binding files from copy_to_src/.
+const dgglibSrc   = await glob('./submodules/DGGRID/src/lib/dglib/lib/*.cpp');
+const proj4Src    = await glob('./submodules/DGGRID/src/lib/proj4lib/lib/*.cpp');
+const shapelibSrc = await glob('./submodules/DGGRID/src/lib/shapelib/lib/*.c');
+
+const srcFiles = [
+  ...dgglibSrc,
+  ...proj4Src,
+  ...shapelibSrc,
+  './copy_to_src/dggrid_transform.cpp',
+  './copy_to_src/webdggrid.cpp',
+];
 
 // build for js env
-runCMD(targetDir, 'libdggrid', false, false);
-runCMD('./lib-wasm-py', 'libdggrid', true, false);
+runCMD('./lib-wasm', srcFiles, 'libdggrid', false, false);
+runCMD('./lib-wasm-py', srcFiles, 'libdggrid', true, false);
