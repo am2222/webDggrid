@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/am2222/webDggrid/compare/v1.2.1...v1.3.0) (2026-04-02)
+
+
+### Features
+
+* Implement deploy-docs workflow for GitHub Pages deployment ([3921ce3](https://github.com/am2222/webDggrid/commit/3921ce32781d427d8978256c5770286db9db2e93))
+
 ## [1.2.1](https://github.com/am2222/webDggrid/compare/v1.2.0...v1.2.1) (2026-04-02)
 
 
