@@ -5,14 +5,16 @@ A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed
 
 <div align="center">
 
-![NPM Version](https://img.shields.io/npm/v/webdggrid?style=flat-square)
- ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/deploy.yml?style=flat-square&label=docs) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/main.yml?style=flat-square&label=npm%20pacakge) [![](https://data.jsdelivr.com/v1/package/npm/webdggrid/badge)](https://www.jsdelivr.com/package/npm/webdggrid)
+[![NPM Version](https://img.shields.io/npm/v/webdggrid?style=flat-square)](https://www.npmjs.com/package/webdggrid)
+[![Docs](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/deploy.yml?style=flat-square&label=docs)](https://am2222.github.io/webDggrid/)
+[![npm package](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/main.yml?style=flat-square&label=npm%20package)](https://github.com/am2222/webDggrid/actions/workflows/main.yml)
+[![](https://data.jsdelivr.com/v1/package/npm/webdggrid/badge)](https://www.jsdelivr.com/package/npm/webdggrid)
 
 </div>
 
 
 <p align="center">
-  <img src="https://github.com/am2222/pydggrid/blob/master/docs/L6kmP.jpg?raw=true" alt="Webdggrid demo screenshot"/>
+  <img src="screenshot.png" alt="Webdggrid demo screenshot"/>
 </p>
 ------------
 

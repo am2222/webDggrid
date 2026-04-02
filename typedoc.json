@@ -2,5 +2,6 @@
     "$schema": "https://typedoc.org/schema.json",
     "entryPoints": ["./src-ts/webdggrid.ts"],
     "out": "./docs/api",
+    "media": "./media",
     "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"]
 }
