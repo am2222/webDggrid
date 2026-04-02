@@ -7,7 +7,7 @@ A wrapper for DGGRID in Web Assembly. Based on last DGGRID c++ library developed
 
 [![NPM Version](https://img.shields.io/npm/v/webdggrid?style=flat-square)](https://www.npmjs.com/package/webdggrid)
 [![Docs](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/deploy.yml?style=flat-square&label=docs)](https://am2222.github.io/webDggrid/)
-[![CI](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/ci.yml?style=flat-square&label=ci)](https://github.com/am2222/webDggrid/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/pr-check.yml?style=flat-square&label=ci)](https://github.com/am2222/webDggrid/actions/workflows/pr-check.yml)
 [![npm package](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/publish.yml?style=flat-square&label=publish)](https://github.com/am2222/webDggrid/actions/workflows/publish.yml)
 [![](https://data.jsdelivr.com/v1/package/npm/webdggrid/badge)](https://www.jsdelivr.com/package/npm/webdggrid)
 
