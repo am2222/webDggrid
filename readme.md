@@ -6,13 +6,11 @@ A WebAssembly wrapper for [DGGRID](https://github.com/sahrk/DGGRID), the C++ lib
 <div align="center">
 
 [![NPM Version](https://img.shields.io/npm/v/webdggrid?style=flat-square)](https://www.npmjs.com/package/webdggrid)
-
-[![Docs](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/publish.yml?style=flat-square&label=docs)](https://am2222.github.io/webDggrid/)
-
-[![Tests](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/pr-check.yml?style=flat-square&label=ci)](https://github.com/am2222/webDggrid/actions/workflows/pr-check.yml)
-
-
-[![JS DEliver](https://data.jsdelivr.com/v1/package/npm/webdggrid/badge)](https://www.jsdelivr.com/package/npm/webdggrid)
+[![GitHub Release](https://img.shields.io/github/v/release/am2222/webDggrid?style=flat-square)](https://github.com/am2222/webDggrid/releases/latest)
+[![Docs](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/deploy-docs.yml?style=flat-square&label=docs)](https://am2222.github.io/webDggrid/)
+[![PR Check](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/pr-check.yml?style=flat-square&label=pr%20check)](https://github.com/am2222/webDggrid/actions/workflows/pr-check.yml)
+[![Publish](https://img.shields.io/github/actions/workflow/status/am2222/webDggrid/publish.yml?style=flat-square&label=publish)](https://github.com/am2222/webDggrid/actions/workflows/publish.yml)
+[![jsDelivr](https://data.jsdelivr.com/v1/package/npm/webdggrid/badge)](https://www.jsdelivr.com/package/npm/webdggrid)
 
 </div>
 
