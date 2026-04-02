@@ -641,8 +641,8 @@ export class Webdggrid {
         const yCoords = coordinates.map((coord) => coord[1]);
 
         const resultArray = this._module.GEO_to_GEO(
-            lat,
             lng,
+            lat,
             azimuth,
             aperture,
             resolution,
@@ -701,8 +701,8 @@ export class Webdggrid {
         let resultArray = [];
         try {
             resultArray = this._module.SeqNumGrid(
-                lat,
                 lng,
+                lat,
                 azimuth,
                 aperture,
                 resolution,

@@ -53,7 +53,7 @@ the returned instance throughout your application. Call
 
 #### Source
 
-[src-ts/webdggrid.ts:219](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L219)
+[src-ts/webdggrid.ts:219](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L219)
 
 ## Properties
 
@@ -63,7 +63,7 @@ the returned instance throughout your application. Call
 
 #### Source
 
-[src-ts/webdggrid.ts:219](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L219)
+[src-ts/webdggrid.ts:219](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L219)
 
 ***
 
@@ -79,7 +79,7 @@ pole at 0° N 0° E, azimuth 0°).
 
 #### Source
 
-[src-ts/webdggrid.ts:205](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L205)
+[src-ts/webdggrid.ts:205](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L205)
 
 ***
 
@@ -98,7 +98,7 @@ Defaults to `1`.
 
 #### Source
 
-[src-ts/webdggrid.ts:217](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L217)
+[src-ts/webdggrid.ts:217](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L217)
 
 ## Methods
 
@@ -117,7 +117,7 @@ Not intended for production use.
 
 #### Source
 
-[src-ts/webdggrid.ts:330](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L330)
+[src-ts/webdggrid.ts:330](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L330)
 
 ***
 
@@ -150,7 +150,7 @@ Average cell area in km².
 
 #### Source
 
-[src-ts/webdggrid.ts:395](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L395)
+[src-ts/webdggrid.ts:395](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L395)
 
 ***
 
@@ -183,7 +183,7 @@ Average cell spacing in km.
 
 #### Source
 
-[src-ts/webdggrid.ts:432](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L432)
+[src-ts/webdggrid.ts:432](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L432)
 
 ***
 
@@ -231,7 +231,7 @@ Array of `[lng, lat]` cell centroid positions, one per input
 
 #### Source
 
-[src-ts/webdggrid.ts:628](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L628)
+[src-ts/webdggrid.ts:628](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L628)
 
 ***
 
@@ -281,7 +281,7 @@ Array of `BigInt` sequence numbers, one per input coordinate,
 
 #### Source
 
-[src-ts/webdggrid.ts:521](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L521)
+[src-ts/webdggrid.ts:521](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L521)
 
 ***
 
@@ -304,7 +304,7 @@ The current resolution level.
 
 #### Source
 
-[src-ts/webdggrid.ts:306](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L306)
+[src-ts/webdggrid.ts:306](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L306)
 
 ***
 
@@ -338,7 +338,7 @@ Grid CLS value.
 
 #### Source
 
-[src-ts/webdggrid.ts:470](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L470)
+[src-ts/webdggrid.ts:470](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L470)
 
 ***
 
@@ -380,7 +380,7 @@ Total number of cells at the given resolution.
 
 #### Source
 
-[src-ts/webdggrid.ts:358](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L358)
+[src-ts/webdggrid.ts:358](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L358)
 
 ***
 
@@ -419,7 +419,7 @@ Array of `[lng, lat]` centroid positions, one per input ID, in
 
 #### Source
 
-[src-ts/webdggrid.ts:569](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L569)
+[src-ts/webdggrid.ts:569](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L569)
 
 ***
 
@@ -466,7 +466,7 @@ If the WASM module encounters an invalid cell ID.
 
 #### Source
 
-[src-ts/webdggrid.ts:687](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L687)
+[src-ts/webdggrid.ts:687](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L687)
 
 ***
 
@@ -520,7 +520,7 @@ A GeoJSON `FeatureCollection` of `Polygon` features, one per
 
 #### Source
 
-[src-ts/webdggrid.ts:779](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L779)
+[src-ts/webdggrid.ts:779](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L779)
 
 ***
 
@@ -559,7 +559,7 @@ The new resolution level. Defaults to `1`.
 
 #### Source
 
-[src-ts/webdggrid.ts:291](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L291)
+[src-ts/webdggrid.ts:291](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L291)
 
 ***
 
@@ -587,7 +587,7 @@ The new resolution level. Must be a positive integer.
 
 #### Source
 
-[src-ts/webdggrid.ts:321](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L321)
+[src-ts/webdggrid.ts:321](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L321)
 
 ***
 
@@ -609,7 +609,7 @@ The DGGRID C++ library version string.
 
 #### Source
 
-[src-ts/webdggrid.ts:268](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L268)
+[src-ts/webdggrid.ts:268](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L268)
 
 ***
 
@@ -641,7 +641,7 @@ A promise that resolves to a fully initialised `Webdggrid` instance.
 
 #### Source
 
-[src-ts/webdggrid.ts:242](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L242)
+[src-ts/webdggrid.ts:242](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L242)
 
 ***
 
@@ -661,4 +661,4 @@ you must call [load](Webdggrid.md#load) again to create a new one.
 
 #### Source
 
-[src-ts/webdggrid.ts:255](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L255)
+[src-ts/webdggrid.ts:255](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L255)

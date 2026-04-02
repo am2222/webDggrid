@@ -14,7 +14,7 @@ hero:
       link: /api/
     - theme: alt
       text: Live Demo
-      link: /example.html
+      link: /demo
 
 features:
   - title: WebAssembly Powered

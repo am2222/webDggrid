@@ -28,7 +28,7 @@ Four-sided diamond cells (squares rotated 45°).
 
 #### Source
 
-[src-ts/webdggrid.ts:30](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L30)
+[src-ts/webdggrid.ts:30](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L30)
 
 ***
 
@@ -40,7 +40,7 @@ Six-sided cells — the default and most widely used topology.
 
 #### Source
 
-[src-ts/webdggrid.ts:24](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L24)
+[src-ts/webdggrid.ts:24](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L24)
 
 ***
 
@@ -52,7 +52,7 @@ Four-sided square cells.
 
 #### Source
 
-[src-ts/webdggrid.ts:28](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L28)
+[src-ts/webdggrid.ts:28](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L28)
 
 ***
 
@@ -64,4 +64,4 @@ Three-sided cells.
 
 #### Source
 
-[src-ts/webdggrid.ts:26](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L26)
+[src-ts/webdggrid.ts:26](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L26)

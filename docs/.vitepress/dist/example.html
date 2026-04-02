@@ -247,6 +247,7 @@
                         }
                     });
                     map.getSource('dggrid').setData(fc);
+                    console.log('GeoJSON FeatureCollection:', JSON.stringify(fc, null, 2));
                     statusEl.textContent = `${seqNums.length} cells · resolution ${resolution}`;
                 } catch (err) {
                     statusEl.textContent = `Error: ${err.message}`;

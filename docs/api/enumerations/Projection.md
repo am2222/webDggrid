@@ -29,7 +29,7 @@ Fuller/Dymaxion projection — shape-preserving cells.
 
 #### Source
 
-[src-ts/webdggrid.ts:55](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L55)
+[src-ts/webdggrid.ts:55](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L55)
 
 ***
 
@@ -41,4 +41,4 @@ Icosahedral Snyder Equal Area projection — equal-area cells.
 
 #### Source
 
-[src-ts/webdggrid.ts:53](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L53)
+[src-ts/webdggrid.ts:53](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L53)

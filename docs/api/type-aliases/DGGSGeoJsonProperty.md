@@ -37,4 +37,4 @@ Row index in an (i, j) address scheme, if available.
 
 ## Source
 
-[src-ts/webdggrid.ts:85](https://github.com/am2222/webDggrid/blob/fd60a5b/src-ts/webdggrid.ts#L85)
+[src-ts/webdggrid.ts:85](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L85)
