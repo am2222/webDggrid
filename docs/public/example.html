@@ -8,7 +8,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: sans-serif; }
-        #map { height: 100vh; width: 100%; }
+        #map { height: 100vh; width: 100%; background-color: #4a4a4a; }
         #controls {
             position: absolute;
             top: 12px;
@@ -84,46 +84,30 @@
             resValueEl.textContent = resSlider.value;
         });
 
-        // Fetch Carto style and inject globe projection before passing to MapLibre
-        const styleJson = await fetch('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json').then(r => r.json());
-        styleJson.projection = { type: 'globe' };
-
         // --- Map ---
         const map = new maplibregl.Map({
             container: 'map',
-            style:  {
-            'version': 8,
-            'projection': {
-                'type': 'globe'
-            },
-            'sources': {
-                'satellite': {
-                    'tiles': ['https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg'],
-                    'type': 'raster'
+            style: {
+                version: 8,
+                projection: { type: 'globe' },
+                sources: {
+                    basemap: {
+                        type: 'raster',
+                        tiles: ['https://tiles.maps.eox.at/wmts/1.0.0/terrain-light_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg'],
+                        tileSize: 256,
+                        attribution: '© <a href="https://eox.at">EOX</a>',
+                    },
+                },
+                layers: [
+                    { id: 'basemap', type: 'raster', source: 'basemap' },
+                ],
+                sky: {
+                    'atmosphere-blend': [
+                        'interpolate', ['linear'], ['zoom'],
+                        0, 1, 5, 1, 7, 0,
+                    ],
                 },
             },
-            'layers': [
-                {
-                    'id': 'Satellite',
-                    'type': 'raster',
-                    'source': 'satellite',
-                },
-            ],
-            'sky': {
-                'atmosphere-blend': [
-                    'interpolate',
-                    ['linear'],
-                    ['zoom'],
-                    0, 1,
-                    5, 1,
-                    7, 0
-                ]
-            },
-            'light': {
-                'anchor': 'map',
-                'position': [1.5, 90, 80]
-            }
-        },
             center: [0, 20],
             zoom: 1.8,
         });
