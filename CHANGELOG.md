@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/am2222/webDggrid/compare/v1.1.1...v1.2.0) (2026-04-02)
+
+
+### Features
+
+* Replace CI and deploy workflows with new configurations and add PR check workflow ([c0e970e](https://github.com/am2222/webDggrid/commit/c0e970e057e0651634fe0ea26c754e3803819394))
+
+
+### Bug Fixes
+
+* Update description in README and index.md for clarity and consistency ([89f27ec](https://github.com/am2222/webDggrid/commit/89f27ec7ac927488045f44896e60d45948137cda))
+
 ## [1.1.1](https://github.com/am2222/webDggrid/compare/v1.1.0...v1.1.1) (2026-04-02)
 
 
