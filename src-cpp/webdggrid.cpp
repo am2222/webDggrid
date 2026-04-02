@@ -144,10 +144,10 @@ static std::vector<double> cellVertices(
     }
 
     // Detect antimeridian crossing: if the longitude span exceeds 180° the
-    // cell straddles ±180°.  Shift all negative longitudes by +360° so the
-    // vertices form a contiguous range and the centroid is computed correctly.
-    // The resulting coordinates may exceed 180°; MapLibre's globe projection
-    // handles extended longitudes correctly for antimeridian-crossing cells.
+    // cell straddles ±180°.  Temporarily shift negative longitudes by +360°
+    // so the centroid and sort are computed in a contiguous range, then
+    // shift back so the output stays within standard [-180, 180] GeoJSON.
+    bool antimeridian = false;
     {
         double min_lon = pts[0].first, max_lon = pts[0].first;
         for (auto &p : pts) {
@@ -155,6 +155,7 @@ static std::vector<double> cellVertices(
             max_lon = std::max(max_lon, p.first);
         }
         if (max_lon - min_lon > 180.0) {
+            antimeridian = true;
             for (auto &p : pts)
                 if (p.first < 0.0) p.first += 360.0;
         }
@@ -172,6 +173,12 @@ static std::vector<double> cellVertices(
             return std::atan2(a.second - cy, a.first - cx) <
                    std::atan2(b.second - cy, b.first - cx);
         });
+
+    // Restore standard [-180, 180] range if we shifted for the sort
+    if (antimeridian) {
+        for (auto &p : pts)
+            if (p.first > 180.0) p.first -= 360.0;
+    }
 
     // Build interleaved result and close the ring
     std::vector<double> result;

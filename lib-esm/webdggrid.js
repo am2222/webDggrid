@@ -53,6 +53,21 @@ export var Projection;
     /** Fuller/Dymaxion projection — shape-preserving cells. */
     Projection["FULLER"] = "FULLER";
 })(Projection || (Projection = {}));
+/**
+ * Rewraps a polygon ring that crosses the antimeridian so that all longitudes
+ * are in a contiguous range (some may exceed 180°).  This is the format
+ * expected by MapLibre GL / Mapbox GL globe projection for antimeridian cells.
+ * For renderers that require standard [-180, 180] coordinates, use the raw
+ * output from {@link Webdggrid.sequenceNumToGrid} directly.
+ */
+export function unwrapAntimeridianRing(ring) {
+    const lons = ring.map((p) => p[0]);
+    const minLon = Math.min(...lons);
+    const maxLon = Math.max(...lons);
+    if (maxLon - minLon <= 180)
+        return ring;
+    return ring.map(([lon, lat]) => [lon < 0 ? lon + 360 : lon, lat]);
+}
 const DEFAULT_RESOLUTION = 1;
 const DEFAULT_DGGS = {
     poleCoordinates: { lat: 0, lng: 0 },
@@ -467,7 +482,7 @@ export class Webdggrid {
             for (let i = 0; i < numVertexes; i += 1) {
                 coordinates.push([currentShapeXVertexes[i], currentShapeYVertexes[i]]);
             }
-            featureSet.push(coordinates);
+            featureSet.push(unwrapAntimeridianRing(coordinates));
             xOffset += numVertexes;
             yOffset += numVertexes;
         }

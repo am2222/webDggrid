@@ -141,6 +141,14 @@ export interface IDGGSProps {
     projection: Projection;
 }
 /**
+ * Rewraps a polygon ring that crosses the antimeridian so that all longitudes
+ * are in a contiguous range (some may exceed 180°).  This is the format
+ * expected by MapLibre GL / Mapbox GL globe projection for antimeridian cells.
+ * For renderers that require standard [-180, 180] coordinates, use the raw
+ * output from {@link Webdggrid.sequenceNumToGrid} directly.
+ */
+export declare function unwrapAntimeridianRing(ring: Position[]): Position[];
+/**
  * Main entry point for the WebDggrid library.
  *
  * `Webdggrid` wraps the DGGRID C++ library compiled to WebAssembly and exposes
