@@ -143,6 +143,23 @@ static std::vector<double> cellVertices(
                         static_cast<double>(c->latDegs()) });
     }
 
+    // Detect antimeridian crossing: if the longitude span exceeds 180° the
+    // cell straddles ±180°.  Shift all negative longitudes by +360° so the
+    // vertices form a contiguous range and the centroid is computed correctly.
+    // The resulting coordinates may exceed 180°; MapLibre's globe projection
+    // handles extended longitudes correctly for antimeridian-crossing cells.
+    {
+        double min_lon = pts[0].first, max_lon = pts[0].first;
+        for (auto &p : pts) {
+            min_lon = std::min(min_lon, p.first);
+            max_lon = std::max(max_lon, p.first);
+        }
+        if (max_lon - min_lon > 180.0) {
+            for (auto &p : pts)
+                if (p.first < 0.0) p.first += 360.0;
+        }
+    }
+
     // Compute centroid
     double cx = 0.0, cy = 0.0;
     for (auto &p : pts) { cx += p.first; cy += p.second; }
