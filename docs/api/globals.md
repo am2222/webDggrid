@@ -17,3 +17,7 @@
 ## Type Aliases
 
 - [DGGSGeoJsonProperty](type-aliases/DGGSGeoJsonProperty.md)
+
+## Functions
+
+- [unwrapAntimeridianRing](functions/unwrapAntimeridianRing.md)

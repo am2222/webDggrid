@@ -43,7 +43,7 @@ Aperture `4` is the most common choice and is the default.
 
 #### Source
 
-[src-ts/webdggrid.ts:144](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L144)
+[src-ts/webdggrid.ts:144](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L144)
 
 ***
 
@@ -56,7 +56,7 @@ Rotates the grid around the pole axis. Defaults to `0`.
 
 #### Source
 
-[src-ts/webdggrid.ts:131](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L131)
+[src-ts/webdggrid.ts:131](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L131)
 
 ***
 
@@ -71,7 +71,7 @@ Defaults to `{ lat: 0, lng: 0 }`.
 
 #### Source
 
-[src-ts/webdggrid.ts:126](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L126)
+[src-ts/webdggrid.ts:126](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L126)
 
 ***
 
@@ -83,7 +83,7 @@ Projection used to map the polyhedron faces onto the sphere. See [Projection](..
 
 #### Source
 
-[src-ts/webdggrid.ts:148](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L148)
+[src-ts/webdggrid.ts:148](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L148)
 
 ***
 
@@ -95,4 +95,4 @@ Shape of each cell. See [Topology](../enumerations/Topology.md).
 
 #### Source
 
-[src-ts/webdggrid.ts:146](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L146)
+[src-ts/webdggrid.ts:146](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L146)

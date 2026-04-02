@@ -2,5 +2,13 @@ node_modules/
 lib
 .yarn
 
-.vitepress/dist 
+.vitepress/dist
 .vitepress/cache
+
+# CMake build artifacts
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.o
+*.o.d
+*.bin

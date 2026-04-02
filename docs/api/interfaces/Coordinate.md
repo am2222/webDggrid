@@ -21,7 +21,7 @@ Latitude in decimal degrees. Range: −90 to 90.
 
 #### Source
 
-[src-ts/webdggrid.ts:69](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L69)
+[src-ts/webdggrid.ts:69](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L69)
 
 ***
 
@@ -33,4 +33,4 @@ Longitude in decimal degrees. Range: −180 to 180.
 
 #### Source
 
-[src-ts/webdggrid.ts:71](https://github.com/am2222/webDggrid/blob/8dc897a/src-ts/webdggrid.ts#L71)
+[src-ts/webdggrid.ts:71](https://github.com/am2222/webDggrid/blob/5796c44/src-ts/webdggrid.ts#L71)
