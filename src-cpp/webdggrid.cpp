@@ -15,6 +15,8 @@
 #include <dglib/DgCell.h>
 #include <dglib/DgLocation.h>
 
+#include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -132,13 +134,37 @@ static std::vector<double> cellVertices(
     const DgGeoSphRF &geoRF = dgg.geoRF();
     const int n = reg.size();
 
+    // Collect raw vertices
+    std::vector<std::pair<double,double>> pts;
+    pts.reserve(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; i++) {
+        const DgGeoCoord *c = geoRF.getAddress(reg[i]);
+        pts.push_back({ static_cast<double>(c->lonDegs()),
+                        static_cast<double>(c->latDegs()) });
+    }
+
+    // Compute centroid
+    double cx = 0.0, cy = 0.0;
+    for (auto &p : pts) { cx += p.first; cy += p.second; }
+    cx /= n; cy /= n;
+
+    // Sort counter-clockwise by angle from centroid so the ring is always valid
+    std::sort(pts.begin(), pts.end(),
+        [cx, cy](const std::pair<double,double> &a,
+                 const std::pair<double,double> &b) {
+            return std::atan2(a.second - cy, a.first - cx) <
+                   std::atan2(b.second - cy, b.first - cx);
+        });
+
+    // Build interleaved result and close the ring
     std::vector<double> result;
     result.reserve(static_cast<std::size_t>((n + 1) * 2));
-    for (int i = 0; i < n + 1; i++) {
-        const DgGeoCoord *c = geoRF.getAddress(reg[i % n]);
-        result.push_back(static_cast<double>(c->lonDegs()));
-        result.push_back(static_cast<double>(c->latDegs()));
+    for (int i = 0; i < n; i++) {
+        result.push_back(pts[i].first);
+        result.push_back(pts[i].second);
     }
+    result.push_back(pts[0].first);
+    result.push_back(pts[0].second);
     return result;
 }
 
