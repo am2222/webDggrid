@@ -172,7 +172,6 @@
             <select id="topology">
                 <option value="HEXAGON" selected>Hexagon</option>
                 <option value="TRIANGLE">Triangle</option>
-                <option value="SQUARE">Square</option>
                 <option value="DIAMOND">Diamond</option>
             </select>
         </div>
@@ -466,7 +465,8 @@
                     console.log('GeoJSON FeatureCollection:', JSON.stringify(fc, null, 2));
                     statusEl.textContent = `${seqNums.length} cells · res ${resolution} · ${topology}`;
                 } catch (err) {
-                    statusEl.textContent = `Error: ${err.message}`;
+                    const msg = (err instanceof Error && err.message) ? err.message : String(err);
+                    statusEl.textContent = `Error: ${msg}`;
                     console.error(err);
                 } finally {
                     generateBtn.disabled = false;

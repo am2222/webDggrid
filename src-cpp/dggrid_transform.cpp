@@ -266,9 +266,8 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
     if      (p.topology == "HEXAGON")  { topo = Hexagon;  metric = D6; }
     else if (p.topology == "TRIANGLE") { topo = Triangle; metric = D4; }
     else if (p.topology == "DIAMOND")  { topo = Diamond;  metric = D4; }
-    else if (p.topology == "SQUARE")   { topo = Square;   metric = D4; }
     else throw std::invalid_argument(
-        "Unknown topology '" + p.topology + "'. Use HEXAGON, TRIANGLE, DIAMOND, or SQUARE.");
+        "Unknown topology '" + p.topology + "'. Use HEXAGON, TRIANGLE, or DIAMOND.");
 
     // DgIDGGS::makeRF is the single generic factory that handles all
     // topology/aperture/projection combinations.
