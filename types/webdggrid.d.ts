@@ -21,8 +21,6 @@ export declare enum Topology {
     'HEXAGON' = "HEXAGON",
     /** Three-sided cells. */
     'TRIANGLE' = "TRIANGLE",
-    /** Four-sided square cells. */
-    'SQUARE' = "SQUARE",
     /** Four-sided diamond cells (squares rotated 45°). */
     'DIAMOND' = "DIAMOND"
 }
