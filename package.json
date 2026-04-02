@@ -2,6 +2,7 @@
   "name": "webdggrid",
   "version": "1.0.5",
   "description": "Wasm package for DGGRID ",
+  "packageManager": "yarn@4.10.3",
   "type": "module",
   "exports": {
     ".": {
@@ -99,7 +100,7 @@
     "rimraf": "~3.0",
     "rollup": "^3.20.2",
     "rollup-plugin-sourcemaps": "^0.6.3",
-    "typedoc": "^0.26.0",
+    "typedoc": "^0.28.0",
     "typedoc-plugin-markdown": "^4.1.0",
     "typedoc-vitepress-theme": "^1.0.0",
     "typescript": "5.0.2",
