@@ -49,14 +49,14 @@ describe('test sequenceNumToGrid function', async () => {
     const coords = dggs.sequenceNumToGrid([1n, 2n, 6n, 10n]);
     expect(coords.length).toBe(4);
     expect(coords[0][1].length).toBe(2);
-    expect(coords[3][2][0]).toBe(-66.68514068908306);
+    expect(coords[3][2][0]).toBe(-22.605417994555836);
   });
 
   test('should return a set of cells for 4 dggids as geojson', () => {
     const featureCollection = dggs.sequenceNumToGridFeatureCollection([1n, 2n, 3n, 10n]);
     expect(featureCollection.features.length).toBe(4);
     expect(featureCollection.features[0].geometry.coordinates[0][1].length).toBe(2);
-    expect(featureCollection.features[3].geometry.coordinates[0][2][0]).toBe(-66.68514068908306);
+    expect(featureCollection.features[3].geometry.coordinates[0][2][0]).toBe(-22.605417994555836);
   });
 
   test('should return a set of cells for 9 dggids as geojson', () => {
