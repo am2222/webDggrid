@@ -4,5 +4,9 @@ title: Live Demo
 ---
 
 <ClientOnly>
-  <DggsGlobe :show-basemap="true" :show-controls="true" height="calc(100vh - var(--vp-nav-height, 64px))" />
+  <DggsGlobe
+    :show-basemap="true"
+    :show-controls="true"
+    height="calc(100vh - var(--vp-nav-height, 64px))"
+  />
 </ClientOnly>

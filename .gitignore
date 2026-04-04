@@ -12,4 +12,3 @@ cmake_install.cmake
 *.o
 *.o.d
 *.bin
-.vitepress
