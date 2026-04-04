@@ -54,6 +54,8 @@
 #include <dglib/DgIDGGutil.h>       // DgQ2DDCoord, DgQ2DDRF, DgPlaneTriRF
 #include <dglib/DgGridTopo.h>       // Hexagon, Triangle, Diamond, D4, D6
 #include <dglib/DgLocation.h>       // DgLocation
+#include <dglib/DgPolygon.h>        // DgPolygon
+#include <dglib/DgCell.h>           // DgCell
 #include <dglib/DgIVec2D.h>         // DgIVec2D (.i(), .j())
 #include <dglib/DgDVec2D.h>         // DgDVec2D (.x(), .y())
 #include <dglib/DgConstants.h>      // M_PIl, M_ZERO
@@ -329,6 +331,87 @@ static std::shared_ptr<Transformer> getTransformer(const DggsParams &p) {
     std::lock_guard<std::mutex> lk(s_mutex);
     auto [it, _] = s_cache.emplace(key, std::move(t));
     return it->second;
+}
+
+// ===========================================================================
+// Cell polygon vertices — uses the transformer cache
+// ===========================================================================
+
+static std::vector<double> computeCellVertices(
+    const DgIDGGBase    &dgg,
+    const DgBoundedIDGG &bndRF,
+    uint64_t sn)
+{
+    DgQ2DICoord q2di = bndRF.addFromSeqNum(
+        static_cast<unsigned long long int>(sn));
+    std::unique_ptr<DgLocation> loc(dgg.makeLocation(q2di));
+
+    DgPolygon verts(dgg);
+    dgg.setVertices(*loc, verts, 0);
+
+    const std::string label = std::to_string(sn);
+    DgCell cell(dgg.geoRF(), label, *loc, new DgPolygon(verts));
+
+    const DgPolygon  &reg   = cell.region();
+    const DgGeoSphRF &geoRF = dgg.geoRF();
+    const int n = reg.size();
+
+    std::vector<std::pair<double,double>> pts;
+    pts.reserve(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; i++) {
+        const DgGeoCoord *c = geoRF.getAddress(reg[i]);
+        pts.push_back({ static_cast<double>(c->lonDegs()),
+                        static_cast<double>(c->latDegs()) });
+    }
+
+    // Antimeridian: if lon span > 180° shift negatives by +360° for sort
+    bool antimeridian = false;
+    {
+        double lo = pts[0].first, hi = pts[0].first;
+        for (auto &p : pts) { lo = std::min(lo, p.first); hi = std::max(hi, p.first); }
+        if (hi - lo > 180.0) {
+            antimeridian = true;
+            for (auto &p : pts) if (p.first < 0.0) p.first += 360.0;
+        }
+    }
+
+    double cx = 0.0, cy = 0.0;
+    for (auto &p : pts) { cx += p.first; cy += p.second; }
+    cx /= n; cy /= n;
+
+    std::sort(pts.begin(), pts.end(),
+        [cx, cy](const std::pair<double,double> &a, const std::pair<double,double> &b) {
+            return std::atan2(a.second - cy, a.first - cx) <
+                   std::atan2(b.second - cy, b.first - cx);
+        });
+
+    if (antimeridian)
+        for (auto &p : pts) if (p.first > 180.0) p.first -= 360.0;
+
+    std::vector<double> result;
+    result.reserve(static_cast<std::size_t>((n + 1) * 2));
+    for (int i = 0; i < n; i++) { result.push_back(pts[i].first); result.push_back(pts[i].second); }
+    result.push_back(pts[0].first); result.push_back(pts[0].second);
+    return result;
+}
+
+CellVerticesResult seqNumsToVertices(const DggsParams &p,
+                                      const std::vector<SeqNum> &seqnums)
+{
+    auto t = getTransformer(p);   // reuses cached DgRFNetwork
+    CellVerticesResult out;
+    out.counts.reserve(seqnums.size());
+
+    for (auto sn : seqnums) {
+        auto verts = computeCellVertices(*t->dgg, *t->bndRF, sn);
+        const unsigned int nv = static_cast<unsigned int>(verts.size() / 2);
+        out.counts.push_back(static_cast<double>(nv));
+        for (std::size_t i = 0; i < verts.size(); i += 2) {
+            out.x.push_back(verts[i]);
+            out.y.push_back(verts[i + 1]);
+        }
+    }
+    return out;
 }
 
 // ===========================================================================
