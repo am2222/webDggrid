@@ -337,10 +337,16 @@ static std::shared_ptr<Transformer> getTransformer(const DggsParams &p) {
 // Cell polygon vertices — uses the transformer cache
 // ===========================================================================
 
-static std::vector<double> computeCellVertices(
+// Writes the closed polygon ring for `sn` directly into `out_x`/`out_y`,
+// reusing `scratch` to avoid a heap allocation per cell.
+// Returns the number of vertices appended (including the closing point).
+static unsigned int computeCellVertices(
     const DgIDGGBase    &dgg,
     const DgBoundedIDGG &bndRF,
-    uint64_t sn)
+    uint64_t sn,
+    std::vector<std::pair<double,double>> &scratch,
+    std::vector<double> &out_x,
+    std::vector<double> &out_y)
 {
     DgQ2DICoord q2di = bndRF.addFromSeqNum(
         static_cast<unsigned long long int>(sn));
@@ -349,50 +355,45 @@ static std::vector<double> computeCellVertices(
     DgPolygon verts(dgg);
     dgg.setVertices(*loc, verts, 0);
 
-    const std::string label = std::to_string(sn);
-    DgCell cell(dgg.geoRF(), label, *loc, new DgPolygon(verts));
-
-    const DgPolygon  &reg   = cell.region();
+    const DgPolygon  &reg   = verts;
     const DgGeoSphRF &geoRF = dgg.geoRF();
     const int n = reg.size();
 
-    std::vector<std::pair<double,double>> pts;
-    pts.reserve(static_cast<std::size_t>(n));
+    scratch.clear();
+    scratch.reserve(static_cast<std::size_t>(n));
     for (int i = 0; i < n; i++) {
         const DgGeoCoord *c = geoRF.getAddress(reg[i]);
-        pts.push_back({ static_cast<double>(c->lonDegs()),
-                        static_cast<double>(c->latDegs()) });
+        scratch.push_back({ static_cast<double>(c->lonDegs()),
+                            static_cast<double>(c->latDegs()) });
     }
 
     // Antimeridian: if lon span > 180° shift negatives by +360° for sort
     bool antimeridian = false;
     {
-        double lo = pts[0].first, hi = pts[0].first;
-        for (auto &p : pts) { lo = std::min(lo, p.first); hi = std::max(hi, p.first); }
+        double lo = scratch[0].first, hi = scratch[0].first;
+        for (auto &p : scratch) { lo = std::min(lo, p.first); hi = std::max(hi, p.first); }
         if (hi - lo > 180.0) {
             antimeridian = true;
-            for (auto &p : pts) if (p.first < 0.0) p.first += 360.0;
+            for (auto &p : scratch) if (p.first < 0.0) p.first += 360.0;
         }
     }
 
     double cx = 0.0, cy = 0.0;
-    for (auto &p : pts) { cx += p.first; cy += p.second; }
+    for (auto &p : scratch) { cx += p.first; cy += p.second; }
     cx /= n; cy /= n;
 
-    std::sort(pts.begin(), pts.end(),
+    std::sort(scratch.begin(), scratch.end(),
         [cx, cy](const std::pair<double,double> &a, const std::pair<double,double> &b) {
             return std::atan2(a.second - cy, a.first - cx) <
                    std::atan2(b.second - cy, b.first - cx);
         });
 
     if (antimeridian)
-        for (auto &p : pts) if (p.first > 180.0) p.first -= 360.0;
+        for (auto &p : scratch) if (p.first > 180.0) p.first -= 360.0;
 
-    std::vector<double> result;
-    result.reserve(static_cast<std::size_t>((n + 1) * 2));
-    for (int i = 0; i < n; i++) { result.push_back(pts[i].first); result.push_back(pts[i].second); }
-    result.push_back(pts[0].first); result.push_back(pts[0].second);
-    return result;
+    for (int i = 0; i < n; i++) { out_x.push_back(scratch[i].first); out_y.push_back(scratch[i].second); }
+    out_x.push_back(scratch[0].first); out_y.push_back(scratch[0].second);
+    return static_cast<unsigned int>(n + 1);
 }
 
 CellVerticesResult seqNumsToVertices(const DggsParams &p,
@@ -400,16 +401,24 @@ CellVerticesResult seqNumsToVertices(const DggsParams &p,
 {
     auto t = getTransformer(p);   // reuses cached DgRFNetwork
     CellVerticesResult out;
+
+    // Estimate vertices per cell from topology to avoid repeated reallocations.
+    // Hexagons produce 7 (6 + closing), triangles 4, diamonds 5.
+    std::size_t vertsPerCell = 7;
+    if      (p.topology == "TRIANGLE") vertsPerCell = 4;
+    else if (p.topology == "DIAMOND")  vertsPerCell = 5;
+
     out.counts.reserve(seqnums.size());
+    out.x.reserve(seqnums.size() * vertsPerCell);
+    out.y.reserve(seqnums.size() * vertsPerCell);
+
+    std::vector<std::pair<double,double>> scratch;
+    scratch.reserve(vertsPerCell);
 
     for (auto sn : seqnums) {
-        auto verts = computeCellVertices(*t->dgg, *t->bndRF, sn);
-        const unsigned int nv = static_cast<unsigned int>(verts.size() / 2);
+        const unsigned int nv =
+            computeCellVertices(*t->dgg, *t->bndRF, sn, scratch, out.x, out.y);
         out.counts.push_back(static_cast<double>(nv));
-        for (std::size_t i = 0; i < verts.size(); i += 2) {
-            out.x.push_back(verts[i]);
-            out.y.push_back(verts[i + 1]);
-        }
     }
     return out;
 }
@@ -463,11 +472,30 @@ std::vector<ResInfo> getRes(const DggsParams &p) {
     return rows;
 }
 
+// Returns stats for a single resolution without allocating the full 31-element
+// vector that getRes() produces. Uses the same cached res=30 transformer.
+ResInfo getResAt(const DggsParams &p, int res) {
+    if (res < 0 || res > 30)
+        throw std::invalid_argument("res out of range 0–30");
+    DggsParams full = p;
+    full.res = 30;
+    auto t = getTransformer(full);
+    const DgIDGGBase  &dgg_r = t->idggs->idggBase(res);
+    const DgGridStats &gs    = dgg_r.gridStats();
+    return ResInfo{
+        res,
+        static_cast<uint64_t>(gs.nCells()),
+        static_cast<double>(gs.cellAreaKM()),
+        static_cast<double>(gs.cellDistKM()),
+        static_cast<double>(gs.cls())
+    };
+}
+
 uint64_t maxCell(const DggsParams &p, int res) {
     int target = (res == -1) ? p.res : res;
     if (target < 0 || target > 30)
         throw std::invalid_argument("res out of range 0–30");
-    return getRes(p)[static_cast<std::size_t>(target)].cells;
+    return getResAt(p, target).cells;
 }
 
 std::string info(const DggsParams &p) {

@@ -55,7 +55,7 @@ double nCells(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
                         aperture, res, topology, projection);
-    return static_cast<double>(dggrid::getRes(p)[static_cast<std::size_t>(res)].cells);
+    return static_cast<double>(dggrid::getResAt(p, res).cells);
 }
 
 double cellAreaKM(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
@@ -64,7 +64,7 @@ double cellAreaKM(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
                         aperture, res, topology, projection);
-    return dggrid::getRes(p)[static_cast<std::size_t>(res)].area_km;
+    return dggrid::getResAt(p, res).area_km;
 }
 
 double cellDistKM(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
@@ -73,7 +73,7 @@ double cellDistKM(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
                         aperture, res, topology, projection);
-    return dggrid::getRes(p)[static_cast<std::size_t>(res)].spacing_km;
+    return dggrid::getResAt(p, res).spacing_km;
 }
 
 double gridStatCLS(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
@@ -82,7 +82,7 @@ double gridStatCLS(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
                         aperture, res, topology, projection);
-    return dggrid::getRes(p)[static_cast<std::size_t>(res)].cls_km;
+    return dggrid::getResAt(p, res).cls_km;
 }
 
 // Returns [res, cells, area_km, spacing_km, cls_km] for a single resolution.
@@ -92,7 +92,7 @@ val getResInfo(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
                         aperture, res, topology, projection);
-    const auto row = dggrid::getRes(p)[static_cast<std::size_t>(res)];
+    const auto row = dggrid::getResAt(p, res);
     std::vector<double> out = {
         static_cast<double>(row.res),
         static_cast<double>(row.cells),
@@ -124,15 +124,24 @@ val SeqNumGrid(
 
     // Format: [count0..countN, x_all..., y_all...]
     std::vector<double> result;
+    result.reserve(r.counts.size() + r.x.size() + r.y.size());
     result.insert(result.end(), r.counts.begin(), r.counts.end());
     result.insert(result.end(), r.x.begin(),      r.x.end());
     result.insert(result.end(), r.y.begin(),      r.y.end());
-    return val::array(result);
+    return toFloat64Array(result);
 }
 
 // ===========================================================================
 // Batch transform helpers — shared output builders
 // ===========================================================================
+
+// Returns a JS Float64Array backed by a copy of `v`.
+// This is significantly faster than val::array() which marshals each element
+// individually across the JS/WASM boundary.
+static val toFloat64Array(const std::vector<double> &v) {
+    return val::global("Float64Array").new_(
+        val(typed_memory_view(v.size(), v.data())));
+}
 
 // [lon..., lat...]
 static val geoArray(const std::vector<dggrid::GeoCoord> &v) {
@@ -140,7 +149,7 @@ static val geoArray(const std::vector<dggrid::GeoCoord> &v) {
     out.reserve(v.size() * 2);
     for (auto &c : v) out.push_back(c.lon_deg);
     for (auto &c : v) out.push_back(c.lat_deg);
-    return val::array(out);
+    return toFloat64Array(out);
 }
 
 // [x..., y...]
@@ -149,7 +158,7 @@ static val planeArray(const std::vector<dggrid::PlaneCoord> &v) {
     out.reserve(v.size() * 2);
     for (auto &c : v) out.push_back(c.x);
     for (auto &c : v) out.push_back(c.y);
-    return val::array(out);
+    return toFloat64Array(out);
 }
 
 // [tnum..., x..., y...]
@@ -159,7 +168,7 @@ static val projTriArray(const std::vector<dggrid::ProjTriCoord> &v) {
     for (auto &c : v) out.push_back(static_cast<double>(c.tnum));
     for (auto &c : v) out.push_back(c.x);
     for (auto &c : v) out.push_back(c.y);
-    return val::array(out);
+    return toFloat64Array(out);
 }
 
 // [quad..., x..., y...]
@@ -169,7 +178,7 @@ static val q2ddArray(const std::vector<dggrid::Q2DDCoord> &v) {
     for (auto &c : v) out.push_back(static_cast<double>(c.quad));
     for (auto &c : v) out.push_back(c.x);
     for (auto &c : v) out.push_back(c.y);
-    return val::array(out);
+    return toFloat64Array(out);
 }
 
 // [quad..., i..., j...]
@@ -179,7 +188,7 @@ static val q2diArray(const std::vector<dggrid::Q2DICoord> &v) {
     for (auto &c : v) out.push_back(static_cast<double>(c.quad));
     for (auto &c : v) out.push_back(static_cast<double>(c.i));
     for (auto &c : v) out.push_back(static_cast<double>(c.j));
-    return val::array(out);
+    return toFloat64Array(out);
 }
 
 // [seqnum...] as BigInt array

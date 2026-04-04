@@ -65,6 +65,7 @@ DggsParams            construct(const std::string& projection,
 
 DggsParams            setRes(const DggsParams& p, int res);
 std::vector<ResInfo>  getRes(const DggsParams& p);
+ResInfo               getResAt(const DggsParams& p, int res);
 uint64_t              maxCell(const DggsParams& p, int res = -1);
 std::string           info(const DggsParams& p);
 
