@@ -317,18 +317,24 @@ onMounted(async () => {
     // static analysis which rejects dynamic imports from /public.
     const { Webdggrid } = await new Function('return import("/dist/index.js")')()
 
+    const isDark = document.documentElement.classList.contains('dark')
+
+    // Read the page background colour so the sky matches the theme
+    const bgColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--vp-c-bg').trim() || (isDark ? '#1b1b1f' : '#ffffff')
+
     const noBasemapStyle = {
       version: 8,
       projection: { type: 'globe' },
       sources: {},
       layers: [],
       sky: {
-        'sky-color':          '#0b1d3a',
-        'sky-horizon-blend':   0.5,
-        'horizon-color':      '#1a3a6e',
-        'horizon-fog-blend':   0.3,
-        'fog-color':          '#071224',
-        'fog-ground-blend':    0.5,
+        'sky-color':         isDark ? '#0b1d3a' : bgColor,
+        'sky-horizon-blend':  0.5,
+        'horizon-color':     isDark ? '#1a3a6e' : bgColor,
+        'horizon-fog-blend':  0.3,
+        'fog-color':         isDark ? '#071224' : bgColor,
+        'fog-ground-blend':   0.5,
         'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 7, 0],
       },
     }
@@ -345,8 +351,13 @@ onMounted(async () => {
         },
       },
       layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
-      sky: {
+      sky: isDark ? {
         'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0],
+      } : {
+        'sky-color':        bgColor,
+        'horizon-color':    bgColor,
+        'fog-color':        bgColor,
+        'atmosphere-blend': 0,
       },
     }
 

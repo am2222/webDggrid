@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { VPButton } from 'vitepress/theme'
 
 const props = defineProps({
   resolution:      { type: Number,  default: 3 },
@@ -279,14 +280,14 @@ defineExpose({ regenerate: generateGrid, switchTopology })
     <div ref="wrapRef" class="d3-globe-wrap" />
 
     <div v-if="showControls" class="topo-bar">
-      <button
+      <VPButton
         v-for="t in TOPOLOGIES"
         :key="t.value"
-        :class="['VPButton', 'medium', activeTopology === t.value ? 'brand' : 'alt']"
+        :text="t.label"
+        size="medium"
+        :theme="activeTopology === t.value ? 'brand' : 'alt'"
         @click="switchTopology(t.value)"
-      >
-        {{ t.label }}
-      </button>
+      />
     </div>
   </div>
 </template>
