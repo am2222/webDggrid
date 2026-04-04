@@ -32,6 +32,7 @@
   "scripts": {
     "build:wasm": "node ./utils/Make",
     "build": "yarn build:wasm && yarn build:types && yarn build:sfx && yarn bundle",
+    "test:dist": "node utils/smoke-test.mjs",
     "build:types": "tsc",
     "build:sfx": "node ./utils/sfx-wasm",
     "bundle": "rollup -c",

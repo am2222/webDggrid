@@ -40,6 +40,9 @@ jobs:
       - name: Build WASM + JS bundles
         run: yarn build
 
+      - name: Smoke test dist/
+        run: yarn test:dist
+
       - name: Build docs
         run: yarn docs:build
 
