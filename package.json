@@ -30,8 +30,8 @@
     "lib-esm/*"
   ],
   "scripts": {
-    "prebuild": "node ./utils/Make",
-    "build": "yarn build:types && yarn build:sfx && yarn bundle",
+    "build:wasm": "node ./utils/Make",
+    "build": "yarn build:wasm && yarn build:types && yarn build:sfx && yarn bundle",
     "build:types": "tsc",
     "build:sfx": "node ./utils/sfx-wasm",
     "bundle": "rollup -c",
