@@ -1,9 +1,14 @@
 node_modules/
 lib
+lib-esm/
+lib-wasm/
+lib-wasm-py/
+dist/
+types/
 .yarn
 
-.vitepress/dist
-.vitepress/cache
+docs/.vitepress/dist
+docs/.vitepress/cache
 
 # CMake build artifacts
 CMakeFiles/

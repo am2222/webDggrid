@@ -313,9 +313,7 @@ onMounted(async () => {
       loadScript('https://unpkg.com/deck.gl@9/dist.min.js'),
     ])
 
-    // Use new Function to defer the import to runtime, bypassing Vite's
-    // static analysis which rejects dynamic imports from /public.
-    const { Webdggrid } = await new Function('return import("/dist/index.js")')()
+    const { Webdggrid } = await new Function('return import("https://cdn.jsdelivr.net/npm/webdggrid/dist/index.js")')()
 
     const isDark = document.documentElement.classList.contains('dark')
 
