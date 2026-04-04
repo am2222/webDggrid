@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/am2222/webDggrid/compare/v1.3.0...v1.4.0) (2026-04-04)
+
+
+### Features
+
+* Refactor code structure for improved readability and maintainab… ([c438672](https://github.com/am2222/webDggrid/commit/c438672bf7752baa7c10fbe4a0356a04f4acaecf))
+* Refactor code structure for improved readability and maintainability ([835ace3](https://github.com/am2222/webDggrid/commit/835ace3b53bbc429527dbf13b88cae3a316fd057))
+
 ## [1.3.0](https://github.com/am2222/webDggrid/compare/v1.2.1...v1.3.0) (2026-04-02)
 
 
