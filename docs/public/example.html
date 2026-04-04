@@ -161,7 +161,7 @@
         <h3>DGGRID Grid Settings</h3>
 
         <div class="field">
-            <label>Resolution <span id="resValue">3</span></label>
+            <label><span id="resLabel">Resolution</span> <span id="resValue">3</span></label>
             <input type="range" id="resolution" min="1" max="5" value="3" />
         </div>
 
@@ -214,6 +214,15 @@
         <h4>Display</h4>
 
         <label class="field-inline">
+            <input type="checkbox" id="multiRes" />
+            Multi-resolution (viewport only)
+        </label>
+        <div class="field" id="zoomOffsetField" style="display:none">
+            <label>Zoom → Res offset <span id="zoomOffsetValue">0</span></label>
+            <input type="range" id="zoomOffset" min="0" max="12" value="0" />
+        </div>
+
+        <label class="field-inline">
             <input type="checkbox" id="colorCells" />
             Color cells (YlOrBr)
         </label>
@@ -226,23 +235,33 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.21.1/dist/maplibre-gl.js"></script>
     <script type="module">
-        import { Webdggrid } from "https://cdn.jsdelivr.net/npm/webdggrid/dist/index.js";
+        import { Webdggrid } from "/dist/index.js";
 
         // BigInt → string so MapLibre can serialize GeoJSON properties
         BigInt.prototype.toJSON = function () { return this.toString(); };
 
         // --- UI elements ---
-        const statusEl    = document.getElementById('status');
-        const resSlider   = document.getElementById('resolution');
-        const resValueEl  = document.getElementById('resValue');
-        const generateBtn = document.getElementById('generateBtn');
-        const topoSel     = document.getElementById('topology');
-        const projSel     = document.getElementById('projection');
-        const apertureSel = document.getElementById('aperture');
-        const azimuthEl   = document.getElementById('azimuth');
-        const poleLngEl   = document.getElementById('poleLng');
-        const poleLatEl   = document.getElementById('poleLat');
+        const statusEl     = document.getElementById('status');
+        const resSlider    = document.getElementById('resolution');
+        const resValueEl   = document.getElementById('resValue');
+        const resLabelEl   = document.getElementById('resLabel');
+        const generateBtn  = document.getElementById('generateBtn');
+        const topoSel      = document.getElementById('topology');
+        const projSel      = document.getElementById('projection');
+        const apertureSel  = document.getElementById('aperture');
+        const azimuthEl    = document.getElementById('azimuth');
+        const poleLngEl    = document.getElementById('poleLng');
+        const poleLatEl    = document.getElementById('poleLat');
         const colorCellsEl = document.getElementById('colorCells');
+        const multiResEl        = document.getElementById('multiRes');
+        const zoomOffsetEl      = document.getElementById('zoomOffset');
+        const zoomOffsetValueEl = document.getElementById('zoomOffsetValue');
+        const zoomOffsetField   = document.getElementById('zoomOffsetField');
+
+        zoomOffsetEl.addEventListener('input', () => {
+            zoomOffsetValueEl.textContent = zoomOffsetEl.value;
+            if (mapReady && webdggrid) generateGrid();
+        });
 
         resSlider.addEventListener('input', () => {
             resValueEl.textContent = resSlider.value;
@@ -264,7 +283,7 @@
         function fillPaint(colored) {
             return colored
                 ? { 'fill-color': ['interpolate', ['linear'], ['get', 'colorValue'], ...YLORBR], 'fill-opacity': 0.7 }
-                : { 'fill-color': '#3388ff', 'fill-opacity': 0.18 };
+                : { 'fill-color': '#3388ff', 'fill-opacity': 0.28 };
         }
 
         colorCellsEl.addEventListener('change', () => {
@@ -337,6 +356,27 @@
         }));
 
         Promise.all([wasmPromise, mapPromise]).then(() => {
+            // Base (coarser) resolution layer — only used in multi-res mode
+            map.addSource('dggrid-base', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] },
+            });
+            map.addLayer({
+                id: 'dggrid-base-fill',
+                type: 'fill',
+                source: 'dggrid-base',
+                layout: { visibility: 'none' },
+                paint: { 'fill-color': '#000000', 'fill-opacity': 0 },
+            });
+            map.addLayer({
+                id: 'dggrid-base-line',
+                type: 'line',
+                source: 'dggrid-base',
+                layout: { visibility: 'none' },
+                paint: { 'line-color': '#f59e0b', 'line-width': 2 },
+            });
+
+            // Fine resolution layer — the zoom-appropriate grid
             map.addSource('dggrid', {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] },
@@ -377,12 +417,77 @@
             generateGrid();
         });
 
+        // --- Multi-resolution helpers ---
+
+        // Map zoom level → appropriate grid resolution (capped at maxRes)
+        function zoomToResolution(zoom, maxRes) {
+            const offset = parseInt(zoomOffsetEl.value, 10);
+            const res = Math.round(zoom) + offset;
+            return Math.min(maxRes, Math.max(1, res));
+        }
+
+        // Sample the current viewport and return unique cell sequence numbers
+        function viewportSeqNums(resolution) {
+            const bounds  = map.getBounds();
+            const minLat  = Math.max(bounds.getSouth(), -89);
+            const maxLat  = Math.min(bounds.getNorth(),  89);
+            const minLng  = bounds.getWest();
+            const maxLng  = bounds.getEast();
+            const steps   = 80;
+            const latStep = (maxLat - minLat) / steps;
+            const lngStep = (maxLng - minLng) / steps;
+
+            const coords = [];
+            for (let i = 0; i <= steps; i++)
+                for (let j = 0; j <= steps; j++)
+                    coords.push([minLng + j * lngStep, minLat + i * latStep]);
+
+            const raw  = webdggrid.geoToSequenceNum(coords, resolution);
+            const seen = new Set();
+            const out  = [];
+            for (const n of raw) {
+                const k = n.toString();
+                if (!seen.has(k)) { seen.add(k); out.push(n); }
+            }
+            return out;
+        }
+
+        // Debounce handle for auto-refresh in multi-res mode
+        let multiResTimer = null;
+
+        multiResEl.addEventListener('change', () => {
+            const on = multiResEl.checked;
+            resLabelEl.textContent = on ? 'Max Resolution' : 'Resolution';
+            generateBtn.style.display = on ? 'none' : '';
+            zoomOffsetField.style.display = on ? '' : 'none';
+            if (on) {
+                resSlider.max = 15;
+                resSlider.value = 15;
+                resValueEl.textContent = 15;
+            } else {
+                resSlider.max = 5;
+                if (parseInt(resSlider.value, 10) > 5) {
+                    resSlider.value = 5;
+                    resValueEl.textContent = 5;
+                }
+            }
+            if (on && mapReady && webdggrid) generateGrid();
+        });
+
+        map.on('moveend', () => {
+            if (!multiResEl.checked || !mapReady || !webdggrid) return;
+            clearTimeout(multiResTimer);
+            multiResTimer = setTimeout(generateGrid, 300);
+        });
+
         generateBtn.addEventListener('click', generateGrid);
 
         function generateGrid() {
             if (!mapReady || !webdggrid) return;
 
-            const resolution = parseInt(resSlider.value, 10);
+            const maxRes     = parseInt(resSlider.value, 10);
+            const multiRes   = multiResEl.checked;
+            const resolution = multiRes ? zoomToResolution(map.getZoom(), maxRes) : maxRes;
             const topology   = topoSel.value;
             const projection = projSel.value;
             const aperture   = parseInt(apertureSel.value, 10);
@@ -398,78 +503,76 @@
                 aperture,
             }, resolution);
 
+            // Show current effective resolution in slider display
+            resValueEl.textContent = resolution;
+
             statusEl.textContent = 'Generating grid…';
-            generateBtn.disabled = true;
+            if (!multiRes) generateBtn.disabled = true;
 
             setTimeout(() => {
                 try {
-                    let seqNums;
-
-                    if (resolution <= 4) {
-                        // Resolutions 1-4 (up to 2 562 cells) — render the full globe
-                        const total = webdggrid.nCells(resolution);
-                        seqNums = Array.from({ length: total }, (_, i) => BigInt(i + 1));
-                    } else {
-                        // Resolution 5 — sample the viewport with a dense grid, then
-                        // keep only cells whose centroid falls inside the visible bounds
-                        const bounds  = map.getBounds();
-                        const minLat  = Math.max(bounds.getSouth(), -85);
-                        const maxLat  = Math.min(bounds.getNorth(),  85);
-                        const minLng  = bounds.getWest();
-                        const maxLng  = bounds.getEast();
-                        const steps   = 80;
-                        const latStep = (maxLat - minLat) / steps;
-                        const lngStep = (maxLng - minLng) / steps;
-
-                        const coords = [];
-                        for (let i = 0; i <= steps; i++)
-                            for (let j = 0; j <= steps; j++)
-                                coords.push([minLng + j * lngStep, minLat + i * latStep]);
-
-                        const raw  = webdggrid.geoToSequenceNum(coords, resolution);
-                        const seen = new Set();
-                        const candidates = [];
-                        for (const n of raw) {
-                            const k = n.toString();
-                            if (!seen.has(k)) { seen.add(k); candidates.push(n); }
-                        }
-
-                        const centroids = webdggrid.sequenceNumToGeo(candidates, resolution);
-                        seqNums = candidates.filter((_, i) => {
-                            const [lng, lat] = centroids[i];
-                            return lng >= minLng && lng <= maxLng &&
-                                   lat >= minLat && lat <= maxLat;
+                    // Helper: build a FeatureCollection and annotate colorValue
+                    function buildFc(seqNums, res) {
+                        const total = webdggrid.nCells(res);
+                        const fc = webdggrid.sequenceNumToGridFeatureCollection(seqNums, res);
+                        fc.features.forEach(f => {
+                            if (typeof f.id === 'bigint') f.id = f.id.toString();
+                            const p = f.properties;
+                            if (p) {
+                                for (const k of Object.keys(p))
+                                    if (typeof p[k] === 'bigint') p[k] = p[k].toString();
+                                p.colorValue = total > 1
+                                    ? (Number(BigInt(p.id) - 1n) / (total - 1))
+                                    : 0;
+                            }
                         });
+                        return fc;
                     }
 
-                    const totalCells = webdggrid.nCells(resolution);
-                    const fc = webdggrid.sequenceNumToGridFeatureCollection(seqNums, resolution);
-                    fc.features.forEach(f => {
-                        if (typeof f.id === 'bigint') f.id = f.id.toString();
-                        const p = f.properties;
-                        if (p) {
-                            for (const k of Object.keys(p))
-                                if (typeof p[k] === 'bigint') p[k] = p[k].toString();
-                            // Normalised position in the sequence [0, 1] for YlOrBr mapping
-                            p.colorValue = totalCells > 1
-                                ? (Number(BigInt(p.id) - 1n) / (totalCells - 1))
-                                : 0;
-                        }
-                    });
+                    let seqNums;
 
-                    map.getSource('dggrid').setData(fc);
-                    // Re-apply paint so color mode is honoured after each regeneration
+                    if (multiRes) {
+                        // Fine layer: zoom-appropriate resolution, viewport only
+                        seqNums = viewportSeqNums(resolution);
+
+                        // Base layer: one resolution coarser, also viewport only
+                        const baseRes = Math.max(1, resolution - 1);
+                        webdggrid.setDggs({
+                            poleCoordinates: { lat: poleLat, lng: poleLng },
+                            azimuth, topology, projection, aperture,
+                        }, baseRes);
+                        const baseSeqNums = viewportSeqNums(baseRes);
+                        map.getSource('dggrid-base').setData(buildFc(baseSeqNums, baseRes));
+                        map.setLayoutProperty('dggrid-base-fill', 'visibility', 'visible');
+                        map.setLayoutProperty('dggrid-base-line', 'visibility', 'visible');
+
+                        // Restore setDggs for the fine resolution
+                        webdggrid.setDggs({
+                            poleCoordinates: { lat: poleLat, lng: poleLng },
+                            azimuth, topology, projection, aperture,
+                        }, resolution);
+                    } else {
+                        // Full globe, hide base layer
+                        const total = webdggrid.nCells(resolution);
+                        seqNums = Array.from({ length: total }, (_, i) => BigInt(i + 1));
+                        map.getSource('dggrid-base').setData({ type: 'FeatureCollection', features: [] });
+                        map.setLayoutProperty('dggrid-base-fill', 'visibility', 'none');
+                        map.setLayoutProperty('dggrid-base-line', 'visibility', 'none');
+                    }
+
+                    map.getSource('dggrid').setData(buildFc(seqNums, resolution));
                     const paint = fillPaint(colorCellsEl.checked);
                     map.setPaintProperty('dggrid-fill', 'fill-color',   paint['fill-color']);
                     map.setPaintProperty('dggrid-fill', 'fill-opacity', paint['fill-opacity']);
-                    console.log('GeoJSON FeatureCollection:', JSON.stringify(fc, null, 2));
-                    statusEl.textContent = `${seqNums.length} cells · res ${resolution} · ${topology}`;
+
+                    const modeLabel = multiRes ? `res ${resolution} · viewport` : `res ${resolution} · globe`;
+                    statusEl.textContent = `${seqNums.length} cells · ${modeLabel} · ${topology}`;
                 } catch (err) {
                     const msg = (err instanceof Error && err.message) ? err.message : String(err);
                     statusEl.textContent = `Error: ${msg}`;
                     console.error(err);
                 } finally {
-                    generateBtn.disabled = false;
+                    if (!multiRes) generateBtn.disabled = false;
                 }
             }, 20);
         }

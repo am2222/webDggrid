@@ -5,14 +5,7 @@
 // DGGRID v8 headers needed for cell polygon generation (SeqNumGrid)
 #include <dglib/DgIDGGBase.h>
 #include <dglib/DgBoundedIDGG.h>
-#include <dglib/DgIDGGS.h>
-#include <dglib/DgGeoSphRF.h>
 #include <dglib/DgEllipsoidRF.h>
-#include <dglib/DgRFNetwork.h>
-#include <dglib/DgIDGGutil.h>
-#include <dglib/DgGridTopo.h>
-#include <dglib/DgPolygon.h>
-#include <dglib/DgCell.h>
 #include <dglib/DgLocation.h>
 
 #include <algorithm>
@@ -115,83 +108,6 @@ val getResInfo(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
 // Result: [count0..countN, x_coords..., y_coords...]
 // ===========================================================================
 
-static std::vector<double> cellVertices(
-    const DgIDGGBase    &dgg,
-    const DgBoundedIDGG &bndRF,
-    uint64_t sn)
-{
-    DgQ2DICoord q2di = bndRF.addFromSeqNum(
-        static_cast<unsigned long long int>(sn));
-    std::unique_ptr<DgLocation> loc(dgg.makeLocation(q2di));
-
-    DgPolygon verts(dgg);
-    dgg.setVertices(*loc, verts, 0);
-
-    const std::string label = std::to_string(sn);
-    DgCell cell(dgg.geoRF(), label, *loc, new DgPolygon(verts));
-
-    const DgPolygon  &reg   = cell.region();
-    const DgGeoSphRF &geoRF = dgg.geoRF();
-    const int n = reg.size();
-
-    // Collect raw vertices
-    std::vector<std::pair<double,double>> pts;
-    pts.reserve(static_cast<std::size_t>(n));
-    for (int i = 0; i < n; i++) {
-        const DgGeoCoord *c = geoRF.getAddress(reg[i]);
-        pts.push_back({ static_cast<double>(c->lonDegs()),
-                        static_cast<double>(c->latDegs()) });
-    }
-
-    // Detect antimeridian crossing: if the longitude span exceeds 180° the
-    // cell straddles ±180°.  Temporarily shift negative longitudes by +360°
-    // so the centroid and sort are computed in a contiguous range, then
-    // shift back so the output stays within standard [-180, 180] GeoJSON.
-    bool antimeridian = false;
-    {
-        double min_lon = pts[0].first, max_lon = pts[0].first;
-        for (auto &p : pts) {
-            min_lon = std::min(min_lon, p.first);
-            max_lon = std::max(max_lon, p.first);
-        }
-        if (max_lon - min_lon > 180.0) {
-            antimeridian = true;
-            for (auto &p : pts)
-                if (p.first < 0.0) p.first += 360.0;
-        }
-    }
-
-    // Compute centroid
-    double cx = 0.0, cy = 0.0;
-    for (auto &p : pts) { cx += p.first; cy += p.second; }
-    cx /= n; cy /= n;
-
-    // Sort counter-clockwise by angle from centroid so the ring is always valid
-    std::sort(pts.begin(), pts.end(),
-        [cx, cy](const std::pair<double,double> &a,
-                 const std::pair<double,double> &b) {
-            return std::atan2(a.second - cy, a.first - cx) <
-                   std::atan2(b.second - cy, b.first - cx);
-        });
-
-    // Restore standard [-180, 180] range if we shifted for the sort
-    if (antimeridian) {
-        for (auto &p : pts)
-            if (p.first > 180.0) p.first -= 360.0;
-    }
-
-    // Build interleaved result and close the ring
-    std::vector<double> result;
-    result.reserve(static_cast<std::size_t>((n + 1) * 2));
-    for (int i = 0; i < n; i++) {
-        result.push_back(pts[i].first);
-        result.push_back(pts[i].second);
-    }
-    result.push_back(pts[0].first);
-    result.push_back(pts[0].second);
-    return result;
-}
-
 val SeqNumGrid(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
@@ -203,47 +119,14 @@ val SeqNumGrid(
     const std::vector<uint64_t> seqnumVector =
         convertJSArrayToNumberVector<uint64_t>(seqnum);
 
-    DgRFNetwork net;
-    const DgGeoSphRF *geoRF = DgGeoSphRF::makeRF(net, "GEO");
-    const DgGeoCoord vert0(
-        static_cast<long double>(pole_lon_deg),
-        static_cast<long double>(pole_lat_deg), false);
-
-    using namespace dgg::topo;
-    DgGridTopology topo;
-    DgGridMetric   metric;
-    if      (topology == "HEXAGON")  { topo = Hexagon;  metric = D6; }
-    else if (topology == "TRIANGLE") { topo = Triangle; metric = D4; }
-    else                             { topo = Diamond;  metric = D4; }
-
-    const DgIDGGSBase *idggs = DgIDGGS::makeRF(
-        net, *geoRF, vert0,
-        static_cast<long double>(azimuth_deg),
-        aperture, res + 1, topo, metric, "IDGGS", projection);
-
-    const DgIDGGBase    &dgg   = idggs->idggBase(res);
-    const DgBoundedIDGG &bndRF = dgg.bndRF();
-
-    std::vector<double> counts;
-    std::vector<double> x;
-    std::vector<double> y;
-
-    for (const auto sn : seqnumVector) {
-        auto verts = cellVertices(dgg, bndRF, sn);
-        const unsigned int vertexes =
-            static_cast<unsigned int>(verts.size() / 2);
-        counts.push_back(static_cast<double>(vertexes));
-        for (std::size_t i = 0; i < verts.size(); i += 2) {
-            x.push_back(verts[i]);
-            y.push_back(verts[i + 1]);
-        }
-    }
+    // Use the cached transformer — no DgRFNetwork rebuild on repeat calls
+    auto r = dggrid::seqNumsToVertices(p, seqnumVector);
 
     // Format: [count0..countN, x_all..., y_all...]
     std::vector<double> result;
-    result.insert(result.end(), counts.begin(), counts.end());
-    result.insert(result.end(), x.begin(), x.end());
-    result.insert(result.end(), y.begin(), y.end());
+    result.insert(result.end(), r.counts.begin(), r.counts.end());
+    result.insert(result.end(), r.x.begin(),      r.x.end());
+    result.insert(result.end(), r.y.begin(),      r.y.end());
     return val::array(result);
 }
 

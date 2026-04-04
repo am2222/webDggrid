@@ -109,6 +109,18 @@ Q2DICoord    q2DIToQ2DI   (const DggsParams& p, uint64_t quad, int64_t i, int64_
 SeqNum       q2DIToSeqNum (const DggsParams& p, uint64_t quad, int64_t i, int64_t j);
 
 // ---------------------------------------------------------------------------
+// Cell polygon vertices (cached — reuses the same DgRFNetwork)
+// ---------------------------------------------------------------------------
+struct CellVerticesResult {
+    std::vector<double> counts;   // vertex count per cell
+    std::vector<double> x;        // all x (longitude) values
+    std::vector<double> y;        // all y (latitude) values
+};
+
+CellVerticesResult seqNumsToVertices(const DggsParams& p,
+                                      const std::vector<SeqNum>& seqnums);
+
+// ---------------------------------------------------------------------------
 // FROM SEQNUM
 // ---------------------------------------------------------------------------
 GeoCoord     seqNumToGeo    (const DggsParams& p, SeqNum seqnum);
