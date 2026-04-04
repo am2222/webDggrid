@@ -71,7 +71,7 @@ const distkm    = dggs.cellDistKM(3);   // average cell spacing in km
 
 ## Live Demo
 
-See the [interactive globe demo](/example.html) for a full example using MapLibre GL JS with a globe projection.
+See the [interactive globe demo](/demo) for a live example with topology switching, drag-to-rotate, and auto-spin.
 
 ---
 

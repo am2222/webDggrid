@@ -2,7 +2,7 @@
 
 # Interface: Coordinate
 
-Defined in: [webdggrid.ts:65](https://github.com/am2222/webDggrid/blob/3921ce32781d427d8978256c5770286db9db2e93/src-ts/webdggrid.ts#L65)
+Defined in: [webdggrid.ts:65](https://github.com/am2222/webDggrid/blob/a6b8cd4012debbc498d65ca4dc0d8036b6cb60cc/src-ts/webdggrid.ts#L65)
 
 A simple geographic coordinate expressed as latitude and longitude in
 decimal degrees (WGS-84).
@@ -19,7 +19,7 @@ const coord: Coordinate = { lat: 51.5, lng: -0.1 };
 
 > **lat**: `number`
 
-Defined in: [webdggrid.ts:67](https://github.com/am2222/webDggrid/blob/3921ce32781d427d8978256c5770286db9db2e93/src-ts/webdggrid.ts#L67)
+Defined in: [webdggrid.ts:67](https://github.com/am2222/webDggrid/blob/a6b8cd4012debbc498d65ca4dc0d8036b6cb60cc/src-ts/webdggrid.ts#L67)
 
 Latitude in decimal degrees. Range: −90 to 90.
 
@@ -29,6 +29,6 @@ Latitude in decimal degrees. Range: −90 to 90.
 
 > **lng**: `number`
 
-Defined in: [webdggrid.ts:69](https://github.com/am2222/webDggrid/blob/3921ce32781d427d8978256c5770286db9db2e93/src-ts/webdggrid.ts#L69)
+Defined in: [webdggrid.ts:69](https://github.com/am2222/webDggrid/blob/a6b8cd4012debbc498d65ca4dc0d8036b6cb60cc/src-ts/webdggrid.ts#L69)
 
 Longitude in decimal degrees. Range: −180 to 180.

@@ -4,6 +4,7 @@
       "outDir": "./lib-esm",
       "declarationDir": "./types",
       "composite": true,
+      "tsBuildInfoFile": "./lib-esm/tsconfig.tsbuildinfo",
       "target": "ES2020",
       "module": "esnext",
       "moduleResolution": "node",

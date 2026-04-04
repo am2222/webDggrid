@@ -22,7 +22,7 @@ jobs:
 
       - run: corepack enable
 
-      - uses: mymindstorm/setup-emsdk@v11
+      - uses: mymindstorm/setup-emsdk@v14
 
       - name: Install dependencies
         run: yarn install --immutable

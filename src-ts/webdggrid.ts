@@ -154,9 +154,13 @@ export interface IDGGSProps {
  * output from {@link Webdggrid.sequenceNumToGrid} directly.
  */
 export function unwrapAntimeridianRing(ring: Position[]): Position[] {
-    const lons = ring.map((p) => p[0]);
-    const minLon = Math.min(...lons);
-    const maxLon = Math.max(...lons);
+    let minLon = ring[0][0];
+    let maxLon = ring[0][0];
+    for (let i = 1; i < ring.length; i++) {
+        const lon = ring[i][0];
+        if (lon < minLon) minLon = lon;
+        else if (lon > maxLon) maxLon = lon;
+    }
     if (maxLon - minLon <= 180) return ring;
     return ring.map(([lon, lat]) => [lon < 0 ? lon + 360 : lon, lat]);
 }
@@ -741,12 +745,9 @@ export class Webdggrid {
         for (let i = 0; i < allShapeVertexes.length; i += 1) {
             const numVertexes = allShapeVertexes[i];
 
-            const currentShapeXVertexes = resultArray.slice(xOffset, xOffset + numVertexes);
-            const currentShapeYVertexes = resultArray.slice(yOffset, yOffset + numVertexes);
-
             const coordinates: Position[] = [];
-            for (let i = 0; i < numVertexes; i += 1) {
-                coordinates.push([currentShapeXVertexes[i], currentShapeYVertexes[i]]);
+            for (let j = 0; j < numVertexes; j += 1) {
+                coordinates.push([resultArray[xOffset + j], resultArray[yOffset + j]]);
             }
             featureSet.push(unwrapAntimeridianRing(coordinates));
             xOffset += numVertexes;

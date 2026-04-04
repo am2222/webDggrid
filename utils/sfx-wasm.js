@@ -39,6 +39,7 @@ export function unloadWasm() {
     }
 }
 `;
+    fs.mkdirSync('./lib-esm', { recursive: true });
     fs.writeFileSync('./lib-esm/libdggrid.wasm.js', content);
 } else {
     throw new Error(' filePath  is required.');

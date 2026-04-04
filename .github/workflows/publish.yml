@@ -25,7 +25,7 @@ jobs:
 
       - run: corepack enable
 
-      - uses: mymindstorm/setup-emsdk@v11
+      - uses: mymindstorm/setup-emsdk@v14
 
       - name: Verify emcc
         run: emcc -v
@@ -56,4 +56,43 @@ jobs:
             lib-wasm-libdggrid.wasm
             lib-wasm-py-libdggrid.js
             lib-wasm-py-libdggrid.wasm
+
+  verify-published:
+    needs: build-publish-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Wait for npm registry
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          VERSION="${VERSION#v}"
+          echo "Waiting for webdggrid@${VERSION} on npm…"
+          for i in $(seq 1 12); do
+            if npm view "webdggrid@${VERSION}" version &>/dev/null; then
+              echo "Package available."
+              break
+            fi
+            echo "  not yet (attempt ${i}/12), retrying in 10s…"
+            sleep 10
+          done
+
+      - name: Install published package
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          VERSION="${VERSION#v}"
+          mkdir /tmp/pkg-test
+          cd /tmp/pkg-test
+          echo '{"type":"module"}' > package.json
+          npm install "webdggrid@${VERSION}"
+
+      - name: Smoke test published package
+        run: |
+          cp utils/smoke-test.mjs /tmp/pkg-test/
+          cd /tmp/pkg-test
+          node smoke-test.mjs webdggrid
 
