@@ -5,6 +5,7 @@ lib-wasm/
 lib-wasm-py/
 dist/
 types/
+*.tsbuildinfo
 .yarn
 
 docs/.vitepress/dist
