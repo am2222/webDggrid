@@ -1,14 +1,16 @@
 /**
- * Smoke test for the built dist/ output.
+ * Smoke test that can run against three targets:
  *
- * Imports Webdggrid from dist/index.js (the same file published to npm and
- * served via jsDelivr) and runs a handful of sanity checks.  Exits with a
- * non-zero code on any failure so CI catches regressions.
+ *   node utils/smoke-test.mjs                 # local dist/ (default)
+ *   node utils/smoke-test.mjs webdggrid       # installed npm package
+ *   node utils/smoke-test.mjs webdggrid@1.2.3 # specific npm version
  *
- * Usage:  node utils/smoke-test.mjs
+ * Exits with a non-zero code on any failure so CI catches regressions.
  */
 
-import { Webdggrid } from '../dist/index.js'
+const source = process.argv[2] ?? '../dist/index.js'
+console.log(`\nImporting from: ${source}`)
+const { Webdggrid } = await import(source)
 
 let passed = 0
 let failed = 0
