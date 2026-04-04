@@ -103,6 +103,9 @@ val getResInfo(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     return val::array(out);
 }
 
+// Forward declarations
+static val toFloat64Array(const std::vector<double> &v);
+
 // ===========================================================================
 // SeqNumGrid — cell polygon rings for a list of sequence numbers.
 // Result: [count0..countN, x_coords..., y_coords...]
