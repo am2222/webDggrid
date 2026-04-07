@@ -42,6 +42,7 @@ export default defineConfig({
           { text: 'Multi-Aperture', link: '/multi-aperture' },
           { text: 'Hierarchical Operations', link: '/hierarchical-operations' },
           { text: 'Hierarchical Address Types', link: '/hierarchical-addresses' },
+          { text: 'Index Arithmetic', link: '/index-arithmetic' },
         ],
       },
       {
