@@ -79,6 +79,9 @@ const seqNum = dggs.geoToSequenceNum([[0, 0]]);
 ### Hierarchical Address Types
 `sequenceNumToVertex2DD` · `vertex2DDToSequenceNum` · `sequenceNumToZOrder` · `zOrderToSequenceNum` · `sequenceNumToZ3` · `z3ToSequenceNum` · `sequenceNumToZ7` · `z7ToSequenceNum`
 
+### Index Digit Manipulation
+`z7GetQuad` · `z7GetDigit` · `z7SetDigit` · `z7ExtractDigits` · `z3GetQuad` · `z3GetDigit` · `z3SetDigit` · `z3ExtractDigits` · `zOrderGetQuad` · `zOrderGetDigit` · `zOrderSetDigit` · `zOrderExtractDigits`
+
 ### Low-Level Coordinate Systems
 `geoToPlane` · `geoToProjtri` · `geoToQ2dd` · `geoToQ2di` · `sequenceNumToPlane` · `sequenceNumToProjtri` · `sequenceNumToQ2dd` · `sequenceNumToQ2di`
 

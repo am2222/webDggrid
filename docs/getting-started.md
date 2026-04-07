@@ -139,6 +139,23 @@ const distkm    = dggs.cellDistKM(3);   // average cell spacing in km
 | [`sequenceNumToZ7()`](api/classes/Webdggrid.md#sequencenumtoz7) | SEQNUM → Z7 (aperture 7 hexagons) |
 | [`z7ToSequenceNum()`](api/classes/Webdggrid.md#z7tosequencenum) | Z7 → SEQNUM |
 
+### Index Digit Manipulation
+
+| Method | Description |
+|--------|-------------|
+| [`z7GetQuad()`](api/classes/Webdggrid.md#z7getquad) | Get quad (icosahedron face) from Z7 index |
+| [`z7GetDigit()`](api/classes/Webdggrid.md#z7getdigit) | Read digit at resolution level from Z7 index |
+| [`z7SetDigit()`](api/classes/Webdggrid.md#z7setdigit) | Write digit at resolution level in Z7 index |
+| [`z7ExtractDigits()`](api/classes/Webdggrid.md#z7extractdigits) | Extract quad + all digits from Z7 index |
+| [`z3GetQuad()`](api/classes/Webdggrid.md#z3getquad) | Get quad from Z3 index |
+| [`z3GetDigit()`](api/classes/Webdggrid.md#z3getdigit) | Read digit at resolution level from Z3 index |
+| [`z3SetDigit()`](api/classes/Webdggrid.md#z3setdigit) | Write digit at resolution level in Z3 index |
+| [`z3ExtractDigits()`](api/classes/Webdggrid.md#z3extractdigits) | Extract quad + all digits from Z3 index |
+| [`zOrderGetQuad()`](api/classes/Webdggrid.md#zordergetquad) | Get quad from ZORDER index |
+| [`zOrderGetDigit()`](api/classes/Webdggrid.md#zordergetdigit) | Read digit at resolution level from ZORDER index |
+| [`zOrderSetDigit()`](api/classes/Webdggrid.md#zordersetdigit) | Write digit at resolution level in ZORDER index |
+| [`zOrderExtractDigits()`](api/classes/Webdggrid.md#zorderextractdigits) | Extract quad + all digits from ZORDER index |
+
 ### Low-Level Coordinate Systems
 
 | Method | Description |

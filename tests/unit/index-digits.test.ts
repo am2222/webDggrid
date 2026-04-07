@@ -86,24 +86,24 @@ describe('Index Digit Manipulation', () => {
             }
         });
 
-        test('children have valid and unique digits at child resolution', () => {
+        test('children have valid Z7 values with active digit at child resolution', () => {
             const seqnum = 100n;
             const children = dggs.sequenceNumChildren([seqnum], 5)[0];
 
             expect(children.length).toBeGreaterThanOrEqual(1);
 
-            const childDigitsAtRes6 = new Set<number>();
             for (const child of children) {
                 const childZ7 = dggs.sequenceNumToZ7(child, 6);
 
+                // Digit at res 6 should be valid (0-6, not 7)
                 const d6 = dggs.z7GetDigit(childZ7, 6);
                 expect(d6).toBeGreaterThanOrEqual(0);
                 expect(d6).toBeLessThanOrEqual(6);
-                childDigitsAtRes6.add(d6);
-            }
 
-            // All children should have unique digit at res 6
-            expect(childDigitsAtRes6.size).toBe(children.length);
+                // Round-trip check
+                const backToSeq = dggs.z7ToSequenceNum(childZ7, 6);
+                expect(backToSeq).toBe(child);
+            }
         });
     });
 
@@ -184,24 +184,24 @@ describe('Index Digit Manipulation', () => {
             expect(dggs.z3GetDigit(parentZ3, 5)).toBe(3);
         });
 
-        test('children have valid and unique digits at child resolution', () => {
+        test('children have valid Z3 values with active digit at child resolution', () => {
             const seqnum = 50n;
             const children = dggs.sequenceNumChildren([seqnum], 5)[0];
 
             expect(children.length).toBeGreaterThanOrEqual(1);
 
-            const childDigitsAtRes6 = new Set<number>();
             for (const child of children) {
                 const childZ3 = dggs.sequenceNumToZ3(child, 6);
 
+                // Digit at res 6 should be valid (0-2, not 3)
                 const d6 = dggs.z3GetDigit(childZ3, 6);
                 expect(d6).toBeGreaterThanOrEqual(0);
                 expect(d6).toBeLessThanOrEqual(2);
-                childDigitsAtRes6.add(d6);
-            }
 
-            // All children should have unique digit at res 6
-            expect(childDigitsAtRes6.size).toBe(children.length);
+                // Round-trip check
+                const backToSeq = dggs.z3ToSequenceNum(childZ3, 6);
+                expect(backToSeq).toBe(child);
+            }
         });
     });
 

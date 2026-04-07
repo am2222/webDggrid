@@ -122,32 +122,12 @@ function verifyRoundTrip(addr, resolution) {
 // API for parent/children and then OBSERVE the digit patterns to show how
 // the encoding works.
 
-const Z7_BITS = 3n
-const Z7_MAX = 20
-const Z3_BITS = 2n
-const Z3_MAX = 30
+function computeZSection(type, value, seqnum, resolution, bitsPerDigit, toZ) {
+  const extractDigits = type === 'Z7' ? (v, r) => dggs.z7ExtractDigits(v, r)
+    : type === 'Z3' ? (v, r) => dggs.z3ExtractDigits(v, r)
+    : (v, r) => dggs.zOrderExtractDigits(v, r)
 
-function zGetQuad(value) {
-  return Number((value >> 60n) & 0xFn)
-}
-
-function zGetDigit(value, res, bitsPerDigit, maxRes) {
-  const shift = BigInt(maxRes - res) * bitsPerDigit
-  const mask = (1n << bitsPerDigit) - 1n
-  return Number((value >> shift) & mask)
-}
-
-function zExtractDigits(value, resolution, bitsPerDigit, maxRes) {
-  const digits = []
-  for (let r = 1; r <= resolution; r++) {
-    digits.push(zGetDigit(value, r, bitsPerDigit, maxRes))
-  }
-  return digits
-}
-
-function computeZSection(type, value, seqnum, resolution, bitsPerDigit, maxRes, toZ, fromZ) {
-  const quad = zGetQuad(value)
-  const digits = zExtractDigits(value, resolution, bitsPerDigit, maxRes)
+  const { quad, digits } = extractDigits(value, resolution)
 
   // Use API for parent, then convert to Z to observe digit change
   let parentSeq = null
@@ -158,8 +138,9 @@ function computeZSection(type, value, seqnum, resolution, bitsPerDigit, maxRes, 
     parentSeq = resolution > 0 ? dggs.sequenceNumParent([seqnum], resolution)[0] : null
     if (parentSeq !== null) {
       parentZ = toZ(parentSeq, resolution - 1)
-      parentQuad = zGetQuad(parentZ)
-      parentDigits = zExtractDigits(parentZ, resolution - 1, bitsPerDigit, maxRes)
+      const parentExtracted = extractDigits(parentZ, resolution - 1)
+      parentQuad = parentExtracted.quad
+      parentDigits = parentExtracted.digits
     }
   } catch { /* skip */ }
 
@@ -170,13 +151,13 @@ function computeZSection(type, value, seqnum, resolution, bitsPerDigit, maxRes, 
   const childrenInfo = childrenApi.map(childSeq => {
     try {
       const childZVal = toZ(childSeq, resolution + 1)
-      const childDigits = zExtractDigits(childZVal, resolution + 1, bitsPerDigit, maxRes)
+      const childExtracted = extractDigits(childZVal, resolution + 1)
       return {
         seqnum: childSeq,
         zValue: childZVal,
         hex: '0x' + childZVal.toString(16).padStart(16, '0'),
-        digits: childDigits,
-        newDigit: childDigits[resolution], // the digit at the child's resolution level
+        digits: childExtracted.digits,
+        newDigit: childExtracted.digits[resolution], // the digit at the child's resolution level
       }
     } catch {
       return { seqnum: childSeq, zValue: null, hex: 'err', digits: [], newDigit: '?' }
@@ -208,17 +189,15 @@ function computeBitOps(addr, resolution) {
 
   if (addr.z3 !== null) {
     ops.sections.push(computeZSection(
-      'Z3', addr.z3, addr.seqnum, resolution, Z3_BITS, Z3_MAX,
+      'Z3', addr.z3, addr.seqnum, resolution, 2,
       (seq, res) => dggs.sequenceNumToZ3(seq, res),
-      (z, res) => dggs.z3ToSequenceNum(z, res),
     ))
   }
 
   if (addr.z7 !== null) {
     ops.sections.push(computeZSection(
-      'Z7', addr.z7, addr.seqnum, resolution, Z7_BITS, Z7_MAX,
+      'Z7', addr.z7, addr.seqnum, resolution, 3,
       (seq, res) => dggs.sequenceNumToZ7(seq, res),
-      (z, res) => dggs.z7ToSequenceNum(z, res),
     ))
   }
 
