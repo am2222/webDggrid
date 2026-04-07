@@ -13,6 +13,14 @@ In addition to the standard SEQNUM (sequence number) addressing, WebDGGRID provi
 | **Z3** | Base-3 Central Place Indexing | Aperture 3 hexagons only | Aperture 3 hierarchical indexing |
 | **Z7** | Base-7 Central Place Indexing | Aperture 7 hexagons only | Aperture 7 hierarchical indexing |
 
+## Interactive Demo
+
+Select an address type to see how cell identifiers change across different indexing systems. Click any cell to inspect all its address representations and verify round-trip conversions.
+
+<ClientOnly>
+  <DggsAddressTypesDemo />
+</ClientOnly>
+
 ## VERTEX2DD
 
 VERTEX2DD addresses represent cell positions relative to the vertices and triangular faces of the underlying icosahedron. This is the most fundamental coordinate system in DGGRID.
