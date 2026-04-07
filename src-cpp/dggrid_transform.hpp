@@ -46,6 +46,12 @@ struct PlaneCoord   { double x, y; };
 struct ProjTriCoord { uint64_t tnum; double x, y; };
 struct Q2DDCoord    { uint64_t quad; double x, y; };
 struct Q2DICoord    { uint64_t quad; int64_t i, j; };
+struct Vertex2DDCoord { bool keep; int vertNum; int triNum; double x, y; };
+
+// Hierarchical Index coordinates (stored as uint64_t)
+struct ZOrderCoord  { uint64_t value; };
+struct Z3Coord      { uint64_t value; };
+struct Z7Coord      { uint64_t value; };
 
 // ---------------------------------------------------------------------------
 // Resolution information
@@ -138,6 +144,31 @@ ProjTriCoord seqNumToProjTri(const DggsParams& p, SeqNum seqnum);
 Q2DDCoord    seqNumToQ2DD   (const DggsParams& p, SeqNum seqnum);
 Q2DICoord    seqNumToQ2DI   (const DggsParams& p, SeqNum seqnum);
 SeqNum       seqNumToSeqNum (const DggsParams& p, SeqNum seqnum);
+Vertex2DDCoord seqNumToVertex2DD (const DggsParams& p, SeqNum seqnum);
+ZOrderCoord  seqNumToZOrder (const DggsParams& p, SeqNum seqnum);
+Z3Coord      seqNumToZ3     (const DggsParams& p, SeqNum seqnum);
+Z7Coord      seqNumToZ7     (const DggsParams& p, SeqNum seqnum);
+
+// ---------------------------------------------------------------------------
+// FROM VERTEX2DD
+// ---------------------------------------------------------------------------
+SeqNum       vertex2DDToSeqNum (const DggsParams& p, bool keep, int vertNum, 
+                                 int triNum, double x, double y);
+
+// ---------------------------------------------------------------------------
+// FROM ZORDER
+// ---------------------------------------------------------------------------
+SeqNum       zOrderToSeqNum (const DggsParams& p, uint64_t value);
+
+// ---------------------------------------------------------------------------
+// FROM Z3
+// ---------------------------------------------------------------------------
+SeqNum       z3ToSeqNum (const DggsParams& p, uint64_t value);
+
+// ---------------------------------------------------------------------------
+// FROM Z7
+// ---------------------------------------------------------------------------
+SeqNum       z7ToSeqNum (const DggsParams& p, uint64_t value);
 
 // ---------------------------------------------------------------------------
 // NEIGHBORS - Get topologically adjacent cells (share an edge)

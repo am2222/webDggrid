@@ -52,7 +52,7 @@
 #include <dglib/DgIDGGBase.h>       // DgIDGGBase (the Q2DI RF + all accessors)
 #include <dglib/DgBoundedIDGG.h>    // DgBoundedIDGG (SEQNUM)
 #include <dglib/DgProjTriRF.h>      // DgProjTriRF, DgProjTriCoord, DgPlaneTriRF
-#include <dglib/DgIDGGutil.h>       // DgQ2DDCoord, DgQ2DDRF, DgPlaneTriRF
+#include <dglib/DgIDGGutil.h>       // DgQ2DDCoord, DgQ2DDRF, DgPlaneTriRF, DgVertex2DDRF
 #include <dglib/DgGridTopo.h>       // Hexagon, Triangle, Diamond, D4, D6
 #include <dglib/DgLocation.h>       // DgLocation
 #include <dglib/DgPolygon.h>        // DgPolygon
@@ -60,6 +60,9 @@
 #include <dglib/DgIVec2D.h>         // DgIVec2D (.i(), .j())
 #include <dglib/DgDVec2D.h>         // DgDVec2D (.x(), .y())
 #include <dglib/DgConstants.h>      // M_PIl, M_ZERO
+#include <dglib/DgZOrderRF.h>       // DgZOrderRF, DgZOrderCoord
+#include <dglib/DgZ3RF.h>           // DgZ3RF, DgZ3Coord
+#include <dglib/DgZ7RF.h>           // DgZ7RF, DgZ7Coord
 
 #include <cmath>
 #include <memory>
@@ -101,6 +104,12 @@ struct Transformer {
     const DgQ2DDRF     *q2ddRF   = nullptr;  // dgg.q2ddRF()
     const DgPlaneTriRF *planeRF  = nullptr;  // dgg.planeRF()
     const DgBoundedIDGG *bndRF   = nullptr;  // dgg.bndRF()  (SEQNUM)
+    
+    // Hierarchical address frames (may be null depending on aperture/topology)
+    const DgVertex2DDRF *vertexRF  = nullptr;  // dgg.vertexRF() - always available
+    const DgZOrderRF    *zorderRF  = nullptr;  // dgg.zorderRF() - aperture 3/4 only
+    const DgZ3RF        *z3RF      = nullptr;  // dgg.z3RF() - aperture 3 only
+    const DgZ7RF        *z7RF      = nullptr;  // dgg.z7RF() - aperture 7 only
 
     // ── inX: create a DgLocation in the named source frame ──────────────
 
@@ -191,6 +200,75 @@ struct Transformer {
         const DgDVec2D *c = planeRF->getAddress(*loc);
         out_x = static_cast<double>(c->x());
         out_y = static_cast<double>(c->y());
+    }
+    
+    void outVERTEX2DD(LocPtr &loc, bool &out_keep, int &out_vertNum, 
+                      int &out_triNum, double &out_x, double &out_y) const {
+        if (!vertexRF) 
+            throw std::runtime_error("VERTEX2DD not available");
+        vertexRF->convert(loc.get());
+        const DgVertex2DDCoord *c = vertexRF->getAddress(*loc);
+        out_keep = c->keep();
+        out_vertNum = c->vertNum();
+        out_triNum = c->triNum();
+        out_x = static_cast<double>(c->coord().x());
+        out_y = static_cast<double>(c->coord().y());
+    }
+    
+    void outZORDER(LocPtr &loc, uint64_t &out_value) const {
+        if (!zorderRF)
+            throw std::runtime_error("ZORDER not available for this aperture (use aperture 3 or 4, not 7)");
+        zorderRF->convert(loc.get());
+        const DgZOrderCoord *c = zorderRF->getAddress(*loc);
+        out_value = c->value();
+    }
+    
+    void outZ3(LocPtr &loc, uint64_t &out_value) const {
+        if (!z3RF)
+            throw std::runtime_error("Z3 not available (requires aperture 3 hexagon grid)");
+        z3RF->convert(loc.get());
+        const DgZ3Coord *c = z3RF->getAddress(*loc);
+        out_value = c->value();
+    }
+    
+    void outZ7(LocPtr &loc, uint64_t &out_value) const {
+        if (!z7RF)
+            throw std::runtime_error("Z7 not available (requires aperture 7 hexagon grid)");
+        z7RF->convert(loc.get());
+        const DgZ7Coord *c = z7RF->getAddress(*loc);
+        out_value = c->value();
+    }
+    
+    // ── inX for hierarchical types ───────────────────────────────────────
+    
+    LocPtr inVERTEX2DD(bool keep, int vertNum, int triNum, double x, double y) const {
+        if (!vertexRF)
+            throw std::runtime_error("VERTEX2DD not available");
+        DgVertex2DDCoord coord(keep, vertNum, triNum, 
+                               DgDVec2D(static_cast<long double>(x), 
+                                        static_cast<long double>(y)));
+        return LocPtr(vertexRF->makeLocation(coord));
+    }
+    
+    LocPtr inZORDER(uint64_t value) const {
+        if (!zorderRF)
+            throw std::runtime_error("ZORDER not available for this aperture (use aperture 3 or 4, not 7)");
+        DgZOrderCoord coord(value);
+        return LocPtr(zorderRF->makeLocation(coord));
+    }
+    
+    LocPtr inZ3(uint64_t value) const {
+        if (!z3RF)
+            throw std::runtime_error("Z3 not available (requires aperture 3 hexagon grid)");
+        DgZ3Coord coord(value);
+        return LocPtr(z3RF->makeLocation(coord));
+    }
+    
+    LocPtr inZ7(uint64_t value) const {
+        if (!z7RF)
+            throw std::runtime_error("Z7 not available (requires aperture 7 hexagon grid)");
+        DgZ7Coord coord(value);
+        return LocPtr(z7RF->makeLocation(coord));
     }
 };
 
@@ -374,6 +452,17 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
     t->q2ddRF   = &dgg.q2ddRF();
     t->planeRF  = &dgg.planeRF();
     t->bndRF    = &dgg.bndRF();
+    
+    // ── Resolve hierarchical address frames (may be null) ─────────────────
+    // These are available from DgIDGGBase accessors:
+    //   const DgVertex2DDRF& vertexRF (void) const { return *vertexRF_; }
+    //   const DgZOrderRF* zorderRF() const { return zorderRF_; }
+    //   const DgZ3RF* z3RF() const { return z3RF_; }
+    //   const DgZ7RF* z7RF() const { return z7RF_; }
+    t->vertexRF = &dgg.vertexRF();  // Always available
+    t->zorderRF = dgg.zorderRF();   // Null if aperture 7
+    t->z3RF     = dgg.z3RF();       // Null if not aperture 3
+    t->z7RF     = dgg.z7RF();       // Null if not aperture 7
 
     return t;
 }
@@ -1020,6 +1109,83 @@ std::vector<std::vector<SeqNum>> seqNumsChildren(const DggsParams &p,
     }
     
     return result;
+}
+
+// ===========================================================================
+// HIERARCHICAL ADDRESS TYPES - SEQNUM conversions
+// ===========================================================================
+
+// ── VERTEX2DD ──────────────────────────────────────────────────────────────
+
+Vertex2DDCoord seqNumToVertex2DD(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    Vertex2DDCoord r{};
+    t->outVERTEX2DD(loc, r.keep, r.vertNum, r.triNum, r.x, r.y);
+    return r;
+}
+
+SeqNum vertex2DDToSeqNum(const DggsParams &p, bool keep, int vertNum, 
+                          int triNum, double x, double y) {
+    auto t = getTransformer(p);
+    auto loc = t->inVERTEX2DD(keep, vertNum, triNum, x, y);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
+}
+
+// ── ZORDER ─────────────────────────────────────────────────────────────────
+
+ZOrderCoord seqNumToZOrder(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    ZOrderCoord r{};
+    t->outZORDER(loc, r.value);
+    return r;
+}
+
+SeqNum zOrderToSeqNum(const DggsParams &p, uint64_t value) {
+    auto t = getTransformer(p);
+    auto loc = t->inZORDER(value);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
+}
+
+// ── Z3 ─────────────────────────────────────────────────────────────────────
+
+Z3Coord seqNumToZ3(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    Z3Coord r{};
+    t->outZ3(loc, r.value);
+    return r;
+}
+
+SeqNum z3ToSeqNum(const DggsParams &p, uint64_t value) {
+    auto t = getTransformer(p);
+    auto loc = t->inZ3(value);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
+}
+
+// ── Z7 ─────────────────────────────────────────────────────────────────────
+
+Z7Coord seqNumToZ7(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    Z7Coord r{};
+    t->outZ7(loc, r.value);
+    return r;
+}
+
+SeqNum z7ToSeqNum(const DggsParams &p, uint64_t value) {
+    auto t = getTransformer(p);
+    auto loc = t->inZ7(value);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
 }
 
 } // namespace dggrid

@@ -957,6 +957,134 @@ val SEQNUMS_children(
 }
 
 // ===========================================================================
+// Hierarchical Address Types - SEQNUM conversions
+// ===========================================================================
+
+// ── VERTEX2DD ──────────────────────────────────────────────────────────────
+
+val SEQNUM_to_VERTEX2DD(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    auto result = dggrid::seqNumToVertex2DD(p, seqnum);
+    
+    // Return as object {keep, vertNum, triNum, x, y}
+    val obj = val::object();
+    obj.set("keep", result.keep);
+    obj.set("vertNum", result.vertNum);
+    obj.set("triNum", result.triNum);
+    obj.set("x", result.x);
+    obj.set("y", result.y);
+    return obj;
+}
+
+uint64_t VERTEX2DD_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    bool keep, int vertNum, int triNum, double x, double y)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    return dggrid::vertex2DDToSeqNum(p, keep, vertNum, triNum, x, y);
+}
+
+// ── ZORDER ─────────────────────────────────────────────────────────────────
+
+uint64_t SEQNUM_to_ZORDER(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    auto result = dggrid::seqNumToZOrder(p, seqnum);
+    return result.value;
+}
+
+uint64_t ZORDER_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t value)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    return dggrid::zOrderToSeqNum(p, value);
+}
+
+// ── Z3 ─────────────────────────────────────────────────────────────────────
+
+uint64_t SEQNUM_to_Z3(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    auto result = dggrid::seqNumToZ3(p, seqnum);
+    return result.value;
+}
+
+uint64_t Z3_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t value)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    return dggrid::z3ToSeqNum(p, value);
+}
+
+// ── Z7 ─────────────────────────────────────────────────────────────────────
+
+uint64_t SEQNUM_to_Z7(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    auto result = dggrid::seqNumToZ7(p, seqnum);
+    return result.value;
+}
+
+uint64_t Z7_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t value)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    return dggrid::z7ToSeqNum(p, value);
+}
+
+// ===========================================================================
 // Utilities
 // ===========================================================================
 
@@ -1055,4 +1183,14 @@ EMSCRIPTEN_BINDINGS(my_module)
     emscripten::function("SEQNUMS_parents",   &SEQNUMS_parents);
     emscripten::function("SEQNUM_children",   &SEQNUM_children);
     emscripten::function("SEQNUMS_children",  &SEQNUMS_children);
+    
+    // HIERARCHICAL ADDRESS TYPES
+    emscripten::function("SEQNUM_to_VERTEX2DD", &SEQNUM_to_VERTEX2DD);
+    emscripten::function("VERTEX2DD_to_SEQNUM", &VERTEX2DD_to_SEQNUM);
+    emscripten::function("SEQNUM_to_ZORDER",    &SEQNUM_to_ZORDER);
+    emscripten::function("ZORDER_to_SEQNUM",    &ZORDER_to_SEQNUM);
+    emscripten::function("SEQNUM_to_Z3",        &SEQNUM_to_Z3);
+    emscripten::function("Z3_to_SEQNUM",        &Z3_to_SEQNUM);
+    emscripten::function("SEQNUM_to_Z7",        &SEQNUM_to_Z7);
+    emscripten::function("Z7_to_SEQNUM",        &Z7_to_SEQNUM);
 }
