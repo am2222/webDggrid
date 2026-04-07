@@ -2,7 +2,7 @@
 
 # Interface: Vertex2DDCoordinate
 
-Defined in: [webdggrid.ts:78](https://github.com/am2222/webDggrid/blob/3579dfb7e3c2bffc807aae448b47bef20e7b9865/src-ts/webdggrid.ts#L78)
+Defined in: [webdggrid.ts:78](https://github.com/am2222/webDggrid/blob/7917cb44f49dfd54c006cb0b682993cf9f954743/src-ts/webdggrid.ts#L78)
 
 VERTEX2DD coordinate representation.
 
@@ -15,7 +15,7 @@ faces in DGGRID's coordinate system.
 
 > **keep**: `boolean`
 
-Defined in: [webdggrid.ts:80](https://github.com/am2222/webDggrid/blob/3579dfb7e3c2bffc807aae448b47bef20e7b9865/src-ts/webdggrid.ts#L80)
+Defined in: [webdggrid.ts:80](https://github.com/am2222/webDggrid/blob/7917cb44f49dfd54c006cb0b682993cf9f954743/src-ts/webdggrid.ts#L80)
 
 Whether to keep this vertex.
 
@@ -25,7 +25,7 @@ Whether to keep this vertex.
 
 > **triNum**: `number`
 
-Defined in: [webdggrid.ts:84](https://github.com/am2222/webDggrid/blob/3579dfb7e3c2bffc807aae448b47bef20e7b9865/src-ts/webdggrid.ts#L84)
+Defined in: [webdggrid.ts:84](https://github.com/am2222/webDggrid/blob/7917cb44f49dfd54c006cb0b682993cf9f954743/src-ts/webdggrid.ts#L84)
 
 Triangle number on the icosahedron.
 
@@ -35,7 +35,7 @@ Triangle number on the icosahedron.
 
 > **vertNum**: `number`
 
-Defined in: [webdggrid.ts:82](https://github.com/am2222/webDggrid/blob/3579dfb7e3c2bffc807aae448b47bef20e7b9865/src-ts/webdggrid.ts#L82)
+Defined in: [webdggrid.ts:82](https://github.com/am2222/webDggrid/blob/7917cb44f49dfd54c006cb0b682993cf9f954743/src-ts/webdggrid.ts#L82)
 
 Vertex number (0-11 for icosahedron).
 
@@ -45,7 +45,7 @@ Vertex number (0-11 for icosahedron).
 
 > **x**: `number`
 
-Defined in: [webdggrid.ts:86](https://github.com/am2222/webDggrid/blob/3579dfb7e3c2bffc807aae448b47bef20e7b9865/src-ts/webdggrid.ts#L86)
+Defined in: [webdggrid.ts:86](https://github.com/am2222/webDggrid/blob/7917cb44f49dfd54c006cb0b682993cf9f954743/src-ts/webdggrid.ts#L86)
 
 X coordinate within the triangle.
 
@@ -55,6 +55,6 @@ X coordinate within the triangle.
 
 > **y**: `number`
 
-Defined in: [webdggrid.ts:88](https://github.com/am2222/webDggrid/blob/3579dfb7e3c2bffc807aae448b47bef20e7b9865/src-ts/webdggrid.ts#L88)
+Defined in: [webdggrid.ts:88](https://github.com/am2222/webDggrid/blob/7917cb44f49dfd54c006cb0b682993cf9f954743/src-ts/webdggrid.ts#L88)
 
 Y coordinate within the triangle.

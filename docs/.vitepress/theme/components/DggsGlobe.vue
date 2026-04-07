@@ -443,12 +443,12 @@ function updateHierarchyLayers(seqnum, resolution) {
       })
       map.addSource('hier-parent', { type: 'geojson', data: parentFc })
       map.addLayer({ id: 'hier-parent-fill', type: 'fill', source: 'hier-parent', paint: {
-        'fill-color': ['case', ['get', '_primary'], '#33cc33', '#88cc88'],
-        'fill-opacity': ['case', ['get', '_primary'], 0.2, 0.1],
+        'fill-color': ['case', ['get', '_primary'], '#22cc55', '#66dd88'],
+        'fill-opacity': ['case', ['get', '_primary'], 0.35, 0.25],
       } })
       map.addLayer({ id: 'hier-parent-line', type: 'line', source: 'hier-parent', paint: {
-        'line-color': '#33cc33',
-        'line-width': ['case', ['get', '_primary'], 3, 1.5],
+        'line-color': ['case', ['get', '_primary'], '#11aa33', '#44bb66'],
+        'line-width': ['case', ['get', '_primary'], 3.5, 2.5],
         'line-dasharray': [3, 2],
       } })
 

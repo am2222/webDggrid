@@ -99,7 +99,6 @@ console.log('Features:', geojson.features.length); // 2
 ## Additional Resources
 
 - [API Documentation](api/classes/Webdggrid.md)
-- [Testing Guide](testing.md)
 - [Multi-Aperture Documentation](multi-aperture.md)
 - [Coordinate Transformations](coordinate-transformations.md)
 
