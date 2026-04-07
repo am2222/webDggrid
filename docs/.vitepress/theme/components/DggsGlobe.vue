@@ -202,6 +202,13 @@ function viewportSeqNums(resolution) {
 function generateGrid() {
   if (!isReady.value || !webdggrid) return
 
+  // Clear any hierarchy selection when regenerating
+  selectedCellId.value = null
+  selectedCellRes.value = null
+  hierarchyInfo.parent = null
+  hierarchyInfo.children = []
+  hierarchyInfo.neighbors = []
+
   const maxRes     = ctrlResolution.value
   const multiRes   = ctrlMultiRes.value
   const resolution = multiRes ? zoomToResolution(map.getZoom(), maxRes) : maxRes
@@ -734,6 +741,45 @@ defineExpose({ getMap: () => map })
       >
         {{ !isReady ? 'Loading WASM…' : isGenerating ? 'Generating…' : 'Generate Grid' }}
       </button>
+
+      <!-- Hierarchy section -->
+      <h4>Cell Hierarchy</h4>
+
+      <div class="field">
+        <label>Index Type</label>
+        <select v-model="ctrlIndexType" @change="selectedCellId && selectCell(selectedCellId, selectedCellRes)">
+          <option v-for="t in availableIndexTypes" :key="t" :value="t">{{ t }}</option>
+        </select>
+      </div>
+
+      <div v-if="selectedCellId" class="hierarchy-panel">
+        <div class="hier-cell-id">
+          Selected: <strong>{{ selectedCellId.toString() }}</strong>
+          <span class="hier-res">res {{ selectedCellRes }}</span>
+        </div>
+
+        <button class="hier-clear-btn" @click="clearSelection">Clear</button>
+
+        <div v-if="hierarchyInfo.parent !== null" class="hier-group">
+          <div class="hier-label hier-parent-label">Parent (res {{ selectedCellRes - 1 }})</div>
+          <div class="hier-value">{{ hierarchyInfo.parent.toString() }}</div>
+        </div>
+
+        <div v-if="hierarchyInfo.children.length" class="hier-group">
+          <div class="hier-label hier-child-label">Children ({{ hierarchyInfo.children.length }}, res {{ selectedCellRes + 1 }})</div>
+          <div class="hier-chips">
+            <span v-for="(c, i) in hierarchyInfo.children" :key="i" class="hier-chip hier-chip-child">{{ c.toString() }}</span>
+          </div>
+        </div>
+
+        <div v-if="hierarchyInfo.neighbors.length" class="hier-group">
+          <div class="hier-label hier-neighbor-label">Neighbors ({{ hierarchyInfo.neighbors.length }})</div>
+          <div class="hier-chips">
+            <span v-for="(n, i) in hierarchyInfo.neighbors" :key="i" class="hier-chip hier-chip-neighbor">{{ n.toString() }}</span>
+          </div>
+        </div>
+      </div>
+      <div v-else class="hier-hint">Click a cell on the map</div>
     </div>
 
     <!-- Status bar -->
@@ -899,6 +945,78 @@ defineExpose({ getMap: () => map })
   font-size: 13px;
   white-space: nowrap;
   color: var(--vp-c-text-1);
+}
+
+/* ---- hierarchy panel ---- */
+.hierarchy-panel {
+  margin-top: 4px;
+}
+.hier-cell-id {
+  font-size: 11px;
+  color: var(--vp-c-text-1);
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+.hier-res {
+  background: var(--vp-c-default-soft);
+  color: var(--vp-c-text-2);
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  margin-left: 4px;
+}
+.hier-clear-btn {
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 3px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+.hier-clear-btn:hover { background: var(--vp-c-default-soft); }
+.hier-group {
+  margin-bottom: 5px;
+}
+.hier-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+}
+.hier-parent-label { color: #33cc33; }
+.hier-child-label { color: #cc9900; }
+.hier-neighbor-label { color: #3399ff; }
+.hier-value {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--vp-c-text-1);
+  word-break: break-all;
+}
+.hier-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.hier-chip {
+  font-size: 10px;
+  font-family: monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-1);
+  word-break: break-all;
+}
+.hier-chip-child { border-left: 2px solid #ffcc00; }
+.hier-chip-neighbor { border-left: 2px solid #3399ff; }
+.hier-hint {
+  font-size: 11px;
+  color: var(--vp-c-text-3);
+  font-style: italic;
+  margin-top: 2px;
 }
 
 /* ---- pole marker (injected into MapLibre DOM) ---- */

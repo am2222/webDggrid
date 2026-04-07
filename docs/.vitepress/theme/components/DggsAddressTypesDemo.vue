@@ -921,20 +921,17 @@ function loadScript(src) {
   font-size: 12px;
   margin-top: 4px;
 }
+/* Only one .children-table td rule, with correct padding */
 .children-table td {
   padding: 6px 8px 6px 10px;
   border-bottom: 1px solid var(--vp-c-divider, #eee);
+  vertical-align: middle;
 }
   color: var(--vp-c-text-3, #999);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   padding: 4px 8px 4px 0;
   border-bottom: 1px solid var(--vp-c-divider, #e2e2e3);
-}
-.children-table td {
-  padding: 4px 8px 4px 0;
-  border-bottom: 1px solid var(--vp-c-divider, #eee);
-  vertical-align: middle;
 }
 .children-table .mono {
   font-family: var(--vp-font-family-mono, monospace);
