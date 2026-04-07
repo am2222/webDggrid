@@ -29,6 +29,7 @@ export default defineConfig({
         items: [
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Geometry Notes', link: '/getting-started#geometry-notes' },
+          { text: 'Address Types', link: '/address-types' },
           { text: 'Multi-Aperture', link: '/multi-aperture' },
           { text: 'Hierarchical Operations', link: '/hierarchical-operations' },
           { text: 'Hierarchical Address Types', link: '/hierarchical-addresses' },
