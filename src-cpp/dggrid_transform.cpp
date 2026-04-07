@@ -1014,36 +1014,22 @@ SeqNum seqNumParent(const DggsParams &p, SeqNum seqnum) {
     if (p.res <= 0) {
         throw std::runtime_error("Cannot get parent: already at resolution 0");
     }
-    
+
+    // Strategy: convert the child cell's center point to the parent resolution.
+    // This correctly identifies the containing parent cell, unlike setParents()
+    // which returns all touching parents and may pick the wrong one for
+    // cells near parent boundaries.
     auto t = getTransformer(p);
-    
-    // Convert seqnum to Q2DI
+
+    // Convert seqnum → GEO (cell center)
     auto loc = t->inSEQNUM(seqnum);
-    const DgQ2DICoord *q2di = t->dgg->getAddress(*loc);
-    
-    // Create resAdd for current resolution
-    DgResAdd<DgQ2DICoord> resAdd(*q2di, p.res);
-    
-    // Get parent cells - use public API
-    DgLocVector parents(*(t->idggs));
-    t->idggs->setParents(p.res, *loc, parents);
-    
-    if (parents.size() == 0) {
-        throw std::runtime_error("No parent found");
-    }
-    
-    // Get the parent at coarser resolution
-    // DgLocVector elements are already in the idggs frame
-    // Need to get the Q2DI address from the first parent
-    const DgIDGGBase &parent_dgg = t->idggs->idggBase(p.res - 1);
-    
-    // Create a new location to convert
-    DgLocation parent_loc(parents[0]);
-    parent_dgg.convert(&parent_loc);
-    const DgQ2DICoord *parent_q2di = parent_dgg.getAddress(parent_loc);
-    
-    uint64_t parent_seqnum = parent_dgg.bndRF().seqNumAddress(*parent_q2di);
-    return static_cast<SeqNum>(parent_seqnum);
+    double lon_deg = 0, lat_deg = 0;
+    t->outGEO(loc, lon_deg, lat_deg);
+
+    // Convert GEO → SEQNUM at parent resolution (res - 1)
+    DggsParams parentParams = p;
+    parentParams.res = p.res - 1;
+    return geoToSeqNum(parentParams, lon_deg, lat_deg);
 }
 
 std::vector<SeqNum> seqNumsParents(const DggsParams &p, 
