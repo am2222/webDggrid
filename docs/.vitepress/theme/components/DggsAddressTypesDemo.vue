@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 
 const svgRef = ref(null)
 const info = ref('')
@@ -45,7 +45,7 @@ onMounted(async () => {
   applySettings()
 })
 
-function applySettings() {
+async function applySettings() {
   if (!dggs) return
   dggs.setDggs({
     poleCoordinates: { lat: 0, lng: 0 },
@@ -61,6 +61,8 @@ function applySettings() {
 
   state.ready = true
   state.loading = false
+
+  await nextTick() // wait for SVG to appear in DOM
 
   const totalCells = dggs.nCells(state.resolution)
   const maxId = Math.min(totalCells, 10000)

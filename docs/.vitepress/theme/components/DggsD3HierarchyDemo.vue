@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 
 const svgRef = ref(null)
 const info = ref('')
@@ -44,7 +44,7 @@ onMounted(async () => {
   applySettings()
 })
 
-function applySettings() {
+async function applySettings() {
   if (!dggs) return
   dggs.setDggs({
     poleCoordinates: { lat: state.poleLat, lng: state.poleLng },
@@ -62,6 +62,8 @@ function applySettings() {
   state.ready = true
   state.loading = false
   state.history = []
+
+  await nextTick() // wait for SVG to appear in DOM
 
   const totalCells = dggs.nCells(state.resolution)
   const maxId = Math.min(totalCells, 10000)
@@ -458,23 +460,25 @@ function loadScript(src) {
         <div class="addr-row" v-if="state.addressInfo">
           <div class="section-title">Address Conversions</div>
           <table class="addr-table">
-            <tr>
-              <td class="addr-label">SEQNUM</td>
-              <td class="addr-value">{{ state.selectedCell.toString() }}</td>
-              <td class="addr-label">VERTEX2DD</td>
-              <td class="addr-value">
-                vertex {{ state.addressInfo.vertex2dd.vertNum }},
-                tri {{ state.addressInfo.vertex2dd.triNum }},
-                x={{ state.addressInfo.vertex2dd.x.toFixed(6) }},
-                y={{ state.addressInfo.vertex2dd.y.toFixed(6) }}
-              </td>
-              <td v-if="state.addressInfo.zorder !== null" class="addr-label">ZORDER</td>
-              <td v-if="state.addressInfo.zorder !== null" class="addr-value">{{ state.addressInfo.zorder.toString() }}</td>
-              <td v-if="state.addressInfo.z3 !== null" class="addr-label">Z3</td>
-              <td v-if="state.addressInfo.z3 !== null" class="addr-value">{{ state.addressInfo.z3.toString() }}</td>
-              <td v-if="state.addressInfo.z7 !== null" class="addr-label">Z7</td>
-              <td v-if="state.addressInfo.z7 !== null" class="addr-value">{{ state.addressInfo.z7.toString() }}</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td class="addr-label">SEQNUM</td>
+                <td class="addr-value">{{ state.selectedCell.toString() }}</td>
+                <td class="addr-label">VERTEX2DD</td>
+                <td class="addr-value">
+                  vertex {{ state.addressInfo.vertex2dd.vertNum }},
+                  tri {{ state.addressInfo.vertex2dd.triNum }},
+                  x={{ state.addressInfo.vertex2dd.x.toFixed(6) }},
+                  y={{ state.addressInfo.vertex2dd.y.toFixed(6) }}
+                </td>
+                <td v-if="state.addressInfo.zorder !== null" class="addr-label">ZORDER</td>
+                <td v-if="state.addressInfo.zorder !== null" class="addr-value">{{ state.addressInfo.zorder.toString() }}</td>
+                <td v-if="state.addressInfo.z3 !== null" class="addr-label">Z3</td>
+                <td v-if="state.addressInfo.z3 !== null" class="addr-value">{{ state.addressInfo.z3.toString() }}</td>
+                <td v-if="state.addressInfo.z7 !== null" class="addr-label">Z7</td>
+                <td v-if="state.addressInfo.z7 !== null" class="addr-value">{{ state.addressInfo.z7.toString() }}</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
