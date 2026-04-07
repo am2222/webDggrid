@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
 import typedocSidebar from '../api/typedoc-sidebar.json'
 
@@ -14,6 +15,14 @@ export default defineConfig({
   description: "A webassembly version of DGGRID",
   base: "/webDggrid/",
 
+  vite: {
+    resolve: {
+      alias: {
+        'webdggrid': fileURLToPath(new URL('../../lib-esm/webdggrid.js', import.meta.url)),
+      },
+    },
+  },
+
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
@@ -28,7 +37,12 @@ export default defineConfig({
         text: 'Guide',
         items: [
           { text: 'Getting Started', link: '/getting-started' },
-          { text: 'Geometry Notes', link: '/getting-started#geometry-notes' },
+          { text: 'Geometry Notes', link: '/geometry-notes' },
+          { text: 'Address Types', link: '/address-types' },
+          { text: 'Hierarchical Operations', link: '/hierarchical-operations' },
+          { text: 'Hierarchical Address Types', link: '/hierarchical-addresses' },
+          { text: 'Index Arithmetic', link: '/index-arithmetic' },
+          { text: 'Multi-Aperture', link: '/multi-aperture' },
         ],
       },
       {

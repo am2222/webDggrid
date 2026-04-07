@@ -48,10 +48,11 @@
 #include <dglib/DgIDGGSBase.h>      // DgIDGGSBase
 #include <dglib/DgIDGGS.h>          // DgIDGGS::makeRF  (generic factory)
 #include <dglib/DgHexIDGGS.h>       // DgHexIDGGS::makeRF
+#include <dglib/DgApSeq.h>          // DgApSeq (aperture sequence support)
 #include <dglib/DgIDGGBase.h>       // DgIDGGBase (the Q2DI RF + all accessors)
 #include <dglib/DgBoundedIDGG.h>    // DgBoundedIDGG (SEQNUM)
 #include <dglib/DgProjTriRF.h>      // DgProjTriRF, DgProjTriCoord, DgPlaneTriRF
-#include <dglib/DgIDGGutil.h>       // DgQ2DDCoord, DgQ2DDRF, DgPlaneTriRF
+#include <dglib/DgIDGGutil.h>       // DgQ2DDCoord, DgQ2DDRF, DgPlaneTriRF, DgVertex2DDRF
 #include <dglib/DgGridTopo.h>       // Hexagon, Triangle, Diamond, D4, D6
 #include <dglib/DgLocation.h>       // DgLocation
 #include <dglib/DgPolygon.h>        // DgPolygon
@@ -59,6 +60,9 @@
 #include <dglib/DgIVec2D.h>         // DgIVec2D (.i(), .j())
 #include <dglib/DgDVec2D.h>         // DgDVec2D (.x(), .y())
 #include <dglib/DgConstants.h>      // M_PIl, M_ZERO
+#include <dglib/DgZOrderRF.h>       // DgZOrderRF, DgZOrderCoord
+#include <dglib/DgZ3RF.h>           // DgZ3RF, DgZ3Coord
+#include <dglib/DgZ7RF.h>           // DgZ7RF, DgZ7Coord
 
 #include <cmath>
 #include <memory>
@@ -100,6 +104,12 @@ struct Transformer {
     const DgQ2DDRF     *q2ddRF   = nullptr;  // dgg.q2ddRF()
     const DgPlaneTriRF *planeRF  = nullptr;  // dgg.planeRF()
     const DgBoundedIDGG *bndRF   = nullptr;  // dgg.bndRF()  (SEQNUM)
+    
+    // Hierarchical address frames (may be null depending on aperture/topology)
+    const DgVertex2DDRF *vertexRF  = nullptr;  // dgg.vertexRF() - always available
+    const DgZOrderRF    *zorderRF  = nullptr;  // dgg.zorderRF() - aperture 3/4 only
+    const DgZ3RF        *z3RF      = nullptr;  // dgg.z3RF() - aperture 3 only
+    const DgZ7RF        *z7RF      = nullptr;  // dgg.z7RF() - aperture 7 only
 
     // ── inX: create a DgLocation in the named source frame ──────────────
 
@@ -191,6 +201,75 @@ struct Transformer {
         out_x = static_cast<double>(c->x());
         out_y = static_cast<double>(c->y());
     }
+    
+    void outVERTEX2DD(LocPtr &loc, bool &out_keep, int &out_vertNum, 
+                      int &out_triNum, double &out_x, double &out_y) const {
+        if (!vertexRF) 
+            throw std::runtime_error("VERTEX2DD not available");
+        vertexRF->convert(loc.get());
+        const DgVertex2DDCoord *c = vertexRF->getAddress(*loc);
+        out_keep = c->keep();
+        out_vertNum = c->vertNum();
+        out_triNum = c->triNum();
+        out_x = static_cast<double>(c->coord().x());
+        out_y = static_cast<double>(c->coord().y());
+    }
+    
+    void outZORDER(LocPtr &loc, uint64_t &out_value) const {
+        if (!zorderRF)
+            throw std::runtime_error("ZORDER not available for this aperture (use aperture 3 or 4, not 7)");
+        zorderRF->convert(loc.get());
+        const DgZOrderCoord *c = zorderRF->getAddress(*loc);
+        out_value = c->value();
+    }
+    
+    void outZ3(LocPtr &loc, uint64_t &out_value) const {
+        if (!z3RF)
+            throw std::runtime_error("Z3 not available (requires aperture 3 hexagon grid)");
+        z3RF->convert(loc.get());
+        const DgZ3Coord *c = z3RF->getAddress(*loc);
+        out_value = c->value();
+    }
+    
+    void outZ7(LocPtr &loc, uint64_t &out_value) const {
+        if (!z7RF)
+            throw std::runtime_error("Z7 not available (requires aperture 7 hexagon grid)");
+        z7RF->convert(loc.get());
+        const DgZ7Coord *c = z7RF->getAddress(*loc);
+        out_value = c->value();
+    }
+    
+    // ── inX for hierarchical types ───────────────────────────────────────
+    
+    LocPtr inVERTEX2DD(bool keep, int vertNum, int triNum, double x, double y) const {
+        if (!vertexRF)
+            throw std::runtime_error("VERTEX2DD not available");
+        DgVertex2DDCoord coord(keep, vertNum, triNum, 
+                               DgDVec2D(static_cast<long double>(x), 
+                                        static_cast<long double>(y)));
+        return LocPtr(vertexRF->makeLocation(coord));
+    }
+    
+    LocPtr inZORDER(uint64_t value) const {
+        if (!zorderRF)
+            throw std::runtime_error("ZORDER not available for this aperture (use aperture 3 or 4, not 7)");
+        DgZOrderCoord coord(value);
+        return LocPtr(zorderRF->makeLocation(coord));
+    }
+    
+    LocPtr inZ3(uint64_t value) const {
+        if (!z3RF)
+            throw std::runtime_error("Z3 not available (requires aperture 3 hexagon grid)");
+        DgZ3Coord coord(value);
+        return LocPtr(z3RF->makeLocation(coord));
+    }
+    
+    LocPtr inZ7(uint64_t value) const {
+        if (!z7RF)
+            throw std::runtime_error("Z7 not available (requires aperture 7 hexagon grid)");
+        DgZ7Coord coord(value);
+        return LocPtr(z7RF->makeLocation(coord));
+    }
 };
 
 // ===========================================================================
@@ -205,6 +284,8 @@ struct CacheKey {
     double       azimuth_deg;
     double       pole_lat_deg;
     double       pole_lon_deg;
+    bool         is_aperture_sequence;
+    std::string  aperture_sequence;
 
     bool operator==(const CacheKey &o) const noexcept {
         return projection   == o.projection   &&
@@ -213,7 +294,9 @@ struct CacheKey {
                res          == o.res          &&
                azimuth_deg  == o.azimuth_deg  &&
                pole_lat_deg == o.pole_lat_deg &&
-               pole_lon_deg == o.pole_lon_deg;
+               pole_lon_deg == o.pole_lon_deg &&
+               is_aperture_sequence == o.is_aperture_sequence &&
+               aperture_sequence    == o.aperture_sequence;
     }
 };
 
@@ -222,7 +305,8 @@ struct CacheKeyHash {
         return std::hash<std::string>()(k.projection)
              ^ (std::hash<unsigned int>()(k.aperture)  << 4)
              ^ (std::hash<std::string>()(k.topology)   << 8)
-             ^ (std::hash<int>()(k.res)                << 16);
+             ^ (std::hash<int>()(k.res)                << 16)
+             ^ (std::hash<std::string>()(k.aperture_sequence) << 20);
     }
 };
 
@@ -239,7 +323,36 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
     if (p.res < 0 || p.res > 30)
         throw std::invalid_argument("res must be 0–30, got " +
                                     std::to_string(p.res));
-
+    // Validate aperture sequence constraints
+    if (p.is_aperture_sequence) {
+        // Aperture sequences only supported for HEXAGON topology
+        if (p.topology != "HEXAGON") {
+            throw std::invalid_argument(
+                "Aperture sequences are only supported for HEXAGON topology, got " + p.topology);
+        }
+        
+        // Validate aperture sequence string contains only valid apertures
+        if (p.aperture_sequence.empty()) {
+            throw std::invalid_argument(
+                "aperture_sequence cannot be empty when is_aperture_sequence is true");
+        }
+        
+        for (char c : p.aperture_sequence) {
+            if (c != '3' && c != '4' && c != '7') {
+                throw std::invalid_argument(
+                    "aperture_sequence contains invalid character '" + 
+                    std::string(1, c) + "'. Only '3', '4', and '7' are allowed.");
+            }
+        }
+        
+        // Resolution must not exceed sequence length
+        if (p.res > static_cast<int>(p.aperture_sequence.length())) {
+            throw std::invalid_argument(
+                "Resolution " + std::to_string(p.res) + 
+                " exceeds aperture sequence length " + 
+                std::to_string(p.aperture_sequence.length()));
+        }
+    }
     auto t   = std::make_shared<Transformer>();
     t->net   = std::make_unique<DgRFNetwork>();
     auto &net = *t->net;
@@ -271,29 +384,56 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
     else throw std::invalid_argument(
         "Unknown topology '" + p.topology + "'. Use HEXAGON, TRIANGLE, or DIAMOND.");
 
-    // DgIDGGS::makeRF is the single generic factory that handles all
-    // topology/aperture/projection combinations.
-    // Signature (from DgIDGGS.h):
-    //   makeRF(network, backFrame, vert0, azDegs, aperture, nRes,
-    //          gridTopo, gridMetric, name, projType, ...)
-    const DgIDGGSBase *idggs = DgIDGGS::makeRF(
-        net,
-        *t->geoRF,
-        vert0,
-        azDegs,
-        p.aperture,
-        nRes,
-        topo,
-        metric,
-        "IDGGS",
-        p.projection
-    );
+    const DgIDGGSBase *idggs = nullptr;
+
+    // Handle aperture sequences (only for HEXAGON topology)
+    if (p.is_aperture_sequence) {
+        // Create DgApSeq from string
+        DgApSeq apSeq(p.aperture_sequence, "CustomApSeq");
+        
+        // Use DgHexIDGGS::makeRF for aperture sequences
+        idggs = DgHexIDGGS::makeRF(
+            net,
+            *t->geoRF,
+            vert0,
+            azDegs,
+            p.aperture,      // ignored when isApSeq=true
+            nRes,
+            "HexIDGGS",
+            p.projection,
+            apSeq,           // the aperture sequence
+            true,            // isApSeq = true
+            false,           // isMixed43
+            0,               // numAp4
+            false            // isSuperfund
+        );
+    } else {
+        // Standard single-aperture grid
+        // DgIDGGS::makeRF is the single generic factory that handles all
+        // topology/aperture/projection combinations.
+        // Signature (from DgIDGGS.h):
+        //   makeRF(network, backFrame, vert0, azDegs, aperture, nRes,
+        //          gridTopo, gridMetric, name, projType, ...)
+        idggs = DgIDGGS::makeRF(
+            net,
+            *t->geoRF,
+            vert0,
+            azDegs,
+            p.aperture,
+            nRes,
+            topo,
+            metric,
+            "IDGGS",
+            p.projection
+        );
+    }
 
     if (!idggs)
         throw std::runtime_error(
-            "DgIDGGS::makeRF returned null for " +
+            "makeRF returned null for " +
             p.projection + "/" + p.topology +
-            " aperture=" + std::to_string(p.aperture));
+            " aperture=" + std::to_string(p.aperture) +
+            (p.is_aperture_sequence ? " sequence=" + p.aperture_sequence : ""));
 
     t->idggs = idggs;
 
@@ -312,6 +452,17 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
     t->q2ddRF   = &dgg.q2ddRF();
     t->planeRF  = &dgg.planeRF();
     t->bndRF    = &dgg.bndRF();
+    
+    // ── Resolve hierarchical address frames (may be null) ─────────────────
+    // These are available from DgIDGGBase accessors:
+    //   const DgVertex2DDRF& vertexRF (void) const { return *vertexRF_; }
+    //   const DgZOrderRF* zorderRF() const { return zorderRF_; }
+    //   const DgZ3RF* z3RF() const { return z3RF_; }
+    //   const DgZ7RF* z7RF() const { return z7RF_; }
+    t->vertexRF = &dgg.vertexRF();  // Always available
+    t->zorderRF = dgg.zorderRF();   // Null if aperture 7
+    t->z3RF     = dgg.z3RF();       // Null if not aperture 3
+    t->z7RF     = dgg.z7RF();       // Null if not aperture 7
 
     return t;
 }
@@ -321,7 +472,8 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
 // ---------------------------------------------------------------------------
 static std::shared_ptr<Transformer> getTransformer(const DggsParams &p) {
     CacheKey key{p.projection, p.aperture, p.topology, p.res,
-                 p.azimuth_deg, p.pole_lat_deg, p.pole_lon_deg};
+                 p.azimuth_deg, p.pole_lat_deg, p.pole_lon_deg,
+                 p.is_aperture_sequence, p.aperture_sequence};
     {
         std::lock_guard<std::mutex> lk(s_mutex);
         auto it = s_cache.find(key);
@@ -434,12 +586,25 @@ DggsParams construct(
         int                res,
         double             azimuth_deg,
         double             pole_lat_deg,
-        double             pole_lon_deg)
+        double             pole_lon_deg,
+        bool               is_aperture_sequence,
+        const std::string& aperture_sequence)
 {
     if (res < 0 || res > 30)
         throw std::invalid_argument("res must be 0–30");
-    return DggsParams{projection, aperture, topology, res,
-                      azimuth_deg, pole_lat_deg, pole_lon_deg};
+    
+    DggsParams p;
+    p.projection = projection;
+    p.aperture = aperture;
+    p.topology = topology;
+    p.res = res;
+    p.azimuth_deg = azimuth_deg;
+    p.pole_lat_deg = pole_lat_deg;
+    p.pole_lon_deg = pole_lon_deg;
+    p.is_aperture_sequence = is_aperture_sequence;
+    p.aperture_sequence = aperture_sequence;
+    
+    return p;
 }
 
 DggsParams setRes(const DggsParams &p, int res) { return p.withRes(res); }
@@ -448,12 +613,19 @@ std::vector<ResInfo> getRes(const DggsParams &p) {
     // Build an IDGGS that covers all resolutions 0–30, then read gridStats()
     // off each individual DgIDGGBase.
     DggsParams full = p;
-    full.res = 30;
+    
+    // For aperture sequences, max resolution is sequence length
+    int maxRes = 30;
+    if (p.is_aperture_sequence && !p.aperture_sequence.empty()) {
+        maxRes = std::min(30, static_cast<int>(p.aperture_sequence.length()));
+    }
+    
+    full.res = maxRes;
     auto t   = getTransformer(full);
 
     std::vector<ResInfo> rows;
-    rows.reserve(31);
-    for (int r = 0; r <= 30; ++r) {
+    rows.reserve(maxRes + 1);
+    for (int r = 0; r <= maxRes; ++r) {
         const DgIDGGBase &dgg_r = t->idggs->idggBase(r);
         // DgGridStats (from DgIDGGutil.h):
         //   nCells()      → unsigned long long int
@@ -473,12 +645,24 @@ std::vector<ResInfo> getRes(const DggsParams &p) {
 }
 
 // Returns stats for a single resolution without allocating the full 31-element
-// vector that getRes() produces. Uses the same cached res=30 transformer.
+// vector that getRes() produces. Uses the same cached transformer.
 ResInfo getResAt(const DggsParams &p, int res) {
     if (res < 0 || res > 30)
         throw std::invalid_argument("res out of range 0–30");
+    
+    // For aperture sequences, determine max valid resolution
+    int maxRes = 30;
+    if (p.is_aperture_sequence && !p.aperture_sequence.empty()) {
+        maxRes = static_cast<int>(p.aperture_sequence.length());
+        if (res > maxRes) {
+            throw std::invalid_argument(
+                "Resolution " + std::to_string(res) + 
+                " exceeds aperture sequence length " + std::to_string(maxRes));
+        }
+    }
+    
     DggsParams full = p;
-    full.res = 30;
+    full.res = maxRes;
     auto t = getTransformer(full);
     const DgIDGGBase  &dgg_r = t->idggs->idggBase(res);
     const DgGridStats &gs    = dgg_r.gridStats();
@@ -770,6 +954,235 @@ SeqNum seqNumToSeqNum(const DggsParams &p, SeqNum seqnum) {
     // For valid inputs the output equals the input.
     auto t = getTransformer(p);
     auto loc = t->inSEQNUM(seqnum);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
+}
+
+// ===========================================================================
+// NEIGHBORS
+// ===========================================================================
+
+std::vector<SeqNum> seqNumNeighbors(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    
+    // Convert seqnum to Q2DI location
+    auto loc = t->inSEQNUM(seqnum);
+    
+    // Create a vector for neighbors
+    DgLocVector neighbors(*(t->dgg));
+    
+    // Get neighbors (triangle topology not supported by DGGRID)
+    if (t->dgg->gridTopo() == Triangle) {
+        throw std::runtime_error("Neighbors not implemented for Triangle grids");
+    }
+    
+    t->dgg->setNeighbors(*loc, neighbors);
+    
+    // Convert neighbor locations to seqnums
+    std::vector<SeqNum> result;
+    result.reserve(neighbors.size());
+    
+    for (int i = 0; i < neighbors.size(); i++) {
+        const DgQ2DICoord *q2di = t->dgg->getAddress(neighbors[i]);
+        uint64_t nbr_seqnum = t->bndRF->seqNumAddress(*q2di);
+        result.push_back(static_cast<SeqNum>(nbr_seqnum));
+    }
+    
+    return result;
+}
+
+std::vector<SeqNum> seqNumsNeighbors(const DggsParams &p, 
+                                      const std::vector<SeqNum>& seqnums) {
+    // Batch version: returns concatenated neighbors for all input seqnums
+    std::vector<SeqNum> result;
+    result.reserve(seqnums.size() * 6); // Estimate 6 neighbors per hex cell
+    
+    for (const auto& seqnum : seqnums) {
+        auto neighbors = seqNumNeighbors(p, seqnum);
+        result.insert(result.end(), neighbors.begin(), neighbors.end());
+    }
+    
+    return result;
+}
+
+// ===========================================================================
+// PARENT/CHILD
+// ===========================================================================
+
+SeqNum seqNumParent(const DggsParams &p, SeqNum seqnum) {
+    if (p.res <= 0) {
+        throw std::runtime_error("Cannot get parent: already at resolution 0");
+    }
+    
+    auto t = getTransformer(p);
+    
+    // Convert seqnum to Q2DI
+    auto loc = t->inSEQNUM(seqnum);
+    const DgQ2DICoord *q2di = t->dgg->getAddress(*loc);
+    
+    // Create resAdd for current resolution
+    DgResAdd<DgQ2DICoord> resAdd(*q2di, p.res);
+    
+    // Get parent cells - use public API
+    DgLocVector parents(*(t->idggs));
+    t->idggs->setParents(p.res, *loc, parents);
+    
+    if (parents.size() == 0) {
+        throw std::runtime_error("No parent found");
+    }
+    
+    // Get the parent at coarser resolution
+    // DgLocVector elements are already in the idggs frame
+    // Need to get the Q2DI address from the first parent
+    const DgIDGGBase &parent_dgg = t->idggs->idggBase(p.res - 1);
+    
+    // Create a new location to convert
+    DgLocation parent_loc(parents[0]);
+    parent_dgg.convert(&parent_loc);
+    const DgQ2DICoord *parent_q2di = parent_dgg.getAddress(parent_loc);
+    
+    uint64_t parent_seqnum = parent_dgg.bndRF().seqNumAddress(*parent_q2di);
+    return static_cast<SeqNum>(parent_seqnum);
+}
+
+std::vector<SeqNum> seqNumsParents(const DggsParams &p, 
+                                    const std::vector<SeqNum>& seqnums) {
+    std::vector<SeqNum> result;
+    result.reserve(seqnums.size());
+    
+    for (const auto& seqnum : seqnums) {
+        result.push_back(seqNumParent(p, seqnum));
+    }
+    
+    return result;
+}
+
+std::vector<SeqNum> seqNumChildren(const DggsParams &p, SeqNum seqnum) {
+    // For children, we need res+1 to exist
+    // Temporarily bump res to ensure IDGGS has the child resolution
+    DggsParams p_with_children = p;
+    if (p.res < 10) {
+        p_with_children.res = p.res + 1;
+    }
+    auto t = getTransformer(p_with_children);
+    
+    // Get the DGG at the parent resolution
+    const DgIDGGBase &parent_dgg = t->idggs->idggBase(p.res);
+    
+    // Convert seqnum to Q2DI coordinate
+    DgQ2DICoord q2di = parent_dgg.bndRF().addFromSeqNum(
+                           static_cast<unsigned long long int>(seqnum));
+    
+    // Create a ResAdd for the parent resolution
+    DgResAdd<DgQ2DICoord> q2diR(q2di, p.res);
+    
+    // Get all children (interior + boundary cells)
+    // For hexagons, this returns 7 cells (1 interior + 6 boundary)
+    DgLocVector children;
+    t->idggs->setAllChildren(q2diR, children);
+    
+    // Convert to seqnums at child resolution
+    const DgIDGGBase &child_dgg = t->idggs->idggBase(p.res + 1);
+    std::vector<SeqNum> result;
+    result.reserve(children.size());
+    
+    for (int i = 0; i < children.size(); i++) {
+        // Create a non-const copy to convert
+        DgLocation child_loc(children[i]);
+        child_dgg.convert(&child_loc);
+        const DgQ2DICoord *child_q2di = child_dgg.getAddress(child_loc);
+        uint64_t child_seqnum = child_dgg.bndRF().seqNumAddress(*child_q2di);
+        result.push_back(static_cast<SeqNum>(child_seqnum));
+    }
+    
+    return result;
+}
+
+std::vector<std::vector<SeqNum>> seqNumsChildren(const DggsParams &p,
+                                                   const std::vector<SeqNum>& seqnums) {
+    std::vector<std::vector<SeqNum>> result;
+    result.reserve(seqnums.size());
+    
+    for (const auto& seqnum : seqnums) {
+        result.push_back(seqNumChildren(p, seqnum));
+    }
+    
+    return result;
+}
+
+// ===========================================================================
+// HIERARCHICAL ADDRESS TYPES - SEQNUM conversions
+// ===========================================================================
+
+// ── VERTEX2DD ──────────────────────────────────────────────────────────────
+
+Vertex2DDCoord seqNumToVertex2DD(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    Vertex2DDCoord r{};
+    t->outVERTEX2DD(loc, r.keep, r.vertNum, r.triNum, r.x, r.y);
+    return r;
+}
+
+SeqNum vertex2DDToSeqNum(const DggsParams &p, bool keep, int vertNum, 
+                          int triNum, double x, double y) {
+    auto t = getTransformer(p);
+    auto loc = t->inVERTEX2DD(keep, vertNum, triNum, x, y);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
+}
+
+// ── ZORDER ─────────────────────────────────────────────────────────────────
+
+ZOrderCoord seqNumToZOrder(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    ZOrderCoord r{};
+    t->outZORDER(loc, r.value);
+    return r;
+}
+
+SeqNum zOrderToSeqNum(const DggsParams &p, uint64_t value) {
+    auto t = getTransformer(p);
+    auto loc = t->inZORDER(value);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
+}
+
+// ── Z3 ─────────────────────────────────────────────────────────────────────
+
+Z3Coord seqNumToZ3(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    Z3Coord r{};
+    t->outZ3(loc, r.value);
+    return r;
+}
+
+SeqNum z3ToSeqNum(const DggsParams &p, uint64_t value) {
+    auto t = getTransformer(p);
+    auto loc = t->inZ3(value);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
+}
+
+// ── Z7 ─────────────────────────────────────────────────────────────────────
+
+Z7Coord seqNumToZ7(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    Z7Coord r{};
+    t->outZ7(loc, r.value);
+    return r;
+}
+
+SeqNum z7ToSeqNum(const DggsParams &p, uint64_t value) {
+    auto t = getTransformer(p);
+    auto loc = t->inZ7(value);
     SeqNum r = 0;
     t->outSEQNUM(loc, r);
     return r;

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { VPButton } from 'vitepress/theme'
+import { loadWebdggrid } from '../utils/loadWebdggrid.js'
 
 const props = defineProps({
   resolution:      { type: Number,  default: 3 },
@@ -245,7 +246,7 @@ onMounted(async () => {
 
   try {
     await loadScript('https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js')
-    const { Webdggrid } = await new Function('return import("https://cdn.jsdelivr.net/npm/webdggrid/dist/index.js")')()
+    const Webdggrid = await loadWebdggrid()
     webdggrid = await Webdggrid.load()
 
     const rect = wrapRef.value.getBoundingClientRect()

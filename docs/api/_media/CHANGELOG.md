@@ -1,0 +1,81 @@
+# Changelog
+
+## [1.5.0](https://github.com/am2222/webDggrid/compare/v1.4.0...v1.5.0) (2026-04-04)
+
+
+### Features
+
+* add DggsD3Globe and DggsGlobe components for interactive globe visualization ([7e1c977](https://github.com/am2222/webDggrid/commit/7e1c9777c290f697ec86a4809eb28d793f53c8f0))
+* add DggsD3Globe and DggsGlobe components for interactive globe visualization ([75bc2fa](https://github.com/am2222/webDggrid/commit/75bc2fac9ad2eaff4fb3dadd680ad9ada8e89ef8))
+* add smoke test for built dist/ output and integrate into deployment workflow ([fecfa7d](https://github.com/am2222/webDggrid/commit/fecfa7def8ce5fe564f8b4a78456b17fa4268b10))
+* add tsBuildInfoFile option to TypeScript configuration ([1019811](https://github.com/am2222/webDggrid/commit/1019811cca726918ae98e0fe986c3aab85b2a377))
+* add verification job for published package and enhance smoke test documentation ([96fc7e8](https://github.com/am2222/webDggrid/commit/96fc7e870b1563229f8a2382b6028abfb85d853e))
+* enhance DggsD3Globe and DggsGlobe components with dynamic background color and improved button integration ([d96a97f](https://github.com/am2222/webDggrid/commit/d96a97f1498972e5fff3d1e1968c77080265fd1d))
+* enhance smoke test for published package and add forward declaration in webdggrid.cpp ([9a8e50c](https://github.com/am2222/webDggrid/commit/9a8e50cc21ba32b28a87ca3d075728e7100d9cfc))
+* ensure directory creation for ESM output before writing wasm.js file ([ab479c5](https://github.com/am2222/webDggrid/commit/ab479c54521c1b3ea909516f2c295c7360505011))
+* Remove deprecated WASM and TypeScript definitions for DGGRID library ([7e7af1e](https://github.com/am2222/webDggrid/commit/7e7af1e009b3cfd47c1e980c0da1767051ec07ef))
+* update build script to include WASM compilation step ([105303d](https://github.com/am2222/webDggrid/commit/105303dff669c4bd500584001f61cbd46d2a4ef6))
+* update deployment workflow and improve package configuration for better documentation and library loading ([33e6455](https://github.com/am2222/webDggrid/commit/33e645515869d33f5bded6619374535630992e82))
+* update emsdk version to v14 in CI workflows ([dc734cb](https://github.com/am2222/webDggrid/commit/dc734cb5cc17b18aa0dd7ced975192ee56381c53))
+
+
+### Bug Fixes
+
+* add .vitepress to .gitignore to prevent unnecessary files from being tracked ([a6b8cd4](https://github.com/am2222/webDggrid/commit/a6b8cd4012debbc498d65ca4dc0d8036b6cb60cc))
+* remove DggsGlobe, DggsHeroBackground, and globeUtils components ([89f0ca9](https://github.com/am2222/webDggrid/commit/89f0ca97444857a4eb709bf000551811a3e2ea5d))
+
+## [1.4.0](https://github.com/am2222/webDggrid/compare/v1.3.0...v1.4.0) (2026-04-04)
+
+
+### Features
+
+* Refactor code structure for improved readability and maintainab… ([c438672](https://github.com/am2222/webDggrid/commit/c438672bf7752baa7c10fbe4a0356a04f4acaecf))
+* Refactor code structure for improved readability and maintainability ([835ace3](https://github.com/am2222/webDggrid/commit/835ace3b53bbc429527dbf13b88cae3a316fd057))
+
+## [1.3.0](https://github.com/am2222/webDggrid/compare/v1.2.1...v1.3.0) (2026-04-02)
+
+
+### Features
+
+* Implement deploy-docs workflow for GitHub Pages deployment ([3921ce3](https://github.com/am2222/webDggrid/commit/3921ce32781d427d8978256c5770286db9db2e93))
+
+## [1.2.1](https://github.com/am2222/webDggrid/compare/v1.2.0...v1.2.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* Update documentation badge links in README for accuracy ([c3491df](https://github.com/am2222/webDggrid/commit/c3491dfc423ed842b969691223ade55c26ce8d7d))
+
+## [1.2.0](https://github.com/am2222/webDggrid/compare/v1.1.1...v1.2.0) (2026-04-02)
+
+
+### Features
+
+* Replace CI and deploy workflows with new configurations and add PR check workflow ([c0e970e](https://github.com/am2222/webDggrid/commit/c0e970e057e0651634fe0ea26c754e3803819394))
+
+
+### Bug Fixes
+
+* Update description in README and index.md for clarity and consistency ([89f27ec](https://github.com/am2222/webDggrid/commit/89f27ec7ac927488045f44896e60d45948137cda))
+
+## [1.1.1](https://github.com/am2222/webDggrid/compare/v1.1.0...v1.1.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* Update npm package badge link in README to point to the correct workflow ([554e20d](https://github.com/am2222/webDggrid/commit/554e20daf2f2e193d226dc73591243008b62a036))
+
+## [1.1.0](https://github.com/am2222/webDggrid/compare/v1.0.9...v1.1.0) (2026-04-02)
+
+
+### Features
+
+* Add CI workflow for build and test automation ([3c33dd3](https://github.com/am2222/webDggrid/commit/3c33dd38b301665f11eb7689b9fb4e1c16a9ac62))
+* Add CI workflow for build and test automation ([239bde1](https://github.com/am2222/webDggrid/commit/239bde14cc54e742ee91ea391507ffae58edb9f5))
+* Refactor GitHub Actions workflow to improve npm package publishing and WASM asset handling ([c21f807](https://github.com/am2222/webDggrid/commit/c21f807f15182fd2a43d4d1086bcfd572e29162e))
+
+
+### Bug Fixes
+
+* Update token handling in release-please workflow to use fallback to github.token ([b08ff41](https://github.com/am2222/webDggrid/commit/b08ff41de6281c86aa4b5ab583167d6ad4d35e4f))
+* Update token handling in release-please workflow to use fallback… ([4715fc7](https://github.com/am2222/webDggrid/commit/4715fc7b4cabaf1c0df5f0423b3725548afffeac))

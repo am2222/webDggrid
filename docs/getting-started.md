@@ -52,6 +52,7 @@ const geojson = dggs.sequenceNumToGridFeatureCollection(seqNums, 5);
 ### Configure the grid system
 
 ```js
+// Standard single-aperture grid
 dggs.setDggs({
   poleCoordinates: { lat: 0, lng: 0 },
   azimuth: 0,
@@ -59,7 +60,18 @@ dggs.setDggs({
   projection: 'ISEA',
   aperture: 4,
 }, /* resolution */ 3);
+
+// Multi-aperture grid (NEW!)
+dggs.setDggs({
+  poleCoordinates: { lat: 0, lng: 0 },
+  azimuth: 0,
+  topology: 'HEXAGON',
+  projection: 'ISEA',
+  apertureSequence: "434747",  // Different aperture per resolution
+}, /* resolution */ 5);
 ```
+
+See the [multi-aperture documentation](multi-aperture.md) for more details.
 
 ## Grid Statistics
 
@@ -71,50 +83,138 @@ const distkm    = dggs.cellDistKM(3);   // average cell spacing in km
 
 ## Live Demo
 
-See the [interactive globe demo](/demo) for a live example with topology switching, drag-to-rotate, and auto-spin.
+- [Globe Demo](/demo) — interactive MapLibre globe with topology switching, multi-aperture grids, and hierarchical cell selection
+- [Hierarchical Operations Demo](/hierarchical-operations#interactive-demo) — explore parent, children, and neighbor relationships
+- [Address Types Demo](/hierarchical-addresses#interactive-demo) — compare index types and see bitwise digit breakdowns
+- [Index Arithmetic Demo](/index-arithmetic#interactive-demo) — live demonstration of digit manipulation on Z3, Z7, and ZORDER indices
 
----
+## API Overview
 
-## Geometry Notes
+### Lifecycle
 
-### Pentagon cells
+| Method | Description |
+|--------|-------------|
+| [`Webdggrid.load()`](api/classes/Webdggrid.md#load) | Compile and instantiate the WASM module |
+| [`Webdggrid.unload()`](api/classes/Webdggrid.md#unload) | Free WASM memory |
 
-Every hexagonal DGGS tessellation of a sphere must contain exactly **12 pentagonal cells** — a mathematical consequence of Euler's formula for polyhedra. These pentagons sit at the 12 vertices of the underlying icosahedron.
+### Configuration
 
-At low resolutions (e.g. resolution 1 with 42 total cells) you will encounter them frequently. A pentagon ring has 5 unique vertices plus a closing repeat (6 total), rather than the 7 of a hexagon. This is **correct and expected** — not a bug.
+| Method | Description |
+|--------|-------------|
+| [`setDggs()`](api/classes/Webdggrid.md#setdggs) | Configure grid projection, aperture, topology, and resolution |
+| [`getResolution()`](api/classes/Webdggrid.md#getresolution) | Get current resolution |
+| [`setResolution()`](api/classes/Webdggrid.md#setresolution) | Set current resolution |
+| [`version()`](api/classes/Webdggrid.md#version) | Get DGGRID version string |
 
-```js
-const fc = dggs.sequenceNumToGridFeatureCollection([1n], 1);
-const ring = fc.features[0].geometry.coordinates[0];
-// ring.length === 6 → pentagon (5 unique + 1 closing vertex)
-// ring.length === 7 → hexagon (6 unique + 1 closing vertex)
-```
+### Coordinate Conversion
 
----
+| Method | Description |
+|--------|-------------|
+| [`geoToSequenceNum()`](api/classes/Webdggrid.md#geotosequencenum) | Convert [lng, lat] points to cell IDs |
+| [`sequenceNumToGeo()`](api/classes/Webdggrid.md#sequencenumtogeo) | Convert cell IDs to [lng, lat] centers |
+| [`geoToGeo()`](api/classes/Webdggrid.md#geotogeo) | Snap [lng, lat] points to cell centers |
+| [`sequenceNumToGrid()`](api/classes/Webdggrid.md#sequencenumtogrid) | Get polygon rings for cell IDs |
+| [`sequenceNumToGridFeatureCollection()`](api/classes/Webdggrid.md#sequencenumtogridfeaturecollection) | Get GeoJSON FeatureCollection for cell IDs |
 
-### Antimeridian handling
+### Grid Statistics
 
-Cells that straddle the ±180° meridian need special treatment. webdggrid outputs **standard GeoJSON** with all longitudes in `[-180, 180]`, which is correct for most consumers (Leaflet, Turf.js, PostGIS, etc.).
+| Method | Description |
+|--------|-------------|
+| [`nCells()`](api/classes/Webdggrid.md#ncells) | Total cell count at a resolution |
+| [`cellAreaKM()`](api/classes/Webdggrid.md#cellareakm) | Average cell area in km² |
+| [`cellDistKM()`](api/classes/Webdggrid.md#celldistkm) | Average cell spacing in km |
+| [`gridStatCLS()`](api/classes/Webdggrid.md#gridstatcls) | Characteristic length scale |
 
-For **MapLibre GL JS / Mapbox GL JS with a globe projection**, polygon edges between a vertex at e.g. `170°` and one at `-170°` will be drawn the wrong way around the globe unless you shift the negative longitude into extended range (i.e. `-170°` → `190°`). webdggrid exports `unwrapAntimeridianRing` for exactly this purpose, and applies it automatically inside `sequenceNumToGridFeatureCollection`.
+### Hierarchical Operations
 
-```js
-import { Webdggrid, unwrapAntimeridianRing } from 'webdggrid';
+| Method | Description |
+|--------|-------------|
+| [`sequenceNumNeighbors()`](api/classes/Webdggrid.md#sequencenumneighbors) | Find edge-sharing neighbor cells |
+| [`sequenceNumParent()`](api/classes/Webdggrid.md#sequencenumparent) | Get parent cell at coarser resolution |
+| [`sequenceNumChildren()`](api/classes/Webdggrid.md#sequencenumchildren) | Get child cells at finer resolution |
 
-// sequenceNumToGridFeatureCollection already applies unwrapAntimeridianRing
-// internally, so it works out of the box with MapLibre globe.
-const fc = dggs.sequenceNumToGridFeatureCollection(seqNums, resolution);
-map.getSource('dggrid').setData(fc);
+### Hierarchical Address Types
 
-// If you use sequenceNumToGrid directly and need extended coordinates:
-const rings = dggs.sequenceNumToGrid(seqNums, resolution);
-const corrected = rings.map(unwrapAntimeridianRing);
-```
+| Method | Description |
+|--------|-------------|
+| [`sequenceNumToVertex2DD()`](api/classes/Webdggrid.md#sequencenumtovertex2dd) | SEQNUM → VERTEX2DD (all apertures) |
+| [`vertex2DDToSequenceNum()`](api/classes/Webdggrid.md#vertex2ddtosequencenum) | VERTEX2DD → SEQNUM |
+| [`sequenceNumToZOrder()`](api/classes/Webdggrid.md#sequencenumtozorder) | SEQNUM → ZORDER (aperture 3, 4) |
+| [`zOrderToSequenceNum()`](api/classes/Webdggrid.md#zordertosequencenum) | ZORDER → SEQNUM |
+| [`sequenceNumToZ3()`](api/classes/Webdggrid.md#sequencenumtoz3) | SEQNUM → Z3 (aperture 3 hexagons) |
+| [`z3ToSequenceNum()`](api/classes/Webdggrid.md#z3tosequencenum) | Z3 → SEQNUM |
+| [`sequenceNumToZ7()`](api/classes/Webdggrid.md#sequencenumtoz7) | SEQNUM → Z7 (aperture 7 hexagons) |
+| [`z7ToSequenceNum()`](api/classes/Webdggrid.md#z7tosequencenum) | Z7 → SEQNUM |
 
-For renderers that **require strictly valid GeoJSON** (`[-180, 180]`), use the raw output of `sequenceNumToGrid` and handle antimeridian splitting yourself (e.g. with [Turf.js `booleanCrossesAntimeridian`](https://turfjs.org/)).
+### Index Digit Manipulation
 
-| Consumer | What to use |
-|---|---|
-| MapLibre GL / Mapbox GL globe | `sequenceNumToGridFeatureCollection` (built-in) |
-| Leaflet, OpenLayers, D3 | `sequenceNumToGrid` — raw `[-180, 180]` |
-| Turf.js / PostGIS | `sequenceNumToGrid` — raw `[-180, 180]` |
+| Method | Description |
+|--------|-------------|
+| [`z7GetQuad()`](api/classes/Webdggrid.md#z7getquad) | Get quad (icosahedron face) from Z7 index |
+| [`z7GetDigit()`](api/classes/Webdggrid.md#z7getdigit) | Read digit at resolution level from Z7 index |
+| [`z7SetDigit()`](api/classes/Webdggrid.md#z7setdigit) | Write digit at resolution level in Z7 index |
+| [`z7ExtractDigits()`](api/classes/Webdggrid.md#z7extractdigits) | Extract quad + all digits from Z7 index |
+| [`z3GetQuad()`](api/classes/Webdggrid.md#z3getquad) | Get quad from Z3 index |
+| [`z3GetDigit()`](api/classes/Webdggrid.md#z3getdigit) | Read digit at resolution level from Z3 index |
+| [`z3SetDigit()`](api/classes/Webdggrid.md#z3setdigit) | Write digit at resolution level in Z3 index |
+| [`z3ExtractDigits()`](api/classes/Webdggrid.md#z3extractdigits) | Extract quad + all digits from Z3 index |
+| [`zOrderGetQuad()`](api/classes/Webdggrid.md#zordergetquad) | Get quad from ZORDER index |
+| [`zOrderGetDigit()`](api/classes/Webdggrid.md#zordergetdigit) | Read digit at resolution level from ZORDER index |
+| [`zOrderSetDigit()`](api/classes/Webdggrid.md#zordersetdigit) | Write digit at resolution level in ZORDER index |
+| [`zOrderExtractDigits()`](api/classes/Webdggrid.md#zorderextractdigits) | Extract quad + all digits from ZORDER index |
+
+### Low-Level Coordinate Systems
+
+| Method | Description |
+|--------|-------------|
+| [`geoToPlane()`](api/classes/Webdggrid.md#geotoplane) | Geographic → PLANE |
+| [`geoToProjtri()`](api/classes/Webdggrid.md#geotoprojtri) | Geographic → PROJTRI |
+| [`geoToQ2dd()`](api/classes/Webdggrid.md#geotoq2dd) | Geographic → Q2DD |
+| [`geoToQ2di()`](api/classes/Webdggrid.md#geotoq2di) | Geographic → Q2DI |
+| [`sequenceNumToPlane()`](api/classes/Webdggrid.md#sequencenumtoplane) | SEQNUM → PLANE |
+| [`sequenceNumToProjtri()`](api/classes/Webdggrid.md#sequencenumtoprojtri) | SEQNUM → PROJTRI |
+| [`sequenceNumToQ2dd()`](api/classes/Webdggrid.md#sequencenumtoq2dd) | SEQNUM → Q2DD |
+| [`sequenceNumToQ2di()`](api/classes/Webdggrid.md#sequencenumtoq2di) | SEQNUM → Q2DI |
+
+### Q2DI Conversions
+
+| Method | Description |
+|--------|-------------|
+| [`q2diToGeo()`](api/classes/Webdggrid.md#q2ditogeo) | Q2DI → Geographic |
+| [`q2diToSequenceNum()`](api/classes/Webdggrid.md#q2ditosequencenum) | Q2DI → SEQNUM |
+| [`q2diToPlane()`](api/classes/Webdggrid.md#q2ditoplane) | Q2DI → PLANE |
+| [`q2diToProjtri()`](api/classes/Webdggrid.md#q2ditoprojtri) | Q2DI → PROJTRI |
+| [`q2diToQ2dd()`](api/classes/Webdggrid.md#q2ditoq2dd) | Q2DI → Q2DD |
+
+### Q2DD Conversions
+
+| Method | Description |
+|--------|-------------|
+| [`q2ddToGeo()`](api/classes/Webdggrid.md#q2ddtogeo) | Q2DD → Geographic |
+| [`q2ddToSequenceNum()`](api/classes/Webdggrid.md#q2ddtosequencenum) | Q2DD → SEQNUM |
+| [`q2ddToPlane()`](api/classes/Webdggrid.md#q2ddtoplane) | Q2DD → PLANE |
+| [`q2ddToProjtri()`](api/classes/Webdggrid.md#q2ddtoprojtri) | Q2DD → PROJTRI |
+| [`q2ddToQ2di()`](api/classes/Webdggrid.md#q2ddtoq2di) | Q2DD → Q2DI |
+
+### PROJTRI Conversions
+
+| Method | Description |
+|--------|-------------|
+| [`projtriToGeo()`](api/classes/Webdggrid.md#projtritogeo) | PROJTRI → Geographic |
+| [`projtriToSequenceNum()`](api/classes/Webdggrid.md#projtritosequencenum) | PROJTRI → SEQNUM |
+| [`projtriToPlane()`](api/classes/Webdggrid.md#projtritoplane) | PROJTRI → PLANE |
+| [`projtriToQ2dd()`](api/classes/Webdggrid.md#projtritoq2dd) | PROJTRI → Q2DD |
+| [`projtriToQ2di()`](api/classes/Webdggrid.md#projtritoq2di) | PROJTRI → Q2DI |
+
+For full parameter details and examples, see the [complete API reference](api/classes/Webdggrid.md).
+
+## Examples
+
+More examples can be found in the test suite:
+
+- [geo.test.ts](https://github.com/am2222/webDggrid/blob/main/tests/unit/geo.test.ts) — Basic grid operations
+- [transforms.test.ts](https://github.com/am2222/webDggrid/blob/main/tests/unit/transforms.test.ts) — Coordinate transformations
+- [hierarchy.test.ts](https://github.com/am2222/webDggrid/blob/main/tests/unit/hierarchy.test.ts) — Parent, children, neighbors
+- [hierarchical-addresses.test.ts](https://github.com/am2222/webDggrid/blob/main/tests/unit/hierarchical-addresses.test.ts) — VERTEX2DD, ZORDER, Z3, Z7
+- [index-digits.test.ts](https://github.com/am2222/webDggrid/blob/main/tests/unit/index-digits.test.ts) — Index digit manipulation
+- [multi-aperture.test.ts](https://github.com/am2222/webDggrid/blob/main/tests/unit/multi-aperture.test.ts) — Multi-aperture grids

@@ -70,6 +70,25 @@ export interface Coordinate {
 }
 
 /**
+ * VERTEX2DD coordinate representation.
+ * 
+ * Represents a position relative to the icosahedron vertices and triangular
+ * faces in DGGRID's coordinate system.
+ */
+export interface Vertex2DDCoordinate {
+    /** Whether to keep this vertex. */
+    keep: boolean;
+    /** Vertex number (0-11 for icosahedron). */
+    vertNum: number;
+    /** Triangle number on the icosahedron. */
+    triNum: number;
+    /** X coordinate within the triangle. */
+    x: number;
+    /** Y coordinate within the triangle. */
+    y: number;
+}
+
+/**
  * GeoJSON `properties` object attached to every cell feature returned by
  * {@link Webdggrid.sequenceNumToGridFeatureCollection}.
  *
@@ -138,8 +157,28 @@ export interface IDGGSProps {
      * | 7 | 2 + 10 × 7^r |
      *
      * Aperture `4` is the most common choice and is the default.
+     * Ignored if `apertureSequence` is specified.
      */
-    aperture: 3 | 4 | 5 | 7;
+    aperture?: 3 | 4 | 5 | 7;
+    /**
+     * Mixed aperture sequence (e.g., `"434747"`).
+     * 
+     * When specified, each character defines the aperture for that resolution level.
+     * The maximum resolution is limited to the length of the sequence string.
+     * 
+     * **Constraints:**
+     * - Only valid for `HEXAGON` topology
+     * - Only characters `'3'`, `'4'`, and `'7'` are allowed
+     * - SEQNUM addressing is not supported (operations will fail)
+     * - Z3/Z7 hierarchical indexing is not supported
+     * 
+     * @example
+     * ```ts
+     * // Resolution 1 uses aperture 4, res 2 uses aperture 3, etc.
+     * apertureSequence: "434747"
+     * ```
+     */
+    apertureSequence?: string;
     /** Shape of each cell. See {@link Topology}. */
     topology: Topology;
     /** Projection used to map the polyhedron faces onto the sphere. See {@link Projection}. */
@@ -379,7 +418,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const cellCount = this._module.nCells(
             lng,
@@ -388,7 +431,9 @@ export class Webdggrid {
             aperture,
             resolution,
             topology,
-            projection
+            projection,
+            isApertureSequence,
+            apSeq
         );
 
         return cellCount as number;
@@ -416,7 +461,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const cellCount = this._module.cellAreaKM(
             lng,
@@ -425,7 +474,9 @@ export class Webdggrid {
             aperture,
             resolution,
             topology,
-            projection
+            projection,
+            isApertureSequence,
+            apSeq
         );
 
         return cellCount as number;
@@ -453,7 +504,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const cellCount = this._module.cellDistKM(
             lng,
@@ -462,7 +517,9 @@ export class Webdggrid {
             aperture,
             resolution,
             topology,
-            projection
+            projection,
+            isApertureSequence,
+            apSeq
         );
 
         return cellCount as number;
@@ -491,7 +548,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const cellCount = this._module.gridStatCLS(
             lng,
@@ -500,7 +561,9 @@ export class Webdggrid {
             aperture,
             resolution,
             topology,
-            projection
+            projection,
+            isApertureSequence,
+            apSeq
         );
 
         return cellCount as number;
@@ -545,7 +608,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const xCoords = coordinates.map((coord) => coord[0]);
         const yCoords = coordinates.map((coord) => coord[1]);
@@ -558,6 +625,8 @@ export class Webdggrid {
             resolution,
             topology,
             projection,
+            isApertureSequence,
+            apSeq,
             xCoords,
             yCoords
         );
@@ -593,7 +662,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const resultArray = this._module.SEQNUM_to_GEO(
             lng,
@@ -603,6 +676,8 @@ export class Webdggrid {
             resolution,
             topology,
             projection,
+            isApertureSequence,
+            apSeq,
             sequenceNum
         );
 
@@ -652,7 +727,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const xCoords = coordinates.map((coord) => coord[0]);
         const yCoords = coordinates.map((coord) => coord[1]);
@@ -665,6 +744,8 @@ export class Webdggrid {
             resolution,
             topology,
             projection,
+            isApertureSequence,
+            apSeq,
             xCoords,
             yCoords
         );
@@ -711,7 +792,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const inputSize = sequenceNum.length;
 
@@ -725,11 +810,13 @@ export class Webdggrid {
                 resolution,
                 topology,
                 projection,
+                isApertureSequence,
+                apSeq,
                 sequenceNum
             );
         } catch (e) {
             console.error(this._module.getExceptionMessage(e).toString());
-            throw(e);
+            throw (e);
         }
 
         const allShapeVertexes = resultArray.slice(0, inputSize);
@@ -817,4 +904,1413 @@ export class Webdggrid {
             features,
         };
     }
+
+    /**
+     * Returns all neighboring cells (sharing an edge) for each input cell.
+     *
+     * For hexagonal grids, each interior cell typically has 6 neighbors.
+     * Pentagon cells and boundary cells may have fewer. Triangle topology
+     * is not supported by the underlying DGGRID library.
+     *
+     * The output is a 2-D array: `result[i]` contains all neighbors of
+     * `sequenceNum[i]`.
+     *
+     * ```ts
+     * const neighbors = dggs.sequenceNumNeighbors([123n], 5);
+     * // neighbors[0] = [122n, 124n, 125n, 126n, 127n, 128n]
+     * ```
+     *
+     * ::: warning
+     * Triangle topology is **not supported**. Attempting to retrieve neighbors
+     * for a TRIANGLE grid will throw an error.
+     * :::
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose neighbors to find.
+     * @param resolution - Resolution at which the IDs were generated. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns A 2-D array of `BigInt[]`: `result[i]` is the array of neighbor
+     *   IDs for `sequenceNum[i]`.
+     * @throws If Triangle topology is used or if an invalid cell ID is provided.
+     */
+    sequenceNumNeighbors(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint[][] {
+        const {
+            poleCoordinates: { lat, lng },
+            azimuth,
+            topology,
+            projection,
+            aperture,
+            apertureSequence,
+        } = this.dggs;
+
+        if (topology === Topology.TRIANGLE) {
+            throw new Error('Neighbor detection is not supported for TRIANGLE topology');
+        }
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
+
+        try {
+            const resultArray = this._module.SEQNUMS_neighbors(
+                lng,
+                lat,
+                azimuth,
+                aperture,
+                resolution,
+                topology,
+                projection,
+                isApertureSequence,
+                apSeq,
+                sequenceNum
+            );
+
+            // The result is a flat array with format:
+            // [count0, count1, ..., countN, neighbor0_0, neighbor0_1, ..., neighbor0_(count0-1), neighbor1_0, ...]
+            const inputSize = sequenceNum.length;
+            const counts = resultArray.slice(0, inputSize);
+            const neighbors: bigint[][] = [];
+
+            let offset = inputSize;
+            for (let i = 0; i < inputSize; i++) {
+                const count = Number(counts[i]);
+                neighbors.push(resultArray.slice(offset, offset + count));
+                offset += count;
+            }
+
+            return neighbors;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
+     * Returns the parent cell at the next coarser resolution (resolution - 1)
+     * for each input cell.
+     *
+     * The parent-child relationship forms a hierarchical index structure. For
+     * aperture 4 grids, each parent contains 4 children; for aperture 7, each
+     * parent contains 7 children.
+     *
+     * ```ts
+     * const parents = dggs.sequenceNumParent([123n, 456n], 5);
+     * // parents = [30n, 114n]  (at resolution 4)
+     * ```
+     *
+     * ::: info
+     * Calling this method at resolution 0 will throw an error because there
+     * are no cells at resolution -1.
+     * :::
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose parents to find.
+     * @param resolution - Resolution at which the input IDs were generated.
+     *   Must be > 0. Defaults to the instance's current {@link resolution}.
+     * @returns Array of `BigInt` parent cell IDs at resolution - 1, one per
+     *   input cell, in the same order.
+     * @throws If resolution is 0 or if an invalid cell ID is provided.
+     */
+    sequenceNumParent(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint[] {
+        if (resolution <= 0) {
+            throw new Error('Cannot get parent at resolution 0 or below');
+        }
+
+        const {
+            poleCoordinates: { lat, lng },
+            azimuth,
+            topology,
+            projection,
+            aperture,
+            apertureSequence,
+        } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
+
+        try {
+            const resultArray = this._module.SEQNUMS_parents(
+                lng,
+                lat,
+                azimuth,
+                aperture,
+                resolution,
+                topology,
+                projection,
+                isApertureSequence,
+                apSeq,
+                sequenceNum
+            );
+
+            return resultArray;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
+     * Returns all child cells at the next finer resolution (resolution + 1)
+     * for each input cell.
+     *
+     * The number of children depends on the aperture:
+     * - Aperture 3: 3 children per parent
+     * - Aperture 4: 4 children per parent
+     * - Aperture 7: 7 children per parent
+     *
+     * The output is a 2-D array: `result[i]` contains all children of
+     * `sequenceNum[i]`.
+     *
+     * ```ts
+     * const children = dggs.sequenceNumChildren([30n], 4);
+     * // children[0] = [120n, 121n, 122n, 123n]  (at resolution 5, aperture 4)
+     * ```
+     *
+     * ::: info
+     * Children always include both boundary and interior cells. The returned
+     * cells completely cover the parent cell's area.
+     * :::
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose children to find.
+     * @param resolution - Resolution at which the input IDs were generated.
+     *   Defaults to the instance's current {@link resolution}.
+     * @returns A 2-D array of `BigInt[]`: `result[i]` is the array of child
+     *   IDs for `sequenceNum[i]` at resolution + 1.
+     * @throws If an invalid cell ID is provided or if the maximum resolution
+     *   is exceeded.
+     */
+    sequenceNumChildren(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint[][] {
+        const {
+            poleCoordinates: { lat, lng },
+            azimuth,
+            topology,
+            projection,
+            aperture,
+            apertureSequence,
+        } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
+
+        try {
+            const resultArray = this._module.SEQNUMS_children(
+                lng,
+                lat,
+                azimuth,
+                aperture,
+                resolution,
+                topology,
+                projection,
+                isApertureSequence,
+                apSeq,
+                sequenceNum
+            );
+
+            // The result is a flat array with format:
+            // [count0, count1, ..., countN, child0_0, child0_1, ..., child0_(count0-1), child1_0, ...]
+            const inputSize = sequenceNum.length;
+            const counts = resultArray.slice(0, inputSize);
+            const children: bigint[][] = [];
+
+            let offset = inputSize;
+            for (let i = 0; i < inputSize; i++) {
+                const count = Number(counts[i]);
+                children.push(resultArray.slice(offset, offset + count));
+                offset += count;
+            }
+
+            return children;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    // =========================================================================
+    // Hierarchical Address Type Conversions
+    // These methods convert between SEQNUM and hierarchical indexing systems
+    // =========================================================================
+
+    /**
+     * Convert a SEQNUM cell ID to VERTEX2DD (icosahedral vertex) coordinates.
+     *
+     * VERTEX2DD addresses represent positions relative to the vertices and
+     * triangular faces of the underlying icosahedron.
+     *
+     * ```ts
+     * const vertex = dggs.sequenceNumToVertex2DD(100n, 5);
+     * // vertex = { keep: true, vertNum: 1, triNum: 1, x: 0.0625, y: 0.054... }
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell. Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns An object with `{keep, vertNum, triNum, x, y}` representing
+     *   the vertex coordinate.
+     */
+    sequenceNumToVertex2DD(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): Vertex2DDCoordinate {
+        try {
+            const result = this._module.SEQNUM_to_VERTEX2DD(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+            return result;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
+     * Convert VERTEX2DD (icosahedral vertex) coordinates to a SEQNUM cell ID.
+     *
+     * ```ts
+     * const seqnum = dggs.vertex2DDToSequenceNum(true, 1, 1, 0.0625, 0.054, 5);
+     * // seqnum = 100n
+     * ```
+     *
+     * @param keep - Whether to keep this vertex.
+     * @param vertNum - Vertex number (0-11 for icosahedron).
+     * @param triNum - Triangle number on the icosahedron.
+     * @param x - X coordinate within the triangle.
+     * @param y - Y coordinate within the triangle.
+     * @param resolution - Resolution at which to compute the cell ID. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns The sequence number (BigInt) of the cell containing this coordinate.
+     */
+    vertex2DDToSequenceNum(
+        keep: boolean,
+        vertNum: number,
+        triNum: number,
+        x: number,
+        y: number,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        try {
+            return this._module.VERTEX2DD_to_SEQNUM(
+                ...this._getParams(resolution),
+                keep,
+                vertNum,
+                triNum,
+                x,
+                y
+            );
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a SEQNUM cell ID to ZORDER (Z-order curve) coordinate.
+     *
+     * ZORDER uses digit-interleaved coordinates to create a space-filling
+     * curve index. This provides good spatial locality for range queries.
+     *
+     * **Compatibility:** ZORDER is only available for **aperture 3 and 4**
+     * hexagon grids. It is **NOT supported** for aperture 7.
+     *
+     * ```ts
+     * // With aperture 4:
+     * const zorder = dggs.sequenceNumToZOrder(100n, 5);
+     * // zorder = 1168684103302643712n
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell. Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns A BigInt representing the Z-order coordinate.
+     * @throws If used with an incompatible aperture (7) or topology.
+     */
+    sequenceNumToZOrder(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, apertureSequence } = this.dggs;
+
+        // Check aperture compatibility
+        if (aperture === 7 && !apertureSequence) {
+            throw new Error(
+                'ZORDER is not available for aperture 7. ' +
+                'Use Z7 hierarchical indexing instead, or switch to aperture 3 or 4.'
+            );
+        }
+
+        try {
+            return this._module.SEQNUM_to_ZORDER(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture')) {
+                throw new Error(
+                    `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a ZORDER (Z-order curve) coordinate to a SEQNUM cell ID.
+     *
+     * ```ts
+     * const seqnum = dggs.zOrderToSequenceNum(1168684103302643712n, 5);
+     * // seqnum = 100n
+     * ```
+     *
+     * @param zorderValue - The Z-order coordinate value (BigInt).
+     * @param resolution - Resolution at which to compute the cell ID. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns The sequence number (BigInt) corresponding to this Z-order value.
+     * @throws If used with an incompatible aperture (7) or topology.
+     */
+    zOrderToSequenceNum(
+        zorderValue: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, apertureSequence } = this.dggs;
+
+        if (aperture === 7 && !apertureSequence) {
+            throw new Error(
+                'ZORDER is not available for aperture 7. ' +
+                'Use Z7 hierarchical indexing instead, or switch to aperture 3 or 4.'
+            );
+        }
+
+        try {
+            return this._module.ZORDER_to_SEQNUM(
+                ...this._getParams(resolution),
+                zorderValue
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture')) {
+                throw new Error(
+                    `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a SEQNUM cell ID to Z3 (base-3 Central Place Indexing) coordinate.
+     *
+     * Z3 uses base-3 digit encoding optimized for aperture 3 hexagon grids.
+     * Each parent cell contains exactly 3 children in the hierarchy.
+     *
+     * **Compatibility:** Z3 is **only available for aperture 3** hexagon grids.
+     *
+     * ```ts
+     * // With aperture 3:
+     * const z3 = dggs.sequenceNumToZ3(100n, 5);
+     * // z3 = 1773292353277132799n
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell. Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns A BigInt representing the Z3 coordinate (INT64 format).
+     * @throws If used with an incompatible aperture (not 3) or topology.
+     */
+    sequenceNumToZ3(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, topology, apertureSequence } = this.dggs;
+
+        if ((aperture !== 3 || topology !== 'HEXAGON') && !apertureSequence) {
+            throw new Error(
+                'Z3 is only available for aperture 3 hexagon grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
+        }
+
+        try {
+            return this._module.SEQNUM_to_Z3(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
+                throw new Error(
+                    `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a Z3 (base-3 Central Place Indexing) coordinate to a SEQNUM cell ID.
+     *
+     * ```ts
+     * const seqnum = dggs.z3ToSequenceNum(1773292353277132799n, 5);
+     * // seqnum = 100n
+     * ```
+     *
+     * @param z3Value - The Z3 coordinate value (BigInt, INT64 format).
+     * @param resolution - Resolution at which to compute the cell ID. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns The sequence number (BigInt) corresponding to this Z3 value.
+     * @throws If used with an incompatible aperture (not 3) or topology.
+     */
+    z3ToSequenceNum(
+        z3Value: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, topology, apertureSequence } = this.dggs;
+
+        if ((aperture !== 3 || topology !== 'HEXAGON') && !apertureSequence) {
+            throw new Error(
+                'Z3 is only available for aperture 3 hexagon grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
+        }
+
+        try {
+            return this._module.Z3_to_SEQNUM(
+                ...this._getParams(resolution),
+                z3Value
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
+                throw new Error(
+                    `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a SEQNUM cell ID to Z7 (base-7 Central Place Indexing) coordinate.
+     *
+     * Z7 uses base-7 digit encoding with pure bitarithmetic operations,
+     * optimized for aperture 7 hexagon grids. Each parent cell contains
+     * exactly 7 children in the hierarchy.
+     *
+     * **Compatibility:** Z7 is **only available for aperture 7** hexagon grids.
+     *
+     * ```ts
+     * // With aperture 7:
+     * const z7 = dggs.sequenceNumToZ7(100n, 5);
+     * // z7 = 1153167795211468799n (displayed as hex: 0x1000000000000fff)
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell. Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns A BigInt representing the Z7 coordinate (INT64/hex format).
+     * @throws If used with an incompatible aperture (not 7) or topology.
+     */
+    sequenceNumToZ7(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, topology, apertureSequence } = this.dggs;
+
+        if ((aperture !== 7 || topology !== 'HEXAGON') && !apertureSequence) {
+            throw new Error(
+                'Z7 is only available for aperture 7 hexagon grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
+        }
+
+        try {
+            return this._module.SEQNUM_to_Z7(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
+                throw new Error(
+                    `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a Z7 (base-7 Central Place Indexing) coordinate to a SEQNUM cell ID.
+     *
+     * ```ts
+     * const seqnum = dggs.z7ToSequenceNum(1153167795211468799n, 5);
+     * // seqnum = 100n
+     * ```
+     *
+     * @param z7Value - The Z7 coordinate value (BigInt, INT64/hex format).
+     * @param resolution - Resolution at which to compute the cell ID. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns The sequence number (BigInt) corresponding to this Z7 value.
+     * @throws If used with an incompatible aperture (not 7) or topology.
+     */
+    z7ToSequenceNum(
+        z7Value: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, topology, apertureSequence } = this.dggs;
+
+        if ((aperture !== 7 || topology !== 'HEXAGON') && !apertureSequence) {
+            throw new Error(
+                'Z7 is only available for aperture 7 hexagon grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
+        }
+
+        try {
+            return this._module.Z7_to_SEQNUM(
+                ...this._getParams(resolution),
+                z7Value
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
+                throw new Error(
+                    `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    // =========================================================================
+    // Index digit manipulation
+    // Pure bitwise operations on Z7, Z3, and ZORDER packed indices.
+    // These match DGGRID's internal macros (Z7_GET_INDEX_DIGIT, etc.)
+    // and do NOT require WASM calls.
+    // =========================================================================
+
+    // --- Z7 constants (3 bits per digit, max 20 resolutions) ---
+    /** @internal */ static readonly Z7_MAX_RES = 20;
+    /** @internal */ static readonly Z7_BITS_PER_DIGIT = 3n;
+    /** @internal */ static readonly Z7_DIGIT_MASK = 7n;
+    /** @internal */ static readonly Z7_QUAD_OFFSET = 60n;
+    /** @internal */ static readonly Z7_QUAD_MASK = 0xF000000000000000n;
+
+    // --- Z3 constants (2 bits per digit, max 30 resolutions) ---
+    /** @internal */ static readonly Z3_MAX_RES = 30;
+    /** @internal */ static readonly Z3_BITS_PER_DIGIT = 2n;
+    /** @internal */ static readonly Z3_DIGIT_MASK = 3n;
+    /** @internal */ static readonly Z3_QUAD_OFFSET = 60n;
+    /** @internal */ static readonly Z3_QUAD_MASK = 0xF000000000000000n;
+
+    // --- ZORDER constants (2 bits per digit, max 30 resolutions) ---
+    /** @internal */ static readonly ZORDER_MAX_RES = 30;
+    /** @internal */ static readonly ZORDER_BITS_PER_DIGIT = 2n;
+    /** @internal */ static readonly ZORDER_DIGIT_MASK = 3n;
+    /** @internal */ static readonly ZORDER_QUAD_OFFSET = 60n;
+    /** @internal */ static readonly ZORDER_QUAD_MASK = 0xF000000000000000n;
+
+    /**
+     * Get the quad (icosahedron face) number from a Z7 index.
+     *
+     * The quad occupies bits 63–60 of the 64-bit packed value.
+     *
+     * ```ts
+     * const quad = dggs.z7GetQuad(z7Value); // 0–11
+     * ```
+     *
+     * @param z7Value - A Z7 packed index (BigInt).
+     * @returns The quad number (0–11).
+     */
+    z7GetQuad(z7Value: bigint): number {
+        return Number((z7Value & Webdggrid.Z7_QUAD_MASK) >> Webdggrid.Z7_QUAD_OFFSET);
+    }
+
+    /**
+     * Get the digit at a specific resolution level from a Z7 index.
+     *
+     * Each digit is 3 bits wide and occupies a fixed position in the 64-bit value.
+     * Valid digits are 0–6; the value 7 is the invalid/padding marker.
+     *
+     * ```ts
+     * const digit = dggs.z7GetDigit(z7Value, 3); // 0–6 (or 7 = invalid)
+     * ```
+     *
+     * @param z7Value - A Z7 packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 20).
+     * @returns The digit value (0–7).
+     */
+    z7GetDigit(z7Value: bigint, res: number): number {
+        const shift = BigInt(Webdggrid.Z7_MAX_RES - res) * Webdggrid.Z7_BITS_PER_DIGIT;
+        return Number((z7Value >> shift) & Webdggrid.Z7_DIGIT_MASK);
+    }
+
+    /**
+     * Set the digit at a specific resolution level in a Z7 index.
+     *
+     * Returns a new Z7 value with the digit at position `res` replaced.
+     *
+     * ```ts
+     * const child = dggs.z7SetDigit(z7Value, 6, 3); // set res-6 digit to 3
+     * ```
+     *
+     * @param z7Value - A Z7 packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 20).
+     * @param digit - The digit value to set (0–6, or 7 for invalid).
+     * @returns A new Z7 value with the digit replaced.
+     */
+    z7SetDigit(z7Value: bigint, res: number, digit: number): bigint {
+        const shift = BigInt(Webdggrid.Z7_MAX_RES - res) * Webdggrid.Z7_BITS_PER_DIGIT;
+        return (z7Value & ~(Webdggrid.Z7_DIGIT_MASK << shift)) | (BigInt(digit) << shift);
+    }
+
+    /**
+     * Extract all digits from a Z7 index up to a given resolution.
+     *
+     * ```ts
+     * const { quad, digits } = dggs.z7ExtractDigits(z7Value, 5);
+     * // quad: 1, digits: [2, 0, 3, 4, 1]
+     * ```
+     *
+     * @param z7Value - A Z7 packed index (BigInt).
+     * @param resolution - Number of digits to extract (1-based).
+     * @returns Object with `quad` (number) and `digits` (number array).
+     */
+    z7ExtractDigits(z7Value: bigint, resolution: number): { quad: number; digits: number[] } {
+        const quad = this.z7GetQuad(z7Value);
+        const digits: number[] = [];
+        for (let r = 1; r <= resolution; r++) {
+            digits.push(this.z7GetDigit(z7Value, r));
+        }
+        return { quad, digits };
+    }
+
+    /**
+     * Get the quad (icosahedron face) number from a Z3 index.
+     *
+     * ```ts
+     * const quad = dggs.z3GetQuad(z3Value); // 0–11
+     * ```
+     *
+     * @param z3Value - A Z3 packed index (BigInt).
+     * @returns The quad number (0–11).
+     */
+    z3GetQuad(z3Value: bigint): number {
+        return Number((z3Value & Webdggrid.Z3_QUAD_MASK) >> Webdggrid.Z3_QUAD_OFFSET);
+    }
+
+    /**
+     * Get the digit at a specific resolution level from a Z3 index.
+     *
+     * Each digit is 2 bits wide. Valid digits are 0–2; the value 3 is the
+     * invalid/padding marker.
+     *
+     * ```ts
+     * const digit = dggs.z3GetDigit(z3Value, 3); // 0–2 (or 3 = invalid)
+     * ```
+     *
+     * @param z3Value - A Z3 packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 30).
+     * @returns The digit value (0–3).
+     */
+    z3GetDigit(z3Value: bigint, res: number): number {
+        const shift = BigInt(Webdggrid.Z3_MAX_RES - res) * Webdggrid.Z3_BITS_PER_DIGIT;
+        return Number((z3Value >> shift) & Webdggrid.Z3_DIGIT_MASK);
+    }
+
+    /**
+     * Set the digit at a specific resolution level in a Z3 index.
+     *
+     * ```ts
+     * const child = dggs.z3SetDigit(z3Value, 6, 1); // set res-6 digit to 1
+     * ```
+     *
+     * @param z3Value - A Z3 packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 30).
+     * @param digit - The digit value to set (0–2, or 3 for invalid).
+     * @returns A new Z3 value with the digit replaced.
+     */
+    z3SetDigit(z3Value: bigint, res: number, digit: number): bigint {
+        const shift = BigInt(Webdggrid.Z3_MAX_RES - res) * Webdggrid.Z3_BITS_PER_DIGIT;
+        return (z3Value & ~(Webdggrid.Z3_DIGIT_MASK << shift)) | (BigInt(digit) << shift);
+    }
+
+    /**
+     * Extract all digits from a Z3 index up to a given resolution.
+     *
+     * ```ts
+     * const { quad, digits } = dggs.z3ExtractDigits(z3Value, 5);
+     * // quad: 1, digits: [1, 0, 2, 1, 0]
+     * ```
+     *
+     * @param z3Value - A Z3 packed index (BigInt).
+     * @param resolution - Number of digits to extract (1-based).
+     * @returns Object with `quad` (number) and `digits` (number array).
+     */
+    z3ExtractDigits(z3Value: bigint, resolution: number): { quad: number; digits: number[] } {
+        const quad = this.z3GetQuad(z3Value);
+        const digits: number[] = [];
+        for (let r = 1; r <= resolution; r++) {
+            digits.push(this.z3GetDigit(z3Value, r));
+        }
+        return { quad, digits };
+    }
+
+    /**
+     * Get the quad (icosahedron face) number from a ZORDER index.
+     *
+     * ```ts
+     * const quad = dggs.zOrderGetQuad(zorderValue); // 0–11
+     * ```
+     *
+     * @param zorderValue - A ZORDER packed index (BigInt).
+     * @returns The quad number (0–11).
+     */
+    zOrderGetQuad(zorderValue: bigint): number {
+        return Number((zorderValue & Webdggrid.ZORDER_QUAD_MASK) >> Webdggrid.ZORDER_QUAD_OFFSET);
+    }
+
+    /**
+     * Get the digit at a specific resolution level from a ZORDER index.
+     *
+     * Each digit is 2 bits wide (values 0–3).
+     *
+     * ```ts
+     * const digit = dggs.zOrderGetDigit(zorderValue, 3); // 0–3
+     * ```
+     *
+     * @param zorderValue - A ZORDER packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 30).
+     * @returns The digit value (0–3).
+     */
+    zOrderGetDigit(zorderValue: bigint, res: number): number {
+        const shift = BigInt(Webdggrid.ZORDER_MAX_RES - res) * Webdggrid.ZORDER_BITS_PER_DIGIT;
+        return Number((zorderValue >> shift) & Webdggrid.ZORDER_DIGIT_MASK);
+    }
+
+    /**
+     * Set the digit at a specific resolution level in a ZORDER index.
+     *
+     * ```ts
+     * const modified = dggs.zOrderSetDigit(zorderValue, 3, 2);
+     * ```
+     *
+     * @param zorderValue - A ZORDER packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 30).
+     * @param digit - The digit value to set (0–3).
+     * @returns A new ZORDER value with the digit replaced.
+     */
+    zOrderSetDigit(zorderValue: bigint, res: number, digit: number): bigint {
+        const shift = BigInt(Webdggrid.ZORDER_MAX_RES - res) * Webdggrid.ZORDER_BITS_PER_DIGIT;
+        return (zorderValue & ~(Webdggrid.ZORDER_DIGIT_MASK << shift)) | (BigInt(digit) << shift);
+    }
+
+    /**
+     * Extract all digits from a ZORDER index up to a given resolution.
+     *
+     * ```ts
+     * const { quad, digits } = dggs.zOrderExtractDigits(zorderValue, 5);
+     * // quad: 1, digits: [2, 0, 3, 1, 0]
+     * ```
+     *
+     * @param zorderValue - A ZORDER packed index (BigInt).
+     * @param resolution - Number of digits to extract (1-based).
+     * @returns Object with `quad` (number) and `digits` (number array).
+     */
+    zOrderExtractDigits(zorderValue: bigint, resolution: number): { quad: number; digits: number[] } {
+        const quad = this.zOrderGetQuad(zorderValue);
+        const digits: number[] = [];
+        for (let r = 1; r <= resolution; r++) {
+            digits.push(this.zOrderGetDigit(zorderValue, r));
+        }
+        return { quad, digits };
+    }
+
+    // =========================================================================
+    // Low-level coordinate transformation methods
+    // These methods expose all DGGRID coordinate systems beyond GEO/SEQNUM
+    // =========================================================================
+
+    /**
+     * Helper to build the DGGS parameter array for WASM calls.
+     * @private
+     */
+    private _getParams(resolution: number = DEFAULT_RESOLUTION): any[] {
+        const {
+            poleCoordinates: { lat, lng },
+            azimuth,
+            topology,
+            projection,
+            aperture,
+            apertureSequence,
+        } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
+
+        return [
+            lng,
+            lat,
+            azimuth,
+            aperture,
+            resolution,
+            topology,
+            projection,
+            isApertureSequence,
+            apSeq
+        ];
+    }
+
+    // -------------------------------------------------------------------------
+    // GEO transformations (beyond the high-level methods above)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Converts geographic coordinates to PLANE coordinates.
+     * 
+     * @param coordinates - Array of `[lng, lat]` pairs
+     * @param resolution - Resolution level
+     * @returns Array of `{x, y}` plane coordinates
+     */
+    geoToPlane(coordinates: number[][], resolution: number = DEFAULT_RESOLUTION): Array<{ x: number, y: number }> {
+        const xCoords = coordinates.map(c => c[0]);
+        const yCoords = coordinates.map(c => c[1]);
+
+        const result = this._module.GEO_to_PLANE(...this._getParams(resolution), xCoords, yCoords);
+
+        const size = result.length / 2;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({ x: result[i], y: result[i + size] });
+        }
+        return output;
+    }
+
+    /**
+     * Converts geographic coordinates to PROJTRI coordinates.
+     * 
+     * @param coordinates - Array of `[lng, lat]` pairs
+     * @param resolution - Resolution level
+     * @returns Array of `{tnum, x, y}` projection triangle coordinates
+     */
+    geoToProjtri(coordinates: number[][], resolution: number = DEFAULT_RESOLUTION): Array<{ tnum: number, x: number, y: number }> {
+        const xCoords = coordinates.map(c => c[0]);
+        const yCoords = coordinates.map(c => c[1]);
+
+        const result = this._module.GEO_to_PROJTRI(...this._getParams(resolution), xCoords, yCoords);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                tnum: result[i],
+                x: result[i + size],
+                y: result[i + 2 * size]
+            });
+        }
+        return output;
+    }
+
+    /**
+     * Converts geographic coordinates to Q2DD coordinates.
+     * 
+     * @param coordinates - Array of `[lng, lat]` pairs
+     * @param resolution - Resolution level
+     * @returns Array of `{quad, x, y}` quad 2D double coordinates
+     */
+    geoToQ2dd(coordinates: number[][], resolution: number = DEFAULT_RESOLUTION): Array<{ quad: number, x: number, y: number }> {
+        const xCoords = coordinates.map(c => c[0]);
+        const yCoords = coordinates.map(c => c[1]);
+
+        const result = this._module.GEO_to_Q2DD(...this._getParams(resolution), xCoords, yCoords);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                quad: result[i],
+                x: result[i + size],
+                y: result[i + 2 * size]
+            });
+        }
+        return output;
+    }
+
+    /**
+     * Converts geographic coordinates to Q2DI coordinates.
+     * 
+     * @param coordinates - Array of `[lng, lat]` pairs
+     * @param resolution - Resolution level
+     * @returns Array of `{quad, i, j}` quad 2D integer coordinates
+     */
+    geoToQ2di(coordinates: number[][], resolution: number = DEFAULT_RESOLUTION): Array<{ quad: number, i: bigint, j: bigint }> {
+        const xCoords = coordinates.map(c => c[0]);
+        const yCoords = coordinates.map(c => c[1]);
+
+        const result = this._module.GEO_to_Q2DI(...this._getParams(resolution), xCoords, yCoords);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                quad: result[i],
+                i: BigInt(result[i + size]),
+                j: BigInt(result[i + 2 * size])
+            });
+        }
+        return output;
+    }
+
+    // -------------------------------------------------------------------------
+    // SEQNUM transformations (beyond the high-level methods above)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Converts sequence numbers to PLANE coordinates.
+     * 
+     * @param sequenceNum - Array of cell IDs
+     * @param resolution - Resolution level
+     * @returns Array of `{x, y}` plane coordinates
+     */
+    sequenceNumToPlane(sequenceNum: bigint[], resolution: number = DEFAULT_RESOLUTION): Array<{ x: number, y: number }> {
+        const result = this._module.SEQNUM_to_PLANE(...this._getParams(resolution), sequenceNum);
+
+        const size = result.length / 2;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({ x: result[i], y: result[i + size] });
+        }
+        return output;
+    }
+
+    /**
+     * Converts sequence numbers to PROJTRI coordinates.
+     * 
+     * @param sequenceNum - Array of cell IDs
+     * @param resolution - Resolution level
+     * @returns Array of `{tnum, x, y}` projection triangle coordinates
+     */
+    sequenceNumToProjtri(sequenceNum: bigint[], resolution: number = DEFAULT_RESOLUTION): Array<{ tnum: number, x: number, y: number }> {
+        const result = this._module.SEQNUM_to_PROJTRI(...this._getParams(resolution), sequenceNum);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                tnum: result[i],
+                x: result[i + size],
+                y: result[i + 2 * size]
+            });
+        }
+        return output;
+    }
+
+    /**
+     * Converts sequence numbers to Q2DD coordinates.
+     * 
+     * @param sequenceNum - Array of cell IDs
+     * @param resolution - Resolution level
+     * @returns Array of `{quad, x, y}` quad 2D double coordinates
+     */
+    sequenceNumToQ2dd(sequenceNum: bigint[], resolution: number = DEFAULT_RESOLUTION): Array<{ quad: number, x: number, y: number }> {
+        const result = this._module.SEQNUM_to_Q2DD(...this._getParams(resolution), sequenceNum);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                quad: result[i],
+                x: result[i + size],
+                y: result[i + 2 * size]
+            });
+        }
+        return output;
+    }
+
+    /**
+     * Converts sequence numbers to Q2DI coordinates.
+     * 
+     * @param sequenceNum - Array of cell IDs
+     * @param resolution - Resolution level
+     * @returns Array of `{quad, i, j}` quad 2D integer coordinates
+     */
+    sequenceNumToQ2di(sequenceNum: bigint[], resolution: number = DEFAULT_RESOLUTION): Array<{ quad: number, i: bigint, j: bigint }> {
+        const result = this._module.SEQNUM_to_Q2DI(...this._getParams(resolution), sequenceNum);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                quad: result[i],
+                i: BigInt(result[i + size]),
+                j: BigInt(result[i + 2 * size])
+            });
+        }
+        return output;
+    }
+
+    // -------------------------------------------------------------------------
+    // Q2DI transformations
+    // -------------------------------------------------------------------------
+
+    /**
+     * Converts Q2DI coordinates to geographic coordinates.
+     * 
+     * @param coords - Array of `{quad, i, j}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `[lng, lat]` positions
+     */
+    q2diToGeo(coords: Array<{ quad: number, i: bigint, j: bigint }>, resolution: number = DEFAULT_RESOLUTION): Position[] {
+        const quads = coords.map(c => c.quad);
+        const is = coords.map(c => Number(c.i));
+        const js = coords.map(c => Number(c.j));
+
+        const result = this._module.Q2DI_to_GEO(...this._getParams(resolution), quads, is, js);
+
+        const size = result.length / 2;
+        const output: Position[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push([result[i], result[i + size]]);
+        }
+        return output;
+    }
+
+    /**
+     * Converts Q2DI coordinates to sequence numbers.
+     * 
+     * @param coords - Array of `{quad, i, j}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of cell IDs
+     */
+    q2diToSequenceNum(coords: Array<{ quad: number, i: bigint, j: bigint }>, resolution: number = DEFAULT_RESOLUTION): bigint[] {
+        const quads = coords.map(c => c.quad);
+        const is = coords.map(c => Number(c.i));
+        const js = coords.map(c => Number(c.j));
+
+        return this._module.Q2DI_to_SEQNUM(...this._getParams(resolution), quads, is, js);
+    }
+
+    /**
+     * Converts Q2DI coordinates to PLANE coordinates.
+     * 
+     * @param coords - Array of `{quad, i, j}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{x, y}` plane coordinates
+     */
+    q2diToPlane(coords: Array<{ quad: number, i: bigint, j: bigint }>, resolution: number = DEFAULT_RESOLUTION): Array<{ x: number, y: number }> {
+        const quads = coords.map(c => c.quad);
+        const is = coords.map(c => Number(c.i));
+        const js = coords.map(c => Number(c.j));
+
+        const result = this._module.Q2DI_to_PLANE(...this._getParams(resolution), quads, is, js);
+
+        const size = result.length / 2;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({ x: result[i], y: result[i + size] });
+        }
+        return output;
+    }
+
+    /**
+     * Converts Q2DI coordinates to PROJTRI coordinates.
+     * 
+     * @param coords - Array of `{quad, i, j}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{tnum, x, y}` projection triangle coordinates
+     */
+    q2diToProjtri(coords: Array<{ quad: number, i: bigint, j: bigint }>, resolution: number = DEFAULT_RESOLUTION): Array<{ tnum: number, x: number, y: number }> {
+        const quads = coords.map(c => c.quad);
+        const is = coords.map(c => Number(c.i));
+        const js = coords.map(c => Number(c.j));
+
+        const result = this._module.Q2DI_to_PROJTRI(...this._getParams(resolution), quads, is, js);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                tnum: result[i],
+                x: result[i + size],
+                y: result[i + 2 * size]
+            });
+        }
+        return output;
+    }
+
+    /**
+     * Converts Q2DI coordinates to Q2DD coordinates.
+     * 
+     * @param coords - Array of `{quad, i, j}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{quad, x, y}` quad 2D double coordinates
+     */
+    q2diToQ2dd(coords: Array<{ quad: number, i: bigint, j: bigint }>, resolution: number = DEFAULT_RESOLUTION): Array<{ quad: number, x: number, y: number }> {
+        const quads = coords.map(c => c.quad);
+        const is = coords.map(c => Number(c.i));
+        const js = coords.map(c => Number(c.j));
+
+        const result = this._module.Q2DI_to_Q2DD(...this._getParams(resolution), quads, is, js);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                quad: result[i],
+                x: result[i + size],
+                y: result[i + 2 * size]
+            });
+        }
+        return output;
+    }
+
+    // -------------------------------------------------------------------------
+    // Q2DD transformations
+    // -------------------------------------------------------------------------
+
+    /**
+     * Converts Q2DD coordinates to geographic coordinates.
+     * 
+     * @param coords - Array of `{quad, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `[lng, lat]` positions
+     */
+    q2ddToGeo(coords: Array<{ quad: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): Position[] {
+        const quads = coords.map(c => c.quad);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        const result = this._module.Q2DD_to_GEO(...this._getParams(resolution), quads, xs, ys);
+
+        const size = result.length / 2;
+        const output: Position[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push([result[i], result[i + size]]);
+        }
+        return output;
+    }
+
+    /**
+     * Converts Q2DD coordinates to sequence numbers.
+     * 
+     * @param coords - Array of `{quad, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of cell IDs
+     */
+    q2ddToSequenceNum(coords: Array<{ quad: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): bigint[] {
+        const quads = coords.map(c => c.quad);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        return this._module.Q2DD_to_SEQNUM(...this._getParams(resolution), quads, xs, ys);
+    }
+
+    /**
+     * Converts Q2DD coordinates to PLANE coordinates.
+     * 
+     * @param coords - Array of `{quad, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{x, y}` plane coordinates
+     */
+    q2ddToPlane(coords: Array<{ quad: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): Array<{ x: number, y: number }> {
+        const quads = coords.map(c => c.quad);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        const result = this._module.Q2DD_to_PLANE(...this._getParams(resolution), quads, xs, ys);
+
+        const size = result.length / 2;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({ x: result[i], y: result[i + size] });
+        }
+        return output;
+    }
+
+    /**
+     * Converts Q2DD coordinates to PROJTRI coordinates.
+     * 
+     * @param coords - Array of `{quad, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{tnum, x, y}` projection triangle coordinates
+     */
+    q2ddToProjtri(coords: Array<{ quad: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): Array<{ tnum: number, x: number, y: number }> {
+        const quads = coords.map(c => c.quad);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        const result = this._module.Q2DD_to_PROJTRI(...this._getParams(resolution), quads, xs, ys);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                tnum: result[i],
+                x: result[i + size],
+                y: result[i + 2 * size]
+            });
+        }
+        return output;
+    }
+
+    /**
+     * Converts Q2DD coordinates to Q2DI coordinates.
+     * 
+     * @param coords - Array of `{quad, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{quad, i, j}` quad 2D integer coordinates
+     */
+    q2ddToQ2di(coords: Array<{ quad: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): Array<{ quad: number, i: bigint, j: bigint }> {
+        const quads = coords.map(c => c.quad);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        const result = this._module.Q2DD_to_Q2DI(...this._getParams(resolution), quads, xs, ys);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                quad: result[i],
+                i: BigInt(result[i + size]),
+                j: BigInt(result[i + 2 * size])
+            });
+        }
+        return output;
+    }
+
+    // -------------------------------------------------------------------------
+    // PROJTRI transformations
+    // -------------------------------------------------------------------------
+
+    /**
+     * Converts PROJTRI coordinates to geographic coordinates.
+     * 
+     * @param coords - Array of `{tnum, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `[lng, lat]` positions
+     */
+    projtriToGeo(coords: Array<{ tnum: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): Position[] {
+        const tnums = coords.map(c => c.tnum);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        const result = this._module.PROJTRI_to_GEO(...this._getParams(resolution), tnums, xs, ys);
+
+        const size = result.length / 2;
+        const output: Position[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push([result[i], result[i + size]]);
+        }
+        return output;
+    }
+
+    /**
+     * Converts PROJTRI coordinates to sequence numbers.
+     * 
+     * @param coords - Array of `{tnum, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of cell IDs
+     */
+    projtriToSequenceNum(coords: Array<{ tnum: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): bigint[] {
+        const tnums = coords.map(c => c.tnum);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        return this._module.PROJTRI_to_SEQNUM(...this._getParams(resolution), tnums, xs, ys);
+    }
+
+    /**
+     * Converts PROJTRI coordinates to PLANE coordinates.
+     * 
+     * @param coords - Array of `{tnum, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{x, y}` plane coordinates
+     */
+    projtriToPlane(coords: Array<{ tnum: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): Array<{ x: number, y: number }> {
+        const tnums = coords.map(c => c.tnum);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        const result = this._module.PROJTRI_to_PLANE(...this._getParams(resolution), tnums, xs, ys);
+
+        const size = result.length / 2;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({ x: result[i], y: result[i + size] });
+        }
+        return output;
+    }
+
+    /**
+     * Converts PROJTRI coordinates to Q2DD coordinates.
+     * 
+     * @param coords - Array of `{tnum, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{quad, x, y}` quad 2D double coordinates
+     */
+    projtriToQ2dd(coords: Array<{ tnum: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): Array<{ quad: number, x: number, y: number }> {
+        const tnums = coords.map(c => c.tnum);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        const result = this._module.PROJTRI_to_Q2DD(...this._getParams(resolution), tnums, xs, ys);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                quad: result[i],
+                x: result[i + size],
+                y: result[i + 2 * size]
+            });
+        }
+        return output;
+    }
+
+    /**
+     * Converts PROJTRI coordinates to Q2DI coordinates.
+     * 
+     * @param coords - Array of `{tnum, x, y}` coordinates
+     * @param resolution - Resolution level
+     * @returns Array of `{quad, i, j}` quad 2D integer coordinates
+     */
+    projtriToQ2di(coords: Array<{ tnum: number, x: number, y: number }>, resolution: number = DEFAULT_RESOLUTION): Array<{ quad: number, i: bigint, j: bigint }> {
+        const tnums = coords.map(c => c.tnum);
+        const xs = coords.map(c => c.x);
+        const ys = coords.map(c => c.y);
+
+        const result = this._module.PROJTRI_to_Q2DI(...this._getParams(resolution), tnums, xs, ys);
+
+        const size = result.length / 3;
+        const output: any[] = [];
+        for (let i = 0; i < size; i++) {
+            output.push({
+                quad: result[i],
+                i: BigInt(result[i + size]),
+                j: BigInt(result[i + 2 * size])
+            });
+        }
+        return output;
+    }
+
+    // -------------------------------------------------------------------------
+    // PLANE transformations
+    // Note: PLANE is an output-only coordinate system in DGGRID.
+    // There are no PLANE_to_* transformations available.
+    // Use other coordinate systems (GEO, SEQNUM, Q2DI, Q2DD, PROJTRI) as input.
+    // -------------------------------------------------------------------------
 }

@@ -28,10 +28,13 @@ static dggrid::DggsParams makeParams(
     unsigned int       aperture,
     int                res,
     const std::string &topology,
-    const std::string &projection)
+    const std::string &projection,
+    bool               is_aperture_sequence = false,
+    const std::string &aperture_sequence = "")
 {
     return dggrid::construct(projection, aperture, topology, res,
-                              azimuth_deg, pole_lat_deg, pole_lon_deg);
+                              azimuth_deg, pole_lat_deg, pole_lon_deg,
+                              is_aperture_sequence, aperture_sequence);
 }
 
 // ---------------------------------------------------------------------------
@@ -51,47 +54,57 @@ int main()
 
 double nCells(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
               unsigned int aperture, int res,
-              std::string topology, std::string projection)
+              std::string topology, std::string projection,
+              bool is_aperture_sequence, std::string aperture_sequence)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     return static_cast<double>(dggrid::getResAt(p, res).cells);
 }
 
 double cellAreaKM(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
                   unsigned int aperture, int res,
-                  std::string topology, std::string projection)
+                  std::string topology, std::string projection,
+                  bool is_aperture_sequence, std::string aperture_sequence)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     return dggrid::getResAt(p, res).area_km;
 }
 
 double cellDistKM(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
                   unsigned int aperture, int res,
-                  std::string topology, std::string projection)
+                  std::string topology, std::string projection,
+                  bool is_aperture_sequence, std::string aperture_sequence)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     return dggrid::getResAt(p, res).spacing_km;
 }
 
 double gridStatCLS(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
                    unsigned int aperture, int res,
-                   std::string topology, std::string projection)
+                   std::string topology, std::string projection,
+                   bool is_aperture_sequence, std::string aperture_sequence)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     return dggrid::getResAt(p, res).cls_km;
 }
 
 // Returns [res, cells, area_km, spacing_km, cls_km] for a single resolution.
 val getResInfo(double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
                unsigned int aperture, int res,
-               std::string topology, std::string projection)
+               std::string topology, std::string projection,
+               bool is_aperture_sequence, std::string aperture_sequence)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto row = dggrid::getResAt(p, res);
     std::vector<double> out = {
         static_cast<double>(row.res),
@@ -115,10 +128,12 @@ val SeqNumGrid(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val seqnum)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const std::vector<uint64_t> seqnumVector =
         convertJSArrayToNumberVector<uint64_t>(seqnum);
 
@@ -208,10 +223,12 @@ val GEO_to_GEO(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
     std::vector<dggrid::GeoCoord> out(xv.size());
@@ -224,10 +241,12 @@ val GEO_to_PLANE(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
     std::vector<dggrid::PlaneCoord> out(xv.size());
@@ -240,10 +259,12 @@ val GEO_to_PROJTRI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
     std::vector<dggrid::ProjTriCoord> out(xv.size());
@@ -256,10 +277,12 @@ val GEO_to_Q2DD(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
     std::vector<dggrid::Q2DDCoord> out(xv.size());
@@ -272,10 +295,12 @@ val GEO_to_Q2DI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
     std::vector<dggrid::Q2DICoord> out(xv.size());
@@ -288,10 +313,12 @@ val GEO_to_SEQNUM(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
     std::vector<dggrid::SeqNum> out(xv.size());
@@ -305,10 +332,12 @@ val DgGEO_to_SEQNUM(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val xs, val ys)
 {
     return GEO_to_SEQNUM(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                          aperture, res, topology, projection, xs, ys);
+                          aperture, res, topology, projection,
+                          is_aperture_sequence, aperture_sequence, xs, ys);
 }
 
 // ===========================================================================
@@ -319,10 +348,12 @@ val SEQNUM_to_GEO(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val seqnums)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
     std::vector<dggrid::GeoCoord> out(sv.size());
     for (std::size_t i = 0; i < sv.size(); i++)
@@ -334,10 +365,12 @@ val SEQNUM_to_PLANE(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val seqnums)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
     std::vector<dggrid::PlaneCoord> out(sv.size());
     for (std::size_t i = 0; i < sv.size(); i++)
@@ -349,10 +382,12 @@ val SEQNUM_to_PROJTRI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val seqnums)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
     std::vector<dggrid::ProjTriCoord> out(sv.size());
     for (std::size_t i = 0; i < sv.size(); i++)
@@ -363,11 +398,13 @@ val SEQNUM_to_PROJTRI(
 val SEQNUM_to_Q2DD(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
-    std::string topology, std::string projection,
+    std::string topology,  std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val seqnums)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
     std::vector<dggrid::Q2DDCoord> out(sv.size());
     for (std::size_t i = 0; i < sv.size(); i++)
@@ -379,10 +416,12 @@ val SEQNUM_to_Q2DI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val seqnums)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
     std::vector<dggrid::Q2DICoord> out(sv.size());
     for (std::size_t i = 0; i < sv.size(); i++)
@@ -394,10 +433,12 @@ val SEQNUM_to_SEQNUM(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val seqnums)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
     std::vector<dggrid::SeqNum> out(sv.size());
     for (std::size_t i = 0; i < sv.size(); i++)
@@ -413,10 +454,12 @@ val PROJTRI_to_GEO(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val tnums, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto tv = convertJSArrayToNumberVector<double>(tnums);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -430,10 +473,12 @@ val PROJTRI_to_PLANE(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val tnums, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto tv = convertJSArrayToNumberVector<double>(tnums);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -447,10 +492,12 @@ val PROJTRI_to_PROJTRI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val tnums, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto tv = convertJSArrayToNumberVector<double>(tnums);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -464,10 +511,12 @@ val PROJTRI_to_Q2DD(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val tnums, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto tv = convertJSArrayToNumberVector<double>(tnums);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -481,10 +530,12 @@ val PROJTRI_to_Q2DI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val tnums, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto tv = convertJSArrayToNumberVector<double>(tnums);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -498,10 +549,12 @@ val PROJTRI_to_SEQNUM(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val tnums, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto tv = convertJSArrayToNumberVector<double>(tnums);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -519,10 +572,12 @@ val Q2DD_to_GEO(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -536,10 +591,12 @@ val Q2DD_to_PLANE(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -553,10 +610,12 @@ val Q2DD_to_PROJTRI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -570,10 +629,12 @@ val Q2DD_to_Q2DD(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -587,10 +648,12 @@ val Q2DD_to_Q2DI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -604,10 +667,12 @@ val Q2DD_to_SEQNUM(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val xs, val ys)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto xv = convertJSArrayToNumberVector<double>(xs);
     const auto yv = convertJSArrayToNumberVector<double>(ys);
@@ -626,10 +691,12 @@ val Q2DI_to_GEO(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val is, val js)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto iv = convertJSArrayToNumberVector<double>(is);
     const auto jv = convertJSArrayToNumberVector<double>(js);
@@ -645,10 +712,12 @@ val Q2DI_to_PLANE(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val is, val js)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto iv = convertJSArrayToNumberVector<double>(is);
     const auto jv = convertJSArrayToNumberVector<double>(js);
@@ -664,10 +733,12 @@ val Q2DI_to_PROJTRI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val is, val js)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto iv = convertJSArrayToNumberVector<double>(is);
     const auto jv = convertJSArrayToNumberVector<double>(js);
@@ -683,10 +754,12 @@ val Q2DI_to_Q2DD(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val is, val js)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto iv = convertJSArrayToNumberVector<double>(is);
     const auto jv = convertJSArrayToNumberVector<double>(js);
@@ -702,10 +775,12 @@ val Q2DI_to_Q2DI(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val is, val js)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto iv = convertJSArrayToNumberVector<double>(is);
     const auto jv = convertJSArrayToNumberVector<double>(js);
@@ -721,10 +796,12 @@ val Q2DI_to_SEQNUM(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
     std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
     val quads, val is, val js)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
-                        aperture, res, topology, projection);
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
     const auto qv = convertJSArrayToNumberVector<double>(quads);
     const auto iv = convertJSArrayToNumberVector<double>(is);
     const auto jv = convertJSArrayToNumberVector<double>(js);
@@ -734,6 +811,277 @@ val Q2DI_to_SEQNUM(
                                        static_cast<int64_t>(iv[i]),
                                        static_cast<int64_t>(jv[i]));
     return seqNumArray(out);
+}
+
+// ===========================================================================
+// NEIGHBORS — Get topologically adjacent cells
+// ===========================================================================
+
+val SEQNUM_neighbors(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnum_val)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    
+    // Single seqnum input
+    uint64_t seqnum = seqnum_val.as<uint64_t>();
+    auto neighbors = dggrid::seqNumNeighbors(p, seqnum);
+    return seqNumArray(neighbors);
+}
+
+val SEQNUMS_neighbors(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnums)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    
+    const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
+    
+    // Get neighbors for each cell
+    std::vector<uint64_t> result;
+    result.reserve(sv.size() + sv.size() * 6); // counts + ~6 neighbors per cell
+    
+    // First, add the counts
+    std::vector<std::vector<uint64_t>> all_neighbors;
+    all_neighbors.reserve(sv.size());
+    
+    for (const auto& seqnum : sv) {
+        auto neighbors = dggrid::seqNumNeighbors(p, seqnum);
+        all_neighbors.push_back(neighbors);
+        result.push_back(neighbors.size()); // Add count
+    }
+    
+    // Then, add all the neighbor data
+    for (const auto& neighbors : all_neighbors) {
+        result.insert(result.end(), neighbors.begin(), neighbors.end());
+    }
+    
+    return seqNumArray(result);
+}
+
+// ===========================================================================
+// PARENT/CHILD — Hierarchical relationships
+// ===========================================================================
+
+val SEQNUM_parent(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnum_val)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    
+    uint64_t seqnum = seqnum_val.as<uint64_t>();
+    auto parent = dggrid::seqNumParent(p, seqnum);
+    return val(parent);
+}
+
+val SEQNUMS_parents(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnums)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    
+    const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
+    auto parents = dggrid::seqNumsParents(p, sv);
+    return seqNumArray(parents);
+}
+
+val SEQNUM_children(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnum_val)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    
+    uint64_t seqnum = seqnum_val.as<uint64_t>();
+    auto children = dggrid::seqNumChildren(p, seqnum);
+    return seqNumArray(children);
+}
+
+val SEQNUMS_children(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnums)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    
+    const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
+    
+    // Get children for each cell
+    std::vector<uint64_t> result;
+    result.reserve(sv.size() + sv.size() * aperture); // counts + aperture children per cell
+    
+    // First, add the counts
+    std::vector<std::vector<uint64_t>> all_children;
+    all_children.reserve(sv.size());
+    
+    for (const auto& seqnum : sv) {
+        auto children = dggrid::seqNumChildren(p, seqnum);
+        all_children.push_back(children);
+        result.push_back(children.size()); // Add count
+    }
+    
+    // Then, add all the children data
+    for (const auto& children : all_children) {
+        result.insert(result.end(), children.begin(), children.end());
+    }
+    
+    return seqNumArray(result);
+}
+
+// ===========================================================================
+// Hierarchical Address Types - SEQNUM conversions
+// ===========================================================================
+
+// ── VERTEX2DD ──────────────────────────────────────────────────────────────
+
+val SEQNUM_to_VERTEX2DD(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    auto result = dggrid::seqNumToVertex2DD(p, seqnum);
+    
+    // Return as object {keep, vertNum, triNum, x, y}
+    val obj = val::object();
+    obj.set("keep", result.keep);
+    obj.set("vertNum", result.vertNum);
+    obj.set("triNum", result.triNum);
+    obj.set("x", result.x);
+    obj.set("y", result.y);
+    return obj;
+}
+
+uint64_t VERTEX2DD_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    bool keep, int vertNum, int triNum, double x, double y)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    return dggrid::vertex2DDToSeqNum(p, keep, vertNum, triNum, x, y);
+}
+
+// ── ZORDER ─────────────────────────────────────────────────────────────────
+
+uint64_t SEQNUM_to_ZORDER(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    auto result = dggrid::seqNumToZOrder(p, seqnum);
+    return result.value;
+}
+
+uint64_t ZORDER_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t value)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    return dggrid::zOrderToSeqNum(p, value);
+}
+
+// ── Z3 ─────────────────────────────────────────────────────────────────────
+
+uint64_t SEQNUM_to_Z3(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    auto result = dggrid::seqNumToZ3(p, seqnum);
+    return result.value;
+}
+
+uint64_t Z3_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t value)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    return dggrid::z3ToSeqNum(p, value);
+}
+
+// ── Z7 ─────────────────────────────────────────────────────────────────────
+
+uint64_t SEQNUM_to_Z7(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    auto result = dggrid::seqNumToZ7(p, seqnum);
+    return result.value;
+}
+
+uint64_t Z7_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    uint64_t value)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+    return dggrid::z7ToSeqNum(p, value);
 }
 
 // ===========================================================================
@@ -825,4 +1173,24 @@ EMSCRIPTEN_BINDINGS(my_module)
     emscripten::function("Q2DI_to_Q2DD",   &Q2DI_to_Q2DD);
     emscripten::function("Q2DI_to_Q2DI",   &Q2DI_to_Q2DI);
     emscripten::function("Q2DI_to_SEQNUM", &Q2DI_to_SEQNUM);
+
+    // NEIGHBORS
+    emscripten::function("SEQNUM_neighbors",  &SEQNUM_neighbors);
+    emscripten::function("SEQNUMS_neighbors", &SEQNUMS_neighbors);
+
+    // PARENT/CHILD
+    emscripten::function("SEQNUM_parent",     &SEQNUM_parent);
+    emscripten::function("SEQNUMS_parents",   &SEQNUMS_parents);
+    emscripten::function("SEQNUM_children",   &SEQNUM_children);
+    emscripten::function("SEQNUMS_children",  &SEQNUMS_children);
+    
+    // HIERARCHICAL ADDRESS TYPES
+    emscripten::function("SEQNUM_to_VERTEX2DD", &SEQNUM_to_VERTEX2DD);
+    emscripten::function("VERTEX2DD_to_SEQNUM", &VERTEX2DD_to_SEQNUM);
+    emscripten::function("SEQNUM_to_ZORDER",    &SEQNUM_to_ZORDER);
+    emscripten::function("ZORDER_to_SEQNUM",    &ZORDER_to_SEQNUM);
+    emscripten::function("SEQNUM_to_Z3",        &SEQNUM_to_Z3);
+    emscripten::function("Z3_to_SEQNUM",        &Z3_to_SEQNUM);
+    emscripten::function("SEQNUM_to_Z7",        &SEQNUM_to_Z7);
+    emscripten::function("Z7_to_SEQNUM",        &Z7_to_SEQNUM);
 }

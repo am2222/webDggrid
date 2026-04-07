@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ylOrBrRgba, processFcForGlobe } from '../utils/globeUtils.js'
+import { loadWebdggrid } from '../utils/loadWebdggrid.js'
 
 const props = defineProps({
   /** Show OSM raster basemap */
@@ -50,6 +51,28 @@ const ctrlColorCells   = ref(false)
 const ctrlMultiRes     = ref(false)
 const ctrlZoomOffset   = ref(0)
 const showAperture     = ref(props.initialTopology === 'HEXAGON')
+const ctrlMixedAperture = ref(false)
+const ctrlApertureSeq   = ref('434747')
+
+// --- hierarchy selection state ---
+const selectedCellId  = ref(null)
+const selectedCellRes = ref(null)
+const hierarchyInfo   = reactive({
+  parent: null,
+  children: [],
+  neighbors: [],
+})
+const ctrlIndexType   = ref('SEQNUM')
+const availableIndexTypes = computed(() => {
+  const types = ['SEQNUM']
+  if (ctrlTopology.value === 'HEXAGON') {
+    types.push('VERTEX2DD')
+    if (ctrlAperture.value !== 7) types.push('ZORDER')
+    if (ctrlAperture.value === 3) types.push('Z3')
+    if (ctrlAperture.value === 7) types.push('Z7')
+  }
+  return types
+})
 
 // --- non-reactive map state (reactivity on MapLibre objects causes issues) ---
 let map           = null
@@ -119,7 +142,15 @@ function makeCellLayer(id, fc, colored, isBase) {
       }
     },
     onClick: isBase || !props.showControls ? undefined : (info) => {
-      if (info.object) console.log('Cell geometry:', info.object.geometry)
+      if (info.object) {
+        const cellId = info.object.properties?.id ?? info.object.id
+        if (cellId != null) {
+          const resolution = ctrlMultiRes.value
+            ? zoomToResolution(map.getZoom(), ctrlResolution.value)
+            : ctrlResolution.value
+          selectCell(cellId, resolution)
+        }
+      }
     },
     updateTriggers: { getFillColor: [colored] },
   })
@@ -174,9 +205,20 @@ function viewportSeqNums(resolution) {
 function generateGrid() {
   if (!isReady.value || !webdggrid) return
 
+  // Clear any hierarchy selection when regenerating
+  selectedCellId.value = null
+  selectedCellRes.value = null
+  hierarchyInfo.parent = null
+  hierarchyInfo.children = []
+  hierarchyInfo.neighbors = []
+  removeHierarchyMapLayers()
+
   const maxRes     = ctrlResolution.value
   const multiRes   = ctrlMultiRes.value
-  const resolution = multiRes ? zoomToResolution(map.getZoom(), maxRes) : maxRes
+  const isMixed    = ctrlMixedAperture.value && ctrlTopology.value === 'HEXAGON'
+  const resolution = multiRes
+    ? zoomToResolution(map.getZoom(), isMixed ? ctrlApertureSeq.value.length : maxRes)
+    : isMixed ? Math.min(maxRes, ctrlApertureSeq.value.length) : maxRes
   const topology   = ctrlTopology.value
   const projection = ctrlProjection.value
   const aperture   = ctrlAperture.value
@@ -184,10 +226,13 @@ function generateGrid() {
   const poleLng    = ctrlPoleLng.value
   const poleLat    = ctrlPoleLat.value
 
-  webdggrid.setDggs({
+  const dggsConfig = {
     poleCoordinates: { lat: poleLat, lng: poleLng },
     azimuth, topology, projection, aperture,
-  }, resolution)
+  }
+  if (isMixed) dggsConfig.apertureSequence = ctrlApertureSeq.value
+
+  webdggrid.setDggs(dggsConfig, resolution)
 
   ctrlResolution.value = resolution
   status.value = 'Generating grid…'
@@ -219,17 +264,11 @@ function generateGrid() {
         seqNums = viewportSeqNums(resolution)
 
         const baseRes = Math.max(1, resolution - 1)
-        webdggrid.setDggs({
-          poleCoordinates: { lat: poleLat, lng: poleLng },
-          azimuth, topology, projection, aperture,
-        }, baseRes)
+        webdggrid.setDggs(dggsConfig, baseRes)
         const baseSeqNums = viewportSeqNums(baseRes)
         baseFc = buildFc(baseSeqNums, baseRes)
 
-        webdggrid.setDggs({
-          poleCoordinates: { lat: poleLat, lng: poleLng },
-          azimuth, topology, projection, aperture,
-        }, resolution)
+        webdggrid.setDggs(dggsConfig, resolution)
       } else {
         const total = webdggrid.nCells(resolution)
         seqNums = Array.from({ length: total }, (_, i) => BigInt(i + 1))
@@ -241,7 +280,8 @@ function generateGrid() {
       updateDeckLayers(fineFc, baseFc)
 
       const modeLabel = multiRes ? `res ${resolution} · viewport` : `res ${resolution} · globe`
-      status.value = `${seqNums.length} cells · ${modeLabel} · ${topology}`
+      const apLabel = isMixed ? `mixed [${dggsConfig.apertureSequence}]` : topology
+      status.value = `${seqNums.length} cells · ${modeLabel} · ${apLabel}`
     } catch (err) {
       const msg = (err instanceof Error && err.message) ? err.message : String(err)
       status.value = `Error: ${msg}`
@@ -258,7 +298,10 @@ function generateGrid() {
 
 watch(ctrlTopology, (val) => {
   showAperture.value = val === 'HEXAGON'
-  if (val !== 'HEXAGON') ctrlAperture.value = 4
+  if (val !== 'HEXAGON') {
+    ctrlAperture.value = 4
+    ctrlMixedAperture.value = false
+  }
 })
 
 watch(ctrlColorCells, () => {
@@ -294,6 +337,198 @@ function onMoveEnd() {
 }
 
 // ---------------------------------------------------------------------------
+// Hierarchy selection
+// ---------------------------------------------------------------------------
+
+function getCellIndexLabel(seqnum, resolution) {
+  try {
+    switch (ctrlIndexType.value) {
+      case 'SEQNUM': return seqnum.toString()
+      case 'VERTEX2DD': {
+        const v = webdggrid.sequenceNumToVertex2DD(seqnum, resolution)
+        return `v${v.vertNum} t${v.triNum}`
+      }
+      case 'ZORDER': return webdggrid.sequenceNumToZOrder(seqnum, resolution).toString()
+      case 'Z3': return webdggrid.sequenceNumToZ3(seqnum, resolution).toString()
+      case 'Z7': return webdggrid.sequenceNumToZ7(seqnum, resolution).toString()
+      default: return seqnum.toString()
+    }
+  } catch {
+    return seqnum.toString()
+  }
+}
+
+function selectCell(cellId, resolution) {
+  if (!webdggrid) return
+
+  const seqnum = typeof cellId === 'bigint' ? cellId : BigInt(cellId)
+  selectedCellId.value = seqnum
+  selectedCellRes.value = resolution
+
+  // Get hierarchical relationships
+  try {
+    hierarchyInfo.neighbors = webdggrid.sequenceNumNeighbors([seqnum], resolution)[0]
+  } catch { hierarchyInfo.neighbors = [] }
+  try {
+    hierarchyInfo.parent = resolution > 0 ? webdggrid.sequenceNumParent([seqnum], resolution)[0] : null
+  } catch { hierarchyInfo.parent = null }
+  try {
+    hierarchyInfo.children = webdggrid.sequenceNumChildren([seqnum], resolution)[0]
+  } catch { hierarchyInfo.children = [] }
+
+  updateHierarchyLayers(seqnum, resolution)
+}
+
+function clearSelection() {
+  selectedCellId.value = null
+  selectedCellRes.value = null
+  hierarchyInfo.parent = null
+  hierarchyInfo.children = []
+  hierarchyInfo.neighbors = []
+  removeHierarchyMapLayers()
+}
+
+// MapLibre source/layer IDs for hierarchy
+const HIER_SOURCES = ['hier-parent', 'hier-children', 'hier-selected', 'hier-labels-selected', 'hier-labels-parent', 'hier-labels-children']
+
+function removeHierarchyMapLayers() {
+  if (!map) return
+  for (const id of HIER_SOURCES) {
+    for (const suffix of ['-fill', '-line', '-text']) {
+      if (map.getLayer(id + suffix)) map.removeLayer(id + suffix)
+    }
+    if (map.getSource(id)) map.removeSource(id)
+  }
+}
+
+function sanitizeFc(fc) {
+  fc.features.forEach(f => {
+    if (typeof f.id === 'bigint') f.id = f.id.toString()
+    if (f.properties) {
+      for (const k of Object.keys(f.properties)) {
+        if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
+      }
+    }
+  })
+  return fc
+}
+
+function updateHierarchyLayers(seqnum, resolution) {
+  if (!map) return
+
+  // Restore base deck.gl grid layers
+  if (deckOverlay && lastFineFc) {
+    updateDeckLayers(lastFineFc, lastBaseFc)
+  }
+
+  // Remove previous MapLibre hierarchy layers
+  removeHierarchyMapLayers()
+
+  // --- Parent polygon ---
+  if (hierarchyInfo.parent !== null && resolution > 0) {
+    try {
+      const parentFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([hierarchyInfo.parent], resolution - 1))
+      console.log('Parent cell geometry:', JSON.stringify(parentFc.features[0]?.geometry))
+      map.addSource('hier-parent', { type: 'geojson', data: parentFc })
+      map.addLayer({ id: 'hier-parent-fill', type: 'fill', source: 'hier-parent', paint: { 'fill-color': '#33cc33', 'fill-opacity': 0.15 } })
+      map.addLayer({ id: 'hier-parent-line', type: 'line', source: 'hier-parent', paint: { 'line-color': '#33cc33', 'line-width': 3, 'line-dasharray': [3, 2] } })
+
+      // Parent label — offset upward so it doesn't overlap selected cell
+      const geo = webdggrid.sequenceNumToGeo([hierarchyInfo.parent], resolution - 1)[0]
+      const parentLabelFc = { type: 'FeatureCollection', features: [{
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
+        properties: { label: getCellIndexLabel(hierarchyInfo.parent, resolution - 1) },
+      }] }
+      map.addSource('hier-labels-parent', { type: 'geojson', data: parentLabelFc })
+      map.addLayer({
+        id: 'hier-labels-parent-text',
+        type: 'symbol',
+        source: 'hier-labels-parent',
+        layout: {
+          'text-field': ['get', 'label'],
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-size': 13,
+          'text-offset': [0, -2],
+          'text-allow-overlap': false,
+        },
+        paint: { 'text-color': '#1a8a1a', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 2 },
+      })
+    } catch (err) { console.error('Parent geometry error:', err) }
+  }
+
+  // --- Children polygons ---
+  if (hierarchyInfo.children.length > 0) {
+    try {
+      const childFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1))
+      map.addSource('hier-children', { type: 'geojson', data: childFc })
+      map.addLayer({ id: 'hier-children-fill', type: 'fill', source: 'hier-children', paint: { 'fill-color': '#ffcc00', 'fill-opacity': 0.3 } })
+      map.addLayer({ id: 'hier-children-line', type: 'line', source: 'hier-children', paint: { 'line-color': '#cc9900', 'line-width': 2 } })
+
+      // Children labels — collision detection auto-hides overlapping ones
+      const childLabelFeatures = []
+      for (const child of hierarchyInfo.children) {
+        try {
+          const geo = webdggrid.sequenceNumToGeo([child], resolution + 1)[0]
+          childLabelFeatures.push({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
+            properties: { label: getCellIndexLabel(child, resolution + 1) },
+          })
+        } catch { /* skip */ }
+      }
+      if (childLabelFeatures.length > 0) {
+        const childLabelFc = { type: 'FeatureCollection', features: childLabelFeatures }
+        map.addSource('hier-labels-children', { type: 'geojson', data: childLabelFc })
+        map.addLayer({
+          id: 'hier-labels-children-text',
+          type: 'symbol',
+          source: 'hier-labels-children',
+          layout: {
+            'text-field': ['get', 'label'],
+            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+            'text-size': 10,
+            'text-allow-overlap': false,
+            'text-optional': true,
+          },
+          paint: { 'text-color': '#886600', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.5 },
+        })
+      }
+    } catch { /* skip */ }
+  }
+
+  // --- Selected cell highlight (always on top) ---
+  try {
+    const centerFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution))
+    map.addSource('hier-selected', { type: 'geojson', data: centerFc })
+    map.addLayer({ id: 'hier-selected-fill', type: 'fill', source: 'hier-selected', paint: { 'fill-color': '#ff3333', 'fill-opacity': 0.25 } })
+    map.addLayer({ id: 'hier-selected-line', type: 'line', source: 'hier-selected', paint: { 'line-color': '#ff3333', 'line-width': 4 } })
+
+    // Selected label — always visible, ignores collisions
+    const geo = webdggrid.sequenceNumToGeo([seqnum], resolution)[0]
+    const selLabelFc = { type: 'FeatureCollection', features: [{
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
+      properties: { label: getCellIndexLabel(seqnum, resolution) },
+    }] }
+    map.addSource('hier-labels-selected', { type: 'geojson', data: selLabelFc })
+    map.addLayer({
+      id: 'hier-labels-selected-text',
+      type: 'symbol',
+      source: 'hier-labels-selected',
+      layout: {
+        'text-field': ['get', 'label'],
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-size': 14,
+        'text-allow-overlap': true,
+        'text-ignore-placement': true,
+      },
+      paint: { 'text-color': '#ff3333', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 2.5 },
+    })
+  } catch { /* skip */ }
+}
+
+// ---------------------------------------------------------------------------
 // Lifecycle
 // ---------------------------------------------------------------------------
 
@@ -313,7 +548,7 @@ onMounted(async () => {
       loadScript('https://unpkg.com/deck.gl@9/dist.min.js'),
     ])
 
-    const { Webdggrid } = await new Function('return import("https://cdn.jsdelivr.net/npm/webdggrid/dist/index.js")')()
+    const Webdggrid = await loadWebdggrid()
 
     const isDark = document.documentElement.classList.contains('dark')
 
@@ -458,13 +693,43 @@ defineExpose({ getMap: () => map })
         </select>
       </div>
 
-      <div v-if="showAperture" class="field">
+      <h4>Aperture</h4>
+
+      <label v-if="showAperture" class="field-inline">
+        <input v-model="ctrlMixedAperture" type="checkbox" />
+        Mixed aperture sequence
+      </label>
+
+      <div v-if="showAperture && !ctrlMixedAperture" class="field">
         <label>Aperture</label>
         <select v-model.number="ctrlAperture">
           <option :value="3">3</option>
           <option :value="4">4</option>
           <option :value="7">7</option>
         </select>
+      </div>
+
+      <div v-if="ctrlMixedAperture && showAperture" class="field">
+        <label>
+          Sequence (digits 3, 4, 7)
+          <span>{{ ctrlApertureSeq.length }} levels</span>
+        </label>
+        <input
+          v-model="ctrlApertureSeq"
+          type="text"
+          placeholder="e.g. 434747"
+          pattern="[347]*"
+          class="aperture-seq-input"
+        />
+        <div class="aperture-seq-preview">
+          <span
+            v-for="(ch, i) in ctrlApertureSeq.split('')"
+            :key="i"
+            class="aperture-digit"
+            :class="{ 'digit-3': ch === '3', 'digit-4': ch === '4', 'digit-7': ch === '7' }"
+            :title="'Res ' + (i + 1) + ' → aperture ' + ch"
+          >{{ ch }}</span>
+        </div>
       </div>
 
       <div class="field">
@@ -514,6 +779,65 @@ defineExpose({ getMap: () => map })
       >
         {{ !isReady ? 'Loading WASM…' : isGenerating ? 'Generating…' : 'Generate Grid' }}
       </button>
+
+    </div>
+
+    <!-- Cell Hierarchy panel (top-left) -->
+    <div v-if="showControls" class="dggs-hierarchy">
+      <h3>Cell Hierarchy</h3>
+
+      <div class="field">
+        <label>Index Type</label>
+        <select v-model="ctrlIndexType" @change="selectedCellId && selectCell(selectedCellId, selectedCellRes)">
+          <option v-for="t in availableIndexTypes" :key="t" :value="t">{{ t }}</option>
+        </select>
+      </div>
+
+      <!-- Mixed aperture per-level display -->
+      <div v-if="ctrlMixedAperture && showAperture" class="hier-group">
+        <div class="hier-label">Aperture per level</div>
+        <div class="aperture-seq-preview">
+          <span
+            v-for="(ch, i) in ctrlApertureSeq.split('')"
+            :key="i"
+            class="aperture-digit"
+            :class="{ 'digit-3': ch === '3', 'digit-4': ch === '4', 'digit-7': ch === '7', 'digit-active': selectedCellRes !== null && i + 1 === selectedCellRes }"
+            :title="'Res ' + (i + 1) + ' → aperture ' + ch"
+          >{{ ch }}</span>
+        </div>
+      </div>
+
+      <template v-if="selectedCellId">
+        <div class="hier-cell-id">
+          Selected: <strong>{{ selectedCellId.toString() }}</strong>
+          <span class="hier-res">res {{ selectedCellRes }}<template v-if="ctrlMixedAperture && showAperture && ctrlApertureSeq[selectedCellRes - 1]"> (a{{ ctrlApertureSeq[selectedCellRes - 1] }})</template></span>
+          <button class="hier-clear-btn" @click="clearSelection">Clear</button>
+        </div>
+
+        <div v-if="hierarchyInfo.parent !== null" class="hier-group">
+          <div class="hier-label hier-parent-label">
+            Parent (res {{ selectedCellRes - 1 }}<template v-if="ctrlMixedAperture && showAperture && ctrlApertureSeq[selectedCellRes - 2]">, a{{ ctrlApertureSeq[selectedCellRes - 2] }}</template>)
+          </div>
+          <div class="hier-value">{{ hierarchyInfo.parent.toString() }}</div>
+        </div>
+
+        <div v-if="hierarchyInfo.children.length" class="hier-group">
+          <div class="hier-label hier-child-label">
+            Children ({{ hierarchyInfo.children.length }}, res {{ selectedCellRes + 1 }}<template v-if="ctrlMixedAperture && showAperture && ctrlApertureSeq[selectedCellRes]">, a{{ ctrlApertureSeq[selectedCellRes] }}</template>)
+          </div>
+          <div class="hier-chips">
+            <span v-for="(c, i) in hierarchyInfo.children" :key="i" class="hier-chip hier-chip-child">{{ c.toString() }}</span>
+          </div>
+        </div>
+
+        <div v-if="hierarchyInfo.neighbors.length" class="hier-group">
+          <div class="hier-label hier-neighbor-label">Neighbors ({{ hierarchyInfo.neighbors.length }})</div>
+          <div class="hier-chips">
+            <span v-for="(n, i) in hierarchyInfo.neighbors" :key="i" class="hier-chip hier-chip-neighbor">{{ n.toString() }}</span>
+          </div>
+        </div>
+      </template>
+      <div v-else class="hier-hint">Click a cell on the map to inspect hierarchy</div>
     </div>
 
     <!-- Status bar -->
@@ -679,6 +1003,146 @@ defineExpose({ getMap: () => map })
   font-size: 13px;
   white-space: nowrap;
   color: var(--vp-c-text-1);
+}
+
+/* ---- aperture sequence ---- */
+.aperture-seq-input {
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+.aperture-seq-preview {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.aperture-digit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: monospace;
+  color: #fff;
+}
+.digit-3 { background: #2b7fd4; }
+.digit-4 { background: #cc9900; }
+.digit-7 { background: #cc4c02; }
+.digit-active { outline: 2px solid var(--vp-c-brand-1); outline-offset: 1px; }
+
+/* ---- hierarchy panel (top-left) ---- */
+.dggs-hierarchy {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  background: var(--vp-c-bg-elv);
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  width: 260px;
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+}
+.dggs-hierarchy h3 {
+  font-size: 10px;
+  margin-bottom: 6px;
+  color: var(--vp-c-text-2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.dggs-hierarchy .field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 5px;
+}
+.dggs-hierarchy .field label {
+  font-size: 11px;
+  color: var(--vp-c-text-2);
+}
+.dggs-hierarchy .field select {
+  width: 100%;
+  padding: 2px 5px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-soft);
+}
+.hier-cell-id {
+  font-size: 11px;
+  color: var(--vp-c-text-1);
+  margin-bottom: 6px;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.hier-res {
+  background: var(--vp-c-default-soft);
+  color: var(--vp-c-text-2);
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  margin-left: 4px;
+}
+.hier-clear-btn {
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 3px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  margin-left: auto;
+}
+.hier-clear-btn:hover { background: var(--vp-c-default-soft); }
+.hier-group {
+  margin-bottom: 5px;
+}
+.hier-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+}
+.hier-parent-label { color: #33cc33; }
+.hier-child-label { color: #cc9900; }
+.hier-neighbor-label { color: #3399ff; }
+.hier-value {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--vp-c-text-1);
+  word-break: break-all;
+}
+.hier-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.hier-chip {
+  font-size: 10px;
+  font-family: monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-1);
+  word-break: break-all;
+}
+.hier-chip-child { border-left: 2px solid #ffcc00; }
+.hier-chip-neighbor { border-left: 2px solid #3399ff; }
+.hier-hint {
+  font-size: 11px;
+  color: var(--vp-c-text-3);
+  font-style: italic;
+  margin-top: 2px;
 }
 
 /* ---- pole marker (injected into MapLibre DOM) ---- */
