@@ -970,11 +970,43 @@ std::vector<SeqNum> seqNumsParents(const DggsParams &p,
 }
 
 std::vector<SeqNum> seqNumChildren(const DggsParams &p, SeqNum seqnum) {
-    // DEBUG: Return fixed values to see if code runs
+    // For children, we need res+1 to exist
+    // Temporarily bump res to ensure IDGGS has the child resolution
+    DggsParams p_with_children = p;
+    if (p.res < 10) {
+        p_with_children.res = p.res + 1;
+    }
+    auto t = getTransformer(p_with_children);
+    
+    // Get the DGG at the parent resolution
+    const DgIDGGBase &parent_dgg = t->idggs->idggBase(p.res);
+    
+    // Convert seqnum to Q2DI coordinate
+    DgQ2DICoord q2di = parent_dgg.bndRF().addFromSeqNum(
+                           static_cast<unsigned long long int>(seqnum));
+    
+    // Create a ResAdd for the parent resolution
+    DgResAdd<DgQ2DICoord> q2diR(q2di, p.res);
+    
+    // Get all children (interior + boundary cells)
+    // For hexagons, this returns 7 cells (1 interior + 6 boundary)
+    DgLocVector children;
+    t->idggs->setAllChildren(q2diR, children);
+    
+    // Convert to seqnums at child resolution
+    const DgIDGGBase &child_dgg = t->idggs->idggBase(p.res + 1);
     std::vector<SeqNum> result;
-    result.push_back(999);
-    result.push_back(888);
-    result.push_back(777);
+    result.reserve(children.size());
+    
+    for (int i = 0; i < children.size(); i++) {
+        // Create a non-const copy to convert
+        DgLocation child_loc(children[i]);
+        child_dgg.convert(&child_loc);
+        const DgQ2DICoord *child_q2di = child_dgg.getAddress(child_loc);
+        uint64_t child_seqnum = child_dgg.bndRF().seqNumAddress(*child_q2di);
+        result.push_back(static_cast<SeqNum>(child_seqnum));
+    }
+    
     return result;
 }
 

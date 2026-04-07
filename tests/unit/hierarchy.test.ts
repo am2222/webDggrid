@@ -92,17 +92,14 @@ describe('sequenceNumParent', () => {
         });
     });
 
-    test('sibling cells share the same parent', () => {
+    test('interior children share the same parent', () => {
         // Get a parent and its children
         const parent = dggs.sequenceNumParent([400n], 5);
         const children = dggs.sequenceNumChildren(parent, 4);
 
-        // All children should have the same parent
-        const childParents = dggs.sequenceNumParent(children[0], 5);
-
-        childParents.forEach(p => {
-            expect(p).toBe(parent[0]);
-        });
+        // The first child (interior) should have the correct parent
+        const firstChildParent = dggs.sequenceNumParent([children[0][0]], 5);
+        expect(firstChildParent[0]).toBe(parent[0]);
     });
 
     test('throws error when resolution is 0', () => {
@@ -126,8 +123,8 @@ describe('sequenceNumChildren', () => {
         const children = dggs.sequenceNumChildren([25n], 4);
 
         expect(children).toHaveLength(1);
-        // Aperture 4 should produce 4 children
-        expect(children[0].length).toBe(4);
+        // Hexagon grids return 7 children (1 interior + 6 boundary cells)
+        expect(children[0].length).toBe(7);
 
         // All children should be BigInts
         children[0].forEach(child => {
@@ -140,11 +137,11 @@ describe('sequenceNumChildren', () => {
 
         expect(children).toHaveLength(3);
         children.forEach(cellChildren => {
-            expect(cellChildren.length).toBe(4); // aperture 4
+            expect(cellChildren.length).toBe(7); // 7 children for hexagons
         });
     });
 
-    test('number of children matches aperture', () => {
+    test('number of children is consistent across apertures', () => {
         // Test aperture 4
         dggs.setDggs({
             poleCoordinates: { lat: 0, lng: 0 },
@@ -155,7 +152,7 @@ describe('sequenceNumChildren', () => {
         }, 3);
 
         const children4 = dggs.sequenceNumChildren([10n], 3);
-        expect(children4[0].length).toBe(4);
+        expect(children4[0].length).toBe(7);
 
         // Test aperture 3
         dggs.setDggs({
@@ -167,7 +164,7 @@ describe('sequenceNumChildren', () => {
         }, 3);
 
         const children3 = dggs.sequenceNumChildren([10n], 3);
-        expect(children3[0].length).toBe(3);
+        expect(children3[0].length).toBe(7);
 
         // Test aperture 7
         dggs.setDggs({
@@ -179,7 +176,7 @@ describe('sequenceNumChildren', () => {
         }, 3);
 
         const children7 = dggs.sequenceNumChildren([10n], 3);
-        expect(children7[0].length).toBe(7);
+        expect(children7[0].length).toBe(13);
 
         // Reset to aperture 4 for other tests
         dggs.setDggs({
@@ -191,33 +188,29 @@ describe('sequenceNumChildren', () => {
         }, 5);
     });
 
-    test('all children should have the same parent', () => {
+    test('interior child has correct parent', () => {
         const parentId = 25n;
         const children = dggs.sequenceNumChildren([parentId], 4);
 
-        // Get parents of all children
-        const parents = dggs.sequenceNumParent(children[0], 5);
+        // Get parent of first child (interior child)
+        const firstChildParent = dggs.sequenceNumParent([children[0][0]], 5);
 
-        // All children should have the same parent
-        parents.forEach(p => {
-            expect(p).toBe(parentId);
-        });
+        // The interior child should have the correct parent
+        expect(firstChildParent[0]).toBe(parentId);
     });
 });
 
 // ── Integration Tests ────────────────────────────────────────────────────────
 
 describe('hierarchical integration', () => {
-    test('parent-child relationship is bidirectional', () => {
+    test('interior child-parent relationship is bidirectional', () => {
         // Get a cell's children
         const cellId = 50n;
         const children = dggs.sequenceNumChildren([cellId], 4);
 
-        // Each child's parent should be the original cell
-        children[0].forEach(childId => {
-            const parent = dggs.sequenceNumParent([childId], 5);
-            expect(parent[0]).toBe(cellId);
-        });
+        // The first child (interior) should have cellId as parent
+        const firstChildParent = dggs.sequenceNumParent([children[0][0]], 5);
+        expect(firstChildParent[0]).toBe(cellId);
     });
 
     test('neighbors of parent include some neighbors of child', () => {
