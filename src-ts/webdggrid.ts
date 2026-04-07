@@ -885,4 +885,231 @@ export class Webdggrid {
             features,
         };
     }
+
+    /**
+     * Returns all neighboring cells (sharing an edge) for each input cell.
+     *
+     * For hexagonal grids, each interior cell typically has 6 neighbors.
+     * Pentagon cells and boundary cells may have fewer. Triangle topology
+     * is not supported by the underlying DGGRID library.
+     *
+     * The output is a 2-D array: `result[i]` contains all neighbors of
+     * `sequenceNum[i]`.
+     *
+     * ```ts
+     * const neighbors = dggs.sequenceNumNeighbors([123n], 5);
+     * // neighbors[0] = [122n, 124n, 125n, 126n, 127n, 128n]
+     * ```
+     *
+     * ::: warning
+     * Triangle topology is **not supported**. Attempting to retrieve neighbors
+     * for a TRIANGLE grid will throw an error.
+     * :::
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose neighbors to find.
+     * @param resolution - Resolution at which the IDs were generated. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns A 2-D array of `BigInt[]`: `result[i]` is the array of neighbor
+     *   IDs for `sequenceNum[i]`.
+     * @throws If Triangle topology is used or if an invalid cell ID is provided.
+     */
+    sequenceNumNeighbors(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint[][] {
+        const {
+            poleCoordinates: { lat, lng },
+            azimuth,
+            topology,
+            projection,
+            aperture,
+            apertureSequence,
+        } = this.dggs;
+
+        if (topology === Topology.TRIANGLE) {
+            throw new Error('Neighbor detection is not supported for TRIANGLE topology');
+        }
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
+
+        try {
+            const resultArray = this._module.SEQNUMS_neighbors(
+                lng,
+                lat,
+                azimuth,
+                aperture,
+                resolution,
+                topology,
+                projection,
+                isApertureSequence,
+                apSeq,
+                sequenceNum
+            );
+
+            // The result is a flat array with format:
+            // [count0, count1, ..., countN, neighbor0_0, neighbor0_1, ..., neighbor0_(count0-1), neighbor1_0, ...]
+            const inputSize = sequenceNum.length;
+            const counts = resultArray.slice(0, inputSize);
+            const neighbors: bigint[][] = [];
+
+            let offset = inputSize;
+            for (let i = 0; i < inputSize; i++) {
+                const count = counts[i];
+                neighbors.push(resultArray.slice(offset, offset + count));
+                offset += count;
+            }
+
+            return neighbors;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
+     * Returns the parent cell at the next coarser resolution (resolution - 1)
+     * for each input cell.
+     *
+     * The parent-child relationship forms a hierarchical index structure. For
+     * aperture 4 grids, each parent contains 4 children; for aperture 7, each
+     * parent contains 7 children.
+     *
+     * ```ts
+     * const parents = dggs.sequenceNumParent([123n, 456n], 5);
+     * // parents = [30n, 114n]  (at resolution 4)
+     * ```
+     *
+     * ::: info
+     * Calling this method at resolution 0 will throw an error because there
+     * are no cells at resolution -1.
+     * :::
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose parents to find.
+     * @param resolution - Resolution at which the input IDs were generated.
+     *   Must be > 0. Defaults to the instance's current {@link resolution}.
+     * @returns Array of `BigInt` parent cell IDs at resolution - 1, one per
+     *   input cell, in the same order.
+     * @throws If resolution is 0 or if an invalid cell ID is provided.
+     */
+    sequenceNumParent(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint[] {
+        if (resolution <= 0) {
+            throw new Error('Cannot get parent at resolution 0 or below');
+        }
+
+        const {
+            poleCoordinates: { lat, lng },
+            azimuth,
+            topology,
+            projection,
+            aperture,
+            apertureSequence,
+        } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
+
+        try {
+            const resultArray = this._module.SEQNUMS_parents(
+                lng,
+                lat,
+                azimuth,
+                aperture,
+                resolution,
+                topology,
+                projection,
+                isApertureSequence,
+                apSeq,
+                sequenceNum
+            );
+
+            return resultArray;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
+     * Returns all child cells at the next finer resolution (resolution + 1)
+     * for each input cell.
+     *
+     * The number of children depends on the aperture:
+     * - Aperture 3: 3 children per parent
+     * - Aperture 4: 4 children per parent
+     * - Aperture 7: 7 children per parent
+     *
+     * The output is a 2-D array: `result[i]` contains all children of
+     * `sequenceNum[i]`.
+     *
+     * ```ts
+     * const children = dggs.sequenceNumChildren([30n], 4);
+     * // children[0] = [120n, 121n, 122n, 123n]  (at resolution 5, aperture 4)
+     * ```
+     *
+     * ::: info
+     * Children always include both boundary and interior cells. The returned
+     * cells completely cover the parent cell's area.
+     * :::
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose children to find.
+     * @param resolution - Resolution at which the input IDs were generated.
+     *   Defaults to the instance's current {@link resolution}.
+     * @returns A 2-D array of `BigInt[]`: `result[i]` is the array of child
+     *   IDs for `sequenceNum[i]` at resolution + 1.
+     * @throws If an invalid cell ID is provided or if the maximum resolution
+     *   is exceeded.
+     */
+    sequenceNumChildren(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint[][] {
+        const {
+            poleCoordinates: { lat, lng },
+            azimuth,
+            topology,
+            projection,
+            aperture,
+            apertureSequence,
+        } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
+
+        try {
+            const resultArray = this._module.SEQNUMS_children(
+                lng,
+                lat,
+                azimuth,
+                aperture,
+                resolution,
+                topology,
+                projection,
+                isApertureSequence,
+                apSeq,
+                sequenceNum
+            );
+
+            // The result is a flat array with format:
+            // [count0, count1, ..., countN, child0_0, child0_1, ..., child0_(count0-1), child1_0, ...]
+            const inputSize = sequenceNum.length;
+            const counts = resultArray.slice(0, inputSize);
+            const children: bigint[][] = [];
+
+            let offset = inputSize;
+            for (let i = 0; i < inputSize; i++) {
+                const count = counts[i];
+                children.push(resultArray.slice(offset, offset + count));
+                offset += count;
+            }
+
+            return children;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
 }

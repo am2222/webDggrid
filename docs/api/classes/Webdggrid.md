@@ -80,6 +80,38 @@ Defaults to `1`.
 
 ## Methods
 
+### Quick Reference
+
+**Static Methods:**
+- [`load()`](#load) - Load the WebAssembly module
+- [`unload()`](#unload) - Unload and free WASM memory
+
+**Configuration:**
+- [`setDggs()`](#setdggs) - Configure the DGGS (topology, projection, aperture)
+- [`setResolution()`](#setresolution) - Set the active grid resolution
+- [`getResolution()`](#getresolution) - Get the current resolution
+
+**Grid Statistics:**
+- [`nCells()`](#ncells) - Total number of cells at a resolution
+- [`cellAreaKM()`](#cellareakm) - Average cell area in km²
+- [`cellDistKM()`](#celldistkm) - Average cell spacing in km
+- [`gridStatCLS()`](#gridstatcls) - Characteristic length scale
+
+**Coordinate Conversion:**
+- [`geoToSequenceNum()`](#geotosequencenum) - Convert coordinates to cell IDs
+- [`sequenceNumToGeo()`](#sequencenumtogeo) - Convert cell IDs to coordinates
+- [`geoToGeo()`](#geotogeo) - Snap coordinates to cell centroids
+
+**Geometry Generation:**
+- [`sequenceNumToGrid()`](#sequencenumtogrid) - Get cell polygon geometries
+- [`sequenceNumToGridFeatureCollection()`](#sequencenumtogridfeaturecollection) - Export cells as GeoJSON
+
+**Other:**
+- [`version()`](#version) - Get DGGRID library version
+- [`_main()`](#_main) - Internal test helper (not for production)
+
+---
+
 ### \_main()
 
 > **\_main**(): `any`

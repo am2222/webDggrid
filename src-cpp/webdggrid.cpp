@@ -846,8 +846,27 @@ val SEQNUMS_neighbors(
                         is_aperture_sequence, aperture_sequence);
     
     const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
-    auto all_neighbors = dggrid::seqNumsNeighbors(p, sv);
-    return seqNumArray(all_neighbors);
+    
+    // Get neighbors for each cell
+    std::vector<uint64_t> result;
+    result.reserve(sv.size() + sv.size() * 6); // counts + ~6 neighbors per cell
+    
+    // First, add the counts
+    std::vector<std::vector<uint64_t>> all_neighbors;
+    all_neighbors.reserve(sv.size());
+    
+    for (const auto& seqnum : sv) {
+        auto neighbors = dggrid::seqNumNeighbors(p, seqnum);
+        all_neighbors.push_back(neighbors);
+        result.push_back(neighbors.size()); // Add count
+    }
+    
+    // Then, add all the neighbor data
+    for (const auto& neighbors : all_neighbors) {
+        result.insert(result.end(), neighbors.begin(), neighbors.end());
+    }
+    
+    return seqNumArray(result);
 }
 
 // ===========================================================================
@@ -914,15 +933,27 @@ val SEQNUMS_children(
                         is_aperture_sequence, aperture_sequence);
     
     const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
-    auto all_children = dggrid::seqNumsChildren(p, sv);
     
-    // Return as an array of arrays  
-    // We'll flatten it for simplicity in JS (can be reshaped there)
-    std::vector<uint64_t> flattened;
-    for (const auto& children : all_children) {
-        flattened.insert(flattened.end(), children.begin(), children.end());
+    // Get children for each cell
+    std::vector<uint64_t> result;
+    result.reserve(sv.size() + sv.size() * aperture); // counts + aperture children per cell
+    
+    // First, add the counts
+    std::vector<std::vector<uint64_t>> all_children;
+    all_children.reserve(sv.size());
+    
+    for (const auto& seqnum : sv) {
+        auto children = dggrid::seqNumChildren(p, seqnum);
+        all_children.push_back(children);
+        result.push_back(children.size()); // Add count
     }
-    return seqNumArray(flattened);
+    
+    // Then, add all the children data
+    for (const auto& children : all_children) {
+        result.insert(result.end(), children.begin(), children.end());
+    }
+    
+    return seqNumArray(result);
 }
 
 // ===========================================================================
