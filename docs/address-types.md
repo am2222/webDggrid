@@ -542,17 +542,6 @@ console.log('Children Z7:', childrenZ7.map(z => z.toString(16)));
 // Parent-child relationship visible in hex representation
 ```
 
----
-
-## Related Documentation
-
-- [Hierarchical Address Types](hierarchical-addresses.md) - Detailed guide to VERTEX2DD, ZORDER, Z3, Z7
-- [Hierarchical Operations](hierarchical-operations.md) - Parent-child relationships
-- [Multi-Aperture Grids](multi-aperture.md) - Mixed aperture sequences
-- [API Reference](api/) - Complete method documentation
-
----
-
 ## Technical Details
 
 ### DGGRID Reference Frames

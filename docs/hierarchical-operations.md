@@ -364,38 +364,8 @@ try {
 
 ## API Reference
 
-### `sequence NumNeighbors(sequenceNum: bigint[], resolution: number): bigint[][]`
-
-Returns neighboring cells that share an edge.
-
-- **Parameters:**
-  - `sequenceNum`: Array of cell IDs to query
-  - `resolution`: Resolution level of the input cells
-- **Returns:** 2D array where `result[i]` contains neighbors of `sequenceNum[i]`
-- **Throws:** Error if triangle topology is used
-
-### `sequenceNumParent(sequenceNum: bigint[], resolution: number): bigint[]`
-
-Returns parent cells at `resolution - 1`.
-
-- **Parameters:**
-  - `sequenceNum`: Array of cell IDs to query
-  - `resolution`: Resolution level of the input cells (must be > 0)
-- **Returns:** Array of parent cell IDs, one per input
-- **Throws:** Error if `resolution` is 0 or negative
-
-### `sequenceNumChildren(sequenceNum: bigint[], resolution: number): bigint[][]`
-
-Returns child cells at `resolution + 1`.
-
-- **Parameters:**
-  - `sequenceNum`: Array of cell IDs to query
-  - `resolution`: Resolution level of the input cells
-- **Returns:** 2D array where `result[i]` contains children of `sequenceNum[i]`
-- **Note:** Number of children equals the aperture value
-
-## Further Reading
-
-- [Getting Started Guide](./getting-started.md)
-- [Multi-Aperture Grids](./multi-aperture.md)
-- [API Reference](./api/)
+| Method | Description |
+|--------|-------------|
+| [`sequenceNumNeighbors()`](api/classes/Webdggrid.md#sequencenumneighbors) | Find all cells sharing an edge with the input cells |
+| [`sequenceNumParent()`](api/classes/Webdggrid.md#sequencenumparent) | Get parent cell at `resolution - 1` |
+| [`sequenceNumChildren()`](api/classes/Webdggrid.md#sequencenumchildren) | Get child cells at `resolution + 1` |

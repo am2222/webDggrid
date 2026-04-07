@@ -37,12 +37,12 @@ export default defineConfig({
         text: 'Guide',
         items: [
           { text: 'Getting Started', link: '/getting-started' },
-          { text: 'Geometry Notes', link: '/getting-started#geometry-notes' },
+          { text: 'Geometry Notes', link: '/geometry-notes' },
           { text: 'Address Types', link: '/address-types' },
-          { text: 'Multi-Aperture', link: '/multi-aperture' },
           { text: 'Hierarchical Operations', link: '/hierarchical-operations' },
           { text: 'Hierarchical Address Types', link: '/hierarchical-addresses' },
           { text: 'Index Arithmetic', link: '/index-arithmetic' },
+          { text: 'Multi-Aperture', link: '/multi-aperture' },
         ],
       },
       {
