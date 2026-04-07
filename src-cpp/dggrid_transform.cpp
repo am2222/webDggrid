@@ -970,33 +970,11 @@ std::vector<SeqNum> seqNumsParents(const DggsParams &p,
 }
 
 std::vector<SeqNum> seqNumChildren(const DggsParams &p, SeqNum seqnum) {
-    auto t = getTransformer(p);
-    
-    // Convert seqnum to Q2DI
-    auto loc = t->inSEQNUM(seqnum);
-    const DgQ2DICoord *q2di = t->dgg->getAddress(*loc);
-    
-    // Create resAdd for current resolution
-    DgResAdd<DgQ2DICoord> resAdd(*q2di, p.res);
-    
-    // Get all children - use public API
-    DgLocVector children(*(t->idggs));
-    t->idggs->setAllChildren(resAdd, children);
-    
-    // Convert to seqnums at child resolution
-    const DgIDGGBase &child_dgg = t->idggs->idggBase(p.res + 1);
+    // DEBUG: Return fixed values to see if code runs
     std::vector<SeqNum> result;
-    result.reserve(children.size());
-    
-    for (int i = 0; i < children.size(); i++) {
-        // Create a non-const copy to convert
-        DgLocation child_loc(children[i]);
-        child_dgg.convert(&child_loc);
-        const DgQ2DICoord *child_q2di = child_dgg.getAddress(child_loc);
-        uint64_t child_seqnum = child_dgg.bndRF().seqNumAddress(*child_q2di);
-        result.push_back(static_cast<SeqNum>(child_seqnum));
-    }
-    
+    result.push_back(999);
+    result.push_back(888);
+    result.push_back(777);
     return result;
 }
 

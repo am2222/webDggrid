@@ -955,7 +955,7 @@ export class Webdggrid {
 
             let offset = inputSize;
             for (let i = 0; i < inputSize; i++) {
-                const count = counts[i];
+                const count = Number(counts[i]);
                 neighbors.push(resultArray.slice(offset, offset + count));
                 offset += count;
             }
@@ -1101,7 +1101,7 @@ export class Webdggrid {
 
             let offset = inputSize;
             for (let i = 0; i < inputSize; i++) {
-                const count = counts[i];
+                const count = Number(counts[i]);
                 children.push(resultArray.slice(offset, offset + count));
                 offset += count;
             }
