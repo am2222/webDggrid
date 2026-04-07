@@ -59,6 +59,13 @@ const seqNum = dggs.geoToSequenceNum([[0, 0]]);
 ```
 
 
+## Live Demos
+
+- [Globe Demo](https://am2222.github.io/webDggrid/demo) — interactive MapLibre globe with topology switching, multi-aperture grids, and hierarchical cell selection
+- [Hierarchical Operations Demo](https://am2222.github.io/webDggrid/hierarchical-operations#interactive-demo) — explore parent, children, and neighbor relationships
+- [Address Types Demo](https://am2222.github.io/webDggrid/hierarchical-addresses#interactive-demo) — compare index types and see bitwise digit breakdowns
+- [Index Arithmetic Demo](https://am2222.github.io/webDggrid/index-arithmetic#interactive-demo) — live demonstration of digit manipulation on Z3, Z7, and ZORDER indices
+
 ## API
 
 ### Lifecycle

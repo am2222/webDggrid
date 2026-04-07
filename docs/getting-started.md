@@ -83,7 +83,10 @@ const distkm    = dggs.cellDistKM(3);   // average cell spacing in km
 
 ## Live Demo
 
-See the [interactive globe demo](/demo) for a live example with topology switching, multi-aperture grids, hierarchical cell selection, and drag-to-rotate.
+- [Globe Demo](/demo) — interactive MapLibre globe with topology switching, multi-aperture grids, and hierarchical cell selection
+- [Hierarchical Operations Demo](/hierarchical-operations#interactive-demo) — explore parent, children, and neighbor relationships
+- [Address Types Demo](/hierarchical-addresses#interactive-demo) — compare index types and see bitwise digit breakdowns
+- [Index Arithmetic Demo](/index-arithmetic#interactive-demo) — live demonstration of digit manipulation on Z3, Z7, and ZORDER indices
 
 ## API Overview
 

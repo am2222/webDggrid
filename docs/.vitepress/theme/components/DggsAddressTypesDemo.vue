@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { loadWebdggrid } from '../utils/loadWebdggrid.js'
 
 const svgRef = ref(null)
 const info = ref('')
@@ -41,7 +42,7 @@ let d3 = null
 
 onMounted(async () => {
   await loadScript('https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js')
-  const { Webdggrid } = await import('webdggrid')
+  const Webdggrid = await loadWebdggrid()
   dggs = await Webdggrid.load()
   d3 = window.d3
   applySettings()

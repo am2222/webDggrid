@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ylOrBrRgba, processFcForGlobe } from '../utils/globeUtils.js'
+import { loadWebdggrid } from '../utils/loadWebdggrid.js'
 
 const props = defineProps({
   /** Show OSM raster basemap */
@@ -547,7 +548,7 @@ onMounted(async () => {
       loadScript('https://unpkg.com/deck.gl@9/dist.min.js'),
     ])
 
-    const { Webdggrid } = await import('webdggrid')
+    const Webdggrid = await loadWebdggrid()
 
     const isDark = document.documentElement.classList.contains('dark')
 
