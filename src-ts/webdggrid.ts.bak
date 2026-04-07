@@ -1166,7 +1166,7 @@ export class Webdggrid {
         const result = this._module.GEO_to_PLANE(...this._getParams(resolution), xCoords, yCoords);
 
         const size = result.length / 2;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({ x: result[i], y: result[i + size] });
         }
@@ -1187,7 +1187,7 @@ export class Webdggrid {
         const result = this._module.GEO_to_PROJTRI(...this._getParams(resolution), xCoords, yCoords);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 tnum: result[i],
@@ -1212,7 +1212,7 @@ export class Webdggrid {
         const result = this._module.GEO_to_Q2DD(...this._getParams(resolution), xCoords, yCoords);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 quad: result[i],
@@ -1237,7 +1237,7 @@ export class Webdggrid {
         const result = this._module.GEO_to_Q2DI(...this._getParams(resolution), xCoords, yCoords);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 quad: result[i],
@@ -1263,7 +1263,7 @@ export class Webdggrid {
         const result = this._module.SEQNUM_to_PLANE(...this._getParams(resolution), sequenceNum);
 
         const size = result.length / 2;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({ x: result[i], y: result[i + size] });
         }
@@ -1281,7 +1281,7 @@ export class Webdggrid {
         const result = this._module.SEQNUM_to_PROJTRI(...this._getParams(resolution), sequenceNum);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 tnum: result[i],
@@ -1303,7 +1303,7 @@ export class Webdggrid {
         const result = this._module.SEQNUM_to_Q2DD(...this._getParams(resolution), sequenceNum);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 quad: result[i],
@@ -1325,7 +1325,7 @@ export class Webdggrid {
         const result = this._module.SEQNUM_to_Q2DI(...this._getParams(resolution), sequenceNum);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 quad: result[i],
@@ -1392,7 +1392,7 @@ export class Webdggrid {
         const result = this._module.Q2DI_to_PLANE(...this._getParams(resolution), quads, is, js);
 
         const size = result.length / 2;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({ x: result[i], y: result[i + size] });
         }
@@ -1414,7 +1414,7 @@ export class Webdggrid {
         const result = this._module.Q2DI_to_PROJTRI(...this._getParams(resolution), quads, is, js);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 tnum: result[i],
@@ -1440,7 +1440,7 @@ export class Webdggrid {
         const result = this._module.Q2DI_to_Q2DD(...this._getParams(resolution), quads, is, js);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 quad: result[i],
@@ -1507,7 +1507,7 @@ export class Webdggrid {
         const result = this._module.Q2DD_to_PLANE(...this._getParams(resolution), quads, xs, ys);
 
         const size = result.length / 2;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({ x: result[i], y: result[i + size] });
         }
@@ -1529,7 +1529,7 @@ export class Webdggrid {
         const result = this._module.Q2DD_to_PROJTRI(...this._getParams(resolution), quads, xs, ys);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 tnum: result[i],
@@ -1555,7 +1555,7 @@ export class Webdggrid {
         const result = this._module.Q2DD_to_Q2DI(...this._getParams(resolution), quads, xs, ys);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 quad: result[i],
@@ -1622,7 +1622,7 @@ export class Webdggrid {
         const result = this._module.PROJTRI_to_PLANE(...this._getParams(resolution), tnums, xs, ys);
 
         const size = result.length / 2;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({ x: result[i], y: result[i + size] });
         }
@@ -1644,7 +1644,7 @@ export class Webdggrid {
         const result = this._module.PROJTRI_to_Q2DD(...this._getParams(resolution), tnums, xs, ys);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 quad: result[i],
@@ -1670,7 +1670,7 @@ export class Webdggrid {
         const result = this._module.PROJTRI_to_Q2DI(...this._getParams(resolution), tnums, xs, ys);
 
         const size = result.length / 3;
-        const output: any[] = [];
+        const output = [];
         for (let i = 0; i < size; i++) {
             output.push({
                 quad: result[i],

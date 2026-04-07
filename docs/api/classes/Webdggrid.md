@@ -102,6 +102,72 @@ Defaults to `1`.
 - [`sequenceNumToGeo()`](#sequencenumtogeo) - Convert cell IDs to coordinates
 - [`geoToGeo()`](#geotogeo) - Snap coordinates to cell centroids
 
+**Low-Level Coordinate Transformations:**
+- [`geoToPlane()`](#geoToplane) - GEO → PLANE
+- [`geoToProjtri()`](#geoToProjtri) - GEO → PROJTRI
+- [`geoToQ2dd()`](#geoToQ2dd) - GEO → Q2DD
+- [`geoToQ2di()`](#geoToQ2di) - GEO → Q2DI
+- [`sequenceNumToPlane()`](#sequenceNumToPlane) - SEQNUM → PLANE
+- [`sequenceNumToProjtri()`](#sequenceNumToProjtri) - SEQNUM → PROJTRI
+- [`sequenceNumToQ2dd()`](#sequenceNumToQ2dd) - SEQNUM → Q2DD
+- [`sequenceNumToQ2di()`](#sequenceNumToQ2di) - SEQNUM → Q2DI
+- [`q2diToGeo()`](#q2diToGeo) - Q2DI → GEO
+- [`q2diToSequenceNum()`](#q2diToSequenceNum) - Q2DI → SEQNUM
+- [`q2diToPlane()`](#q2diToPlane) - Q2DI → PLANE
+- [`q2diToProjtri()`](#q2diToProjtri) - Q2DI → PROJTRI
+- [`q2diToQ2dd()`](#q2diToQ2dd) - Q2DI → Q2DD
+- [`q2ddToGeo()`](#q2ddToGeo) - Q2DD → GEO
+- [`q2ddToSequenceNum()`](#q2ddToSequenceNum) - Q2DD → SEQNUM
+- [`q2ddToPlane()`](#q2ddToPlane) - Q2DD → PLANE
+- [`q2ddToProjtri()`](#q2ddToProjtri) - Q2DD → PROJTRI
+- [`q2ddToQ2di()`](#q2ddToQ2di) - Q2DD → Q2DI
+- [`projtriToGeo()`](#projtriToGeo) - PROJTRI → GEO
+- [`projtriToSequenceNum()`](#projtriToSequenceNum) - PROJTRI → SEQNUM
+- [`projtriToPlane()`](#projtriToPlane) - PROJTRI → PLANE
+- [`projtriToQ2dd()`](#projtriToQ2dd) - PROJTRI → Q2DD
+- [`projtriToQ2di()`](#projtriToQ2di) - PROJTRI → Q2DI
+
+**Coordinate Systems:**
+- **GEO** - Geographic (lon, lat) in degrees
+- **SEQNUM** - Sequence number (cell ID)
+- **Q2DI** - Quad 2D Integer (quad, i, j)
+- **Q2DD** - Quad 2D Double (quad, x, y)
+- **PROJTRI** - Projection Triangle (tnum, x, y)
+- **PLANE** - Planar (x, y) - output only
+
+**Low-Level Coordinate Transformations:**
+- [`geoToPlane()`](#geoToplane) - GEO → PLANE
+- [`geoToProjtri()`](#geoToProjtri) - GEO → PROJTRI
+- [`geoToQ2dd()`](#geoToQ2dd) - GEO → Q2DD
+- [`geoToQ2di()`](#geoToQ2di) - GEO → Q2DI
+- [`sequenceNumToPlane()`](#sequenceNumToPlane) - SEQNUM → PLANE
+- [`sequenceNumToProjtri()`](#sequenceNumToProjtri) - SEQNUM → PROJTRI
+- [`sequenceNumToQ2dd()`](#sequenceNumToQ2dd) - SEQNUM → Q2DD
+- [`sequenceNumToQ2di()`](#sequenceNumToQ2di) - SEQNUM → Q2DI
+- [`q2diToGeo()`](#q2diToGeo) - Q2DI → GEO
+- [`q2diToSequenceNum()`](#q2diToSequenceNum) - Q2DI → SEQNUM
+- [`q2diToPlane()`](#q2diToPlane) - Q2DI → PLANE
+- [`q2diToProjtri()`](#q2diToProjtri) - Q2DI → PROJTRI
+- [`q2diToQ2dd()`](#q2diToQ2dd) - Q2DI → Q2DD
+- [`q2ddToGeo()`](#q2ddToGeo) - Q2DD → GEO
+- [`q2ddToSequenceNum()`](#q2ddToSequenceNum) - Q2DD → SEQNUM
+- [`q2ddToPlane()`](#q2ddToPlane) - Q2DD → PLANE
+- [`q2ddToProjtri()`](#q2ddToProjtri) - Q2DD → PROJTRI
+- [`q2ddToQ2di()`](#q2ddToQ2di) - Q2DD → Q2DI
+- [`projtriToGeo()`](#projtriToGeo) - PROJTRI → GEO
+- [`projtriToSequenceNum()`](#projtriToSequenceNum) - PROJTRI → SEQNUM
+- [`projtriToPlane()`](#projtriToPlane) - PROJTRI → PLANE
+- [`projtriToQ2dd()`](#projtriToQ2dd) - PROJTRI → Q2DD
+- [`projtriToQ2di()`](#projtriToQ2di) - PROJTRI → Q2DI
+
+**Coordinate Systems:**
+- **GEO** - Geographic (lon, lat) in degrees
+- **SEQNUM** - Sequence number (cell ID)
+- **Q2DI** - Quad 2D Integer (quad, i, j)
+- **Q2DD** - Quad 2D Double (quad, x, y)
+- **PROJTRI** - Projection Triangle (tnum, x, y)
+- **PLANE** - Planar (x, y) - output only
+
 **Geometry Generation:**
 - [`sequenceNumToGrid()`](#sequencenumtogrid) - Get cell polygon geometries
 - [`sequenceNumToGridFeatureCollection()`](#sequencenumtogridfeaturecollection) - Export cells as GeoJSON

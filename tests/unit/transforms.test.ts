@@ -17,8 +17,8 @@ import { Webdggrid } from '../../lib-esm/webdggrid';
 
 type M = any;
 
-// Standard DGGS parameters (pole_lon, pole_lat, az, aperture, res, topo, proj)
-const P = [0, 0, 0, 4, 1, 'HEXAGON', 'ISEA'] as const;
+// Standard DGGS parameters (pole_lon, pole_lat, az, aperture, res, topo, proj, is_aperture_seq, aperture_seq)
+const P = [0, 0, 0, 4, 1, 'HEXAGON', 'ISEA', false, ''] as const;
 
 let m: M;
 beforeAll(async () => {
@@ -358,23 +358,23 @@ describe('Q2DI_to_Q2DI', () => {
 
 describe('cross-frame round-trips', () => {
   test('GEO → SEQNUM → Q2DI → GEO matches GEO_to_GEO snap', () => {
-    const sn   = m.GEO_to_SEQNUM(...P, [0], [0]);
+    const sn = m.GEO_to_SEQNUM(...P, [0], [0]);
     const q2di = m.SEQNUM_to_Q2DI(...P, sn);
-    const geo  = m.Q2DI_to_GEO(...P, [q2di[0]], [q2di[1]], [q2di[2]]);
+    const geo = m.Q2DI_to_GEO(...P, [q2di[0]], [q2di[1]], [q2di[2]]);
     const snap = m.GEO_to_GEO(...P, [0], [0]);
     expect(geo[0]).toBeCloseTo(snap[0], 8);
     expect(geo[1]).toBeCloseTo(snap[1], 8);
   });
 
   test('GEO → PROJTRI → Q2DI → SEQNUM gives seqnum 1', () => {
-    const pt  = m.GEO_to_PROJTRI(...P, [0], [0]);
-    const sn  = m.PROJTRI_to_SEQNUM(...P, [pt[0]], [pt[1]], [pt[2]]);
+    const pt = m.GEO_to_PROJTRI(...P, [0], [0]);
+    const sn = m.PROJTRI_to_SEQNUM(...P, [pt[0]], [pt[1]], [pt[2]]);
     expect(sn[0]).toBe(1n);
   });
 
   test('GEO → Q2DD → SEQNUM gives seqnum 1', () => {
     const q2dd = m.GEO_to_Q2DD(...P, [0], [0]);
-    const sn   = m.Q2DD_to_SEQNUM(...P, [q2dd[0]], [q2dd[1]], [q2dd[2]]);
+    const sn = m.Q2DD_to_SEQNUM(...P, [q2dd[0]], [q2dd[1]], [q2dd[2]]);
     expect(sn[0]).toBe(1n);
   });
 });
