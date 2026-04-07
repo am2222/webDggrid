@@ -402,9 +402,12 @@ function updateHierarchyLayers(seqnum, resolution) {
         if (typeof f.id === 'bigint') f.id = f.id.toString()
         if (f.properties) for (const k of Object.keys(f.properties)) if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
       })
+      console.log('Parent cell geometry (raw):', JSON.stringify(parentFc.features[0]?.geometry))
+      const parentProcessed = processFcForGlobe(parentFc)
+      console.log('Parent cell geometry (globe-processed):', JSON.stringify(parentProcessed.features[0]?.geometry))
       layers.push(new GeoJsonLayer({
         id: 'hierarchy-parent',
-        data: processFcForGlobe(parentFc),
+        data: parentProcessed,
         filled: true,
         stroked: true,
         wrapLongitude: true,
@@ -413,7 +416,7 @@ function updateHierarchyLayers(seqnum, resolution) {
         getLineWidth: 3,
         lineWidthUnits: 'pixels',
       }))
-    } catch { /* skip */ }
+    } catch (err) { console.error('Parent geometry error:', err) }
   }
 
   // Children layer
@@ -742,8 +745,11 @@ defineExpose({ getMap: () => map })
         {{ !isReady ? 'Loading WASM…' : isGenerating ? 'Generating…' : 'Generate Grid' }}
       </button>
 
-      <!-- Hierarchy section -->
-      <h4>Cell Hierarchy</h4>
+    </div>
+
+    <!-- Cell Hierarchy panel (top-left) -->
+    <div v-if="showControls" class="dggs-hierarchy">
+      <h3>Cell Hierarchy</h3>
 
       <div class="field">
         <label>Index Type</label>
@@ -752,13 +758,12 @@ defineExpose({ getMap: () => map })
         </select>
       </div>
 
-      <div v-if="selectedCellId" class="hierarchy-panel">
+      <template v-if="selectedCellId">
         <div class="hier-cell-id">
           Selected: <strong>{{ selectedCellId.toString() }}</strong>
           <span class="hier-res">res {{ selectedCellRes }}</span>
+          <button class="hier-clear-btn" @click="clearSelection">Clear</button>
         </div>
-
-        <button class="hier-clear-btn" @click="clearSelection">Clear</button>
 
         <div v-if="hierarchyInfo.parent !== null" class="hier-group">
           <div class="hier-label hier-parent-label">Parent (res {{ selectedCellRes - 1 }})</div>
@@ -778,8 +783,8 @@ defineExpose({ getMap: () => map })
             <span v-for="(n, i) in hierarchyInfo.neighbors" :key="i" class="hier-chip hier-chip-neighbor">{{ n.toString() }}</span>
           </div>
         </div>
-      </div>
-      <div v-else class="hier-hint">Click a cell on the map</div>
+      </template>
+      <div v-else class="hier-hint">Click a cell on the map to inspect hierarchy</div>
     </div>
 
     <!-- Status bar -->
@@ -947,15 +952,55 @@ defineExpose({ getMap: () => map })
   color: var(--vp-c-text-1);
 }
 
-/* ---- hierarchy panel ---- */
-.hierarchy-panel {
-  margin-top: 4px;
+/* ---- hierarchy panel (top-left) ---- */
+.dggs-hierarchy {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  background: var(--vp-c-bg-elv);
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  width: 260px;
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+}
+.dggs-hierarchy h3 {
+  font-size: 10px;
+  margin-bottom: 6px;
+  color: var(--vp-c-text-2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.dggs-hierarchy .field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 5px;
+}
+.dggs-hierarchy .field label {
+  font-size: 11px;
+  color: var(--vp-c-text-2);
+}
+.dggs-hierarchy .field select {
+  width: 100%;
+  padding: 2px 5px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-soft);
 }
 .hier-cell-id {
   font-size: 11px;
   color: var(--vp-c-text-1);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   word-break: break-all;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 .hier-res {
   background: var(--vp-c-default-soft);
@@ -973,7 +1018,7 @@ defineExpose({ getMap: () => map })
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-2);
   cursor: pointer;
-  margin-bottom: 6px;
+  margin-left: auto;
 }
 .hier-clear-btn:hover { background: var(--vp-c-default-soft); }
 .hier-group {
