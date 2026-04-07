@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.6.0](https://github.com/am2222/webDggrid/compare/v1.5.0...v1.6.0) (2026-04-07)
+
+
+### Features
+
+* add cell index type selection and address conversion display in DGGs demo ([0863df8](https://github.com/am2222/webDggrid/commit/0863df8ccdd1579f92180e51f443be11a6713e55))
+* add DggsAddressTypesDemo component and integrate into documentation for address type conversions ([2f5821b](https://github.com/am2222/webDggrid/commit/2f5821bbc55cfb601e927eb774448818ff915a75))
+* add hierarchical address types and conversions ([e745d5a](https://github.com/am2222/webDggrid/commit/e745d5aa0fa0f6acb48e4f9929c7c253d449e5f4))
+* add hierarchy selection panel with index type and clear functionality ([380e8bc](https://github.com/am2222/webDggrid/commit/380e8bc45695c416ff6d3c6470f98613355fa6e6))
+* add Index Arithmetic documentation and link in the configuration ([1b111bb](https://github.com/am2222/webDggrid/commit/1b111bb76a7f92c22a210a62034b26b97629e955))
+* add methods for retrieving neighboring and hierarchical cells with comprehensive tests ([795f3a9](https://github.com/am2222/webDggrid/commit/795f3a9b33ff81e6beb4ff0a30a6bc336a279000))
+* add multi-aperture grid support with comprehensive documentation and examples ([ef72c0f](https://github.com/am2222/webDggrid/commit/ef72c0f6113e3dbf1eef4fa355468bbe10de21f7))
+* enhance child retrieval methods to support hexagonal grids and update related tests ([be5ab49](https://github.com/am2222/webDggrid/commit/be5ab49e790abe0fc1eab14635b27cb61e4c3df4))
+* enhance DGGs settings with dynamic controls and improved error handling ([0bedb7b](https://github.com/am2222/webDggrid/commit/0bedb7b2a03aa35534e43983457dcacab238c31b))
+* enhance hierarchy panel with improved layout and clear selection functionality ([100e444](https://github.com/am2222/webDggrid/commit/100e4444658ed54e2c1c737dfca7e8b00f4c6101))
+* enhance index digit manipulation methods and update documentation for Z3, Z7, and ZORDER ([f50f3f4](https://github.com/am2222/webDggrid/commit/f50f3f40befd48cf68128b88f5f1f1db271dc890))
+* enhance UI with theme-aware address highlighting and improve layout padding ([5384c1e](https://github.com/am2222/webDggrid/commit/5384c1eb8cd9a016b82f0a596746d4abbc2fae73))
+* implement Bitarithmetic demonstration with Z3 and Z7 arithmetic calculations ([4c6b180](https://github.com/am2222/webDggrid/commit/4c6b1803d6333f432107860429c9a733bd4c444d))
+* Implement bitwise operations for Z3, Z7, and ZORDER indices; add helper functions for digit manipulation and extraction ([e81ee6d](https://github.com/am2222/webDggrid/commit/e81ee6def3e910c6f554d37b94f52e088ae70014))
+* implement hierarchical address types (VERTEX2DD, ZORDER, Z3, Z7) with conversions and WASM bindings ([a01ee42](https://github.com/am2222/webDggrid/commit/a01ee42e248ecce0b2ca21295b8ac4b65d0bd6a7))
+* implement hierarchy layer removal and sanitize feature collections in DggsGlobe component ([83a37ad](https://github.com/am2222/webDggrid/commit/83a37ad02f8689ac02a7c0043a4170eb13037679))
+* implement loadWebdggrid utility for dynamic loading of Webdggrid class and update components to use it ([5a64660](https://github.com/am2222/webDggrid/commit/5a64660de1789d5b07cde9b5af0f0d1a5e7ad0f9))
+* update applySettings function to be asynchronous and ensure SVG rendering before processing ([1795816](https://github.com/am2222/webDggrid/commit/1795816cdeb40d5ae7b0314e000ace5a364468b3))
+* update documentation links and add geometry notes for pentagonal cells and antimeridian handling ([4767dd8](https://github.com/am2222/webDggrid/commit/4767dd867676f329a94df225806d5e0d24eb0c26))
+
+
+### Bug Fixes
+
+* ensure counts are converted to numbers in neighbor and child retrieval methods ([70f3fdb](https://github.com/am2222/webDggrid/commit/70f3fdbdb8ed4476a516efa51e379862b05734ff))
+* remove redundant styles from loadScript function in DggsAddressTypesDemo.vue ([396afd7](https://github.com/am2222/webDggrid/commit/396afd70d34dbf6cc5b7b8ae83aad1638b4d6bc3))
+
 ## [1.5.0](https://github.com/am2222/webDggrid/compare/v1.4.0...v1.5.0) (2026-04-04)
 
 
