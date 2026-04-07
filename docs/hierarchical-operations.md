@@ -8,7 +8,16 @@ WebDggrid now supports hierarchical relationships between DGGS cells, enabling p
 
 These operations leverage DGGRID's built-in topological algorithms for efficient, accurate adjacency and hierarchical queries.
 
+## Interactive Demo
+
+Click any cell to select it and explore its hierarchical relationships. Navigate to parents, children, or neighbors by clicking cells in the visualization or using the buttons in the panel.
+
+<ClientOnly>
+  <DggsD3HierarchyDemo />
+</ClientOnly>
+
 ## Cell Neighbors
+
 
 Find all cells that share an edge with a given cell using `sequenceNumNeighbors()`.
 

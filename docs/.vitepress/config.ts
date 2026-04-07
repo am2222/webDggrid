@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
 import typedocSidebar from '../api/typedoc-sidebar.json'
 
@@ -13,6 +14,14 @@ export default defineConfig({
   title: "WebDggrid",
   description: "A webassembly version of DGGRID",
   base: "/webDggrid/",
+
+  vite: {
+    resolve: {
+      alias: {
+        'webdggrid': fileURLToPath(new URL('../../lib-esm/webdggrid.js', import.meta.url)),
+      },
+    },
+  },
 
   themeConfig: {
     nav: [
