@@ -362,10 +362,29 @@ try {
 }
 ```
 
+## Primary vs All Parents
+
+`sequenceNumParent()` returns the **primary (containing) parent** — the coarser-resolution cell whose center is closest to the child cell's center. This is determined by converting the child's center point to the parent resolution.
+
+For cells that lie on the **boundary** between two or more parent cells, `sequenceNumAllParents()` returns all touching parents. The primary parent is always first in the returned array.
+
+```ts
+// Primary parent only (most common use case)
+const parent = dggs.sequenceNumParent([cellId], 5)[0];
+
+// All touching parents (boundary analysis)
+const allParents = dggs.sequenceNumAllParents([cellId], 5)[0];
+// allParents[0] is the primary (containing) parent
+// allParents[1..n] are additional touching parents (if any)
+```
+
+Interior cells typically have 1 parent. Boundary cells may have 2–3 parents depending on the aperture and topology.
+
 ## API Reference
 
 | Method | Description |
 |--------|-------------|
 | [`sequenceNumNeighbors()`](api/classes/Webdggrid.md#sequencenumneighbors) | Find all cells sharing an edge with the input cells |
-| [`sequenceNumParent()`](api/classes/Webdggrid.md#sequencenumparent) | Get parent cell at `resolution - 1` |
+| [`sequenceNumParent()`](api/classes/Webdggrid.md#sequencenumparent) | Get the primary (containing) parent at `resolution - 1` |
+| [`sequenceNumAllParents()`](api/classes/Webdggrid.md#sequencenumallparents) | Get all touching parent cells at `resolution - 1` (primary first) |
 | [`sequenceNumChildren()`](api/classes/Webdggrid.md#sequencenumchildren) | Get child cells at `resolution + 1` |

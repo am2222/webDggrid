@@ -10,6 +10,7 @@ const state = reactive({
   selectedCell: null,
   selectedRes: null,
   parentCell: null,
+  allParentCells: [],
   childrenCells: [],
   neighborCells: [],
   addressInfo: null,
@@ -107,9 +108,16 @@ function selectCell(cellId, resolution) {
     state.neighborCells = []
   }
   try {
-    state.parentCell = resolution > 0 ? dggs.sequenceNumParent([cellId], resolution)[0] : null
+    if (resolution > 0) {
+      state.allParentCells = dggs.sequenceNumAllParents([cellId], resolution)[0]
+      state.parentCell = state.allParentCells[0] ?? null
+    } else {
+      state.allParentCells = []
+      state.parentCell = null
+    }
   } catch {
     state.parentCell = null
+    state.allParentCells = []
   }
   try {
     state.childrenCells = dggs.sequenceNumChildren([cellId], resolution)[0]
@@ -144,14 +152,14 @@ function drawScene(cellId, resolution) {
   const childrenGeom = dggs.sequenceNumToGridFeatureCollection(state.childrenCells, resolution + 1)
 
   let parentGeom = null
-  if (state.parentCell !== null && resolution > 0) {
-    parentGeom = dggs.sequenceNumToGridFeatureCollection([state.parentCell], resolution - 1)
+  if (state.allParentCells.length > 0 && resolution > 0) {
+    parentGeom = dggs.sequenceNumToGridFeatureCollection(state.allParentCells, resolution - 1)
   }
 
   // Draw order: parent -> neighbors -> children -> center
   const features = []
   if (parentGeom) {
-    features.push(...parentGeom.features.map(f => ({ ...f, _type: 'parent', _res: resolution - 1 })))
+    features.push(...parentGeom.features.map((f, i) => ({ ...f, _type: i === 0 ? 'parent' : 'parent-secondary', _res: resolution - 1 })))
   }
   features.push(...neighborGeom.features.map(f => ({ ...f, _type: 'neighbor', _res: resolution })))
   features.push(...childrenGeom.features.map(f => ({ ...f, _type: 'child', _res: resolution + 1 })))
@@ -177,6 +185,7 @@ function drawScene(cellId, resolution) {
 
   const colorMap = {
     parent: '#33cc33',
+    'parent-secondary': '#88cc88',
     neighbor: '#3399ff',
     center: '#ff3333',
     child: '#ffcc00',
@@ -184,6 +193,7 @@ function drawScene(cellId, resolution) {
 
   const opacityMap = {
     parent: 0.25,
+    'parent-secondary': 0.15,
     neighbor: 0.85,
     center: 0.35,
     child: 0.6,
@@ -218,13 +228,15 @@ function drawScene(cellId, resolution) {
 
   // Parent outline on top
   if (parentGeom) {
-    svg.append('polygon')
-      .attr('points', parentGeom.features[0].geometry.coordinates[0].map(c => proj(c)).join(' '))
-      .attr('fill', 'none')
-      .attr('stroke', '#33cc33')
-      .attr('stroke-width', 2.5)
-      .attr('stroke-dasharray', '6,3')
-      .attr('pointer-events', 'none')
+    parentGeom.features.forEach((f, i) => {
+      svg.append('polygon')
+        .attr('points', f.geometry.coordinates[0].map(c => proj(c)).join(' '))
+        .attr('fill', 'none')
+        .attr('stroke', i === 0 ? '#33cc33' : '#88cc88')
+        .attr('stroke-width', i === 0 ? 2.5 : 1.5)
+        .attr('stroke-dasharray', '6,3')
+        .attr('pointer-events', 'none')
+    })
   }
 
   // Center outline on top
@@ -236,7 +248,7 @@ function drawScene(cellId, resolution) {
     .attr('pointer-events', 'none')
 
   // Draw index labels on cells (skip parent — too large)
-  const labelFeatures = features.filter(f => f._type !== 'parent')
+  const labelFeatures = features.filter(f => f._type !== 'parent' && f._type !== 'parent-secondary')
   const labelGroup = svg.append('g').attr('pointer-events', 'none')
 
   labelGroup.selectAll('text.cell-label')
@@ -420,12 +432,15 @@ function loadScript(src) {
 
           <!-- Parent -->
           <div class="panel-cell">
-            <div class="section-title parent-title">Parent</div>
-            <div v-if="state.parentCell !== null" class="cell-list">
-              <button class="btn btn-parent" @click="goToParent">
-                {{ state.parentCell.toString() }}
-                <span class="res-badge small">res {{ state.selectedRes - 1 }}</span>
-              </button>
+            <div class="section-title parent-title">Parents ({{ state.allParentCells.length }})</div>
+            <div v-if="state.allParentCells.length" class="cell-list">
+              <button
+                v-for="(p, i) in state.allParentCells"
+                :key="i"
+                class="btn btn-parent"
+                :class="{ 'btn-primary-parent': i === 0 }"
+                @click="navigateTo(p, state.selectedRes - 1)"
+              >{{ p.toString() }}<span v-if="i === 0" class="primary-tag">primary</span></button>
             </div>
             <div v-else class="muted">Root</div>
           </div>
@@ -646,6 +661,14 @@ function loadScript(src) {
   color: var(--vp-c-text-2);
 }
 .btn-parent { border-left: 3px solid #33cc33; }
+.btn-primary-parent { font-weight: 600; }
+.primary-tag {
+  font-size: 9px;
+  color: #1a8a1a;
+  margin-left: 4px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
 .btn-neighbor { border-left: 3px solid #3399ff; }
 .btn-child { border-left: 3px solid #ffcc00; }
 .muted {

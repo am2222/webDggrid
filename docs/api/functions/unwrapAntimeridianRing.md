@@ -4,7 +4,7 @@
 
 > **unwrapAntimeridianRing**(`ring`): `Position`[]
 
-Defined in: [webdggrid.ts:195](https://github.com/am2222/webDggrid/blob/16f19ca15fe4f253b39e62ee2d6a6a107f5964b9/src-ts/webdggrid.ts#L195)
+Defined in: [webdggrid.ts:195](https://github.com/am2222/webDggrid/blob/7917cb44f49dfd54c006cb0b682993cf9f954743/src-ts/webdggrid.ts#L195)
 
 Rewraps a polygon ring that crosses the antimeridian so that all longitudes
 are in a contiguous range (some may exceed 180°).  This is the format

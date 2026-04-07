@@ -59,6 +59,7 @@ const selectedCellId  = ref(null)
 const selectedCellRes = ref(null)
 const hierarchyInfo   = reactive({
   parent: null,
+  allParents: [],
   children: [],
   neighbors: [],
 })
@@ -209,6 +210,7 @@ function generateGrid() {
   selectedCellId.value = null
   selectedCellRes.value = null
   hierarchyInfo.parent = null
+  hierarchyInfo.allParents = []
   hierarchyInfo.children = []
   hierarchyInfo.neighbors = []
   removeHierarchyMapLayers()
@@ -370,8 +372,14 @@ function selectCell(cellId, resolution) {
     hierarchyInfo.neighbors = webdggrid.sequenceNumNeighbors([seqnum], resolution)[0]
   } catch { hierarchyInfo.neighbors = [] }
   try {
-    hierarchyInfo.parent = resolution > 0 ? webdggrid.sequenceNumParent([seqnum], resolution)[0] : null
-  } catch { hierarchyInfo.parent = null }
+    if (resolution > 0) {
+      hierarchyInfo.allParents = webdggrid.sequenceNumAllParents([seqnum], resolution)[0]
+      hierarchyInfo.parent = hierarchyInfo.allParents[0] ?? null
+    } else {
+      hierarchyInfo.allParents = []
+      hierarchyInfo.parent = null
+    }
+  } catch { hierarchyInfo.parent = null; hierarchyInfo.allParents = [] }
   try {
     hierarchyInfo.children = webdggrid.sequenceNumChildren([seqnum], resolution)[0]
   } catch { hierarchyInfo.children = [] }
@@ -383,6 +391,7 @@ function clearSelection() {
   selectedCellId.value = null
   selectedCellRes.value = null
   hierarchyInfo.parent = null
+  hierarchyInfo.allParents = []
   hierarchyInfo.children = []
   hierarchyInfo.neighbors = []
   removeHierarchyMapLayers()
@@ -424,23 +433,38 @@ function updateHierarchyLayers(seqnum, resolution) {
   // Remove previous MapLibre hierarchy layers
   removeHierarchyMapLayers()
 
-  // --- Parent polygon ---
-  if (hierarchyInfo.parent !== null && resolution > 0) {
+  // --- Parent polygons (all touching parents) ---
+  if (hierarchyInfo.allParents.length > 0 && resolution > 0) {
     try {
-      const parentFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([hierarchyInfo.parent], resolution - 1))
-      console.log('Parent cell geometry:', JSON.stringify(parentFc.features[0]?.geometry))
+      const parentFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.allParents, resolution - 1))
+      // Tag primary vs secondary parents
+      parentFc.features.forEach((f, i) => {
+        f.properties._primary = i === 0
+      })
       map.addSource('hier-parent', { type: 'geojson', data: parentFc })
-      map.addLayer({ id: 'hier-parent-fill', type: 'fill', source: 'hier-parent', paint: { 'fill-color': '#33cc33', 'fill-opacity': 0.15 } })
-      map.addLayer({ id: 'hier-parent-line', type: 'line', source: 'hier-parent', paint: { 'line-color': '#33cc33', 'line-width': 3, 'line-dasharray': [3, 2] } })
+      map.addLayer({ id: 'hier-parent-fill', type: 'fill', source: 'hier-parent', paint: {
+        'fill-color': ['case', ['get', '_primary'], '#22cc55', '#66dd88'],
+        'fill-opacity': ['case', ['get', '_primary'], 0.35, 0.25],
+      } })
+      map.addLayer({ id: 'hier-parent-line', type: 'line', source: 'hier-parent', paint: {
+        'line-color': ['case', ['get', '_primary'], '#11aa33', '#44bb66'],
+        'line-width': ['case', ['get', '_primary'], 3.5, 2.5],
+        'line-dasharray': [3, 2],
+      } })
 
-      // Parent label — offset upward so it doesn't overlap selected cell
-      const geo = webdggrid.sequenceNumToGeo([hierarchyInfo.parent], resolution - 1)[0]
-      const parentLabelFc = { type: 'FeatureCollection', features: [{
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
-        properties: { label: getCellIndexLabel(hierarchyInfo.parent, resolution - 1) },
-      }] }
-      map.addSource('hier-labels-parent', { type: 'geojson', data: parentLabelFc })
+      // Parent labels
+      const parentLabelFeatures = hierarchyInfo.allParents.map((p, i) => {
+        const geo = webdggrid.sequenceNumToGeo([p], resolution - 1)[0]
+        return {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
+          properties: {
+            label: getCellIndexLabel(p, resolution - 1),
+            primary: i === 0,
+          },
+        }
+      })
+      map.addSource('hier-labels-parent', { type: 'geojson', data: { type: 'FeatureCollection', features: parentLabelFeatures } })
       map.addLayer({
         id: 'hier-labels-parent-text',
         type: 'symbol',
@@ -448,11 +472,15 @@ function updateHierarchyLayers(seqnum, resolution) {
         layout: {
           'text-field': ['get', 'label'],
           'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-          'text-size': 13,
+          'text-size': ['case', ['get', 'primary'], 13, 11],
           'text-offset': [0, -2],
           'text-allow-overlap': false,
         },
-        paint: { 'text-color': '#1a8a1a', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 2 },
+        paint: {
+          'text-color': ['case', ['get', 'primary'], '#1a8a1a', '#5a9a5a'],
+          'text-halo-color': 'rgba(255,255,255,0.95)',
+          'text-halo-width': 2,
+        },
       })
     } catch (err) { console.error('Parent geometry error:', err) }
   }
@@ -814,11 +842,13 @@ defineExpose({ getMap: () => map })
           <button class="hier-clear-btn" @click="clearSelection">Clear</button>
         </div>
 
-        <div v-if="hierarchyInfo.parent !== null" class="hier-group">
+        <div v-if="hierarchyInfo.allParents.length" class="hier-group">
           <div class="hier-label hier-parent-label">
-            Parent (res {{ selectedCellRes - 1 }}<template v-if="ctrlMixedAperture && showAperture && ctrlApertureSeq[selectedCellRes - 2]">, a{{ ctrlApertureSeq[selectedCellRes - 2] }}</template>)
+            Parents ({{ hierarchyInfo.allParents.length }}, res {{ selectedCellRes - 1 }}<template v-if="ctrlMixedAperture && showAperture && ctrlApertureSeq[selectedCellRes - 2]">, a{{ ctrlApertureSeq[selectedCellRes - 2] }}</template>)
           </div>
-          <div class="hier-value">{{ hierarchyInfo.parent.toString() }}</div>
+          <div class="hier-chips">
+            <span v-for="(p, i) in hierarchyInfo.allParents" :key="i" class="hier-chip hier-chip-parent" :class="{ 'hier-chip-primary': i === 0 }">{{ p.toString() }}<span v-if="i === 0" class="hier-primary-badge">primary</span></span>
+          </div>
         </div>
 
         <div v-if="hierarchyInfo.children.length" class="hier-group">
@@ -1135,6 +1165,15 @@ defineExpose({ getMap: () => map })
   border: 1px solid var(--vp-c-divider);
   color: var(--vp-c-text-1);
   word-break: break-all;
+}
+.hier-chip-parent { border-left: 2px solid #33cc33; }
+.hier-chip-primary { font-weight: 600; }
+.hier-primary-badge {
+  font-size: 8px;
+  font-weight: 600;
+  color: #1a8a1a;
+  margin-left: 3px;
+  text-transform: uppercase;
 }
 .hier-chip-child { border-left: 2px solid #ffcc00; }
 .hier-chip-neighbor { border-left: 2px solid #3399ff; }

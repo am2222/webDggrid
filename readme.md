@@ -81,7 +81,7 @@ const seqNum = dggs.geoToSequenceNum([[0, 0]]);
 `nCells` · `cellAreaKM` · `cellDistKM` · `gridStatCLS`
 
 ### Hierarchical Operations
-`sequenceNumNeighbors` · `sequenceNumParent` · `sequenceNumChildren`
+`sequenceNumNeighbors` · `sequenceNumParent` · `sequenceNumAllParents` · `sequenceNumChildren`
 
 ### Hierarchical Address Types
 `sequenceNumToVertex2DD` · `vertex2DDToSequenceNum` · `sequenceNumToZOrder` · `zOrderToSequenceNum` · `sequenceNumToZ3` · `z3ToSequenceNum` · `sequenceNumToZ7` · `z7ToSequenceNum`

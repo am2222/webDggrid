@@ -206,6 +206,6 @@ All possible transformations:
 
 ## See Also
 
-- [API Reference - Webdggrid class](classes/Webdggrid.md)
+- [API Reference - Webdggrid class](api/classes/Webdggrid.md)
 - [examples/multi-aperture-example.mjs](../examples/multi-aperture-example.mjs)
 - [tests/unit/coordinate-transforms.test.ts](../tests/unit/coordinate-transforms.test.ts)

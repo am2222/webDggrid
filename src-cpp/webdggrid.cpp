@@ -905,6 +905,32 @@ val SEQNUMS_parents(
     return seqNumArray(parents);
 }
 
+val SEQNUMS_all_parents(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnums)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+
+    const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
+    auto allParents = dggrid::seqNumsAllParents(p, sv);
+
+    // Return as array of arrays
+    val result = val::array();
+    for (const auto& parents : allParents) {
+        val inner = val::array();
+        for (const auto& parent : parents) {
+            inner.call<void>("push", static_cast<uint64_t>(parent));
+        }
+        result.call<void>("push", inner);
+    }
+    return result;
+}
+
 val SEQNUM_children(
     double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
     unsigned int aperture, int res,
@@ -1180,8 +1206,9 @@ EMSCRIPTEN_BINDINGS(my_module)
 
     // PARENT/CHILD
     emscripten::function("SEQNUM_parent",     &SEQNUM_parent);
-    emscripten::function("SEQNUMS_parents",   &SEQNUMS_parents);
-    emscripten::function("SEQNUM_children",   &SEQNUM_children);
+    emscripten::function("SEQNUMS_parents",       &SEQNUMS_parents);
+    emscripten::function("SEQNUMS_all_parents",  &SEQNUMS_all_parents);
+    emscripten::function("SEQNUM_children",       &SEQNUM_children);
     emscripten::function("SEQNUMS_children",  &SEQNUMS_children);
     
     // HIERARCHICAL ADDRESS TYPES

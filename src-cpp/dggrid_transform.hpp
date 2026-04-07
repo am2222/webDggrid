@@ -180,10 +180,15 @@ std::vector<SeqNum> seqNumsNeighbors (const DggsParams& p,
 // ---------------------------------------------------------------------------
 // PARENT/CHILD - Hierarchical relationships between resolutions
 // ---------------------------------------------------------------------------
-// Get parent cell at the previous (coarser) resolution
+// Get the primary (containing) parent cell at the previous (coarser) resolution
 SeqNum              seqNumParent (const DggsParams& p, SeqNum seqnum);
-std::vector<SeqNum> seqNumsParents (const DggsParams& p, 
+std::vector<SeqNum> seqNumsParents (const DggsParams& p,
                                      const std::vector<SeqNum>& seqnums);
+
+// Get ALL parent cells that touch a child cell (primary parent first)
+std::vector<SeqNum> seqNumAllParents (const DggsParams& p, SeqNum seqnum);
+std::vector<std::vector<SeqNum>> seqNumsAllParents (const DggsParams& p,
+                                                     const std::vector<SeqNum>& seqnums);
 
 // Get all child cells at the next (finer) resolution
 std::vector<SeqNum> seqNumChildren (const DggsParams& p, SeqNum seqnum);
