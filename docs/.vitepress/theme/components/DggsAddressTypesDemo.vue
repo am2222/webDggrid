@@ -770,7 +770,7 @@ function loadScript(src) {
   border-bottom: 1px solid var(--vp-c-divider, #e2e2e3);
 }
 .conv-table td {
-  padding: 6px 8px 6px 0;
+  padding: 6px 8px 6px 10px;
   border-bottom: 1px solid var(--vp-c-divider, #eee);
 }
 .type-label {
@@ -921,10 +921,10 @@ function loadScript(src) {
   font-size: 12px;
   margin-top: 4px;
 }
-.children-table th {
-  text-align: left;
-  font-size: 10px;
-  font-weight: 600;
+.children-table td {
+  padding: 6px 8px 6px 10px;
+  border-bottom: 1px solid var(--vp-c-divider, #eee);
+}
   color: var(--vp-c-text-3, #999);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -948,9 +948,17 @@ function loadScript(src) {
 }
 .zorder-center {
   background: #e8f4fd;
+  color: #222;
+}
+@media (prefers-color-scheme: dark) {
+  .zorder-center {
+    background: #23405a;
+    color: #fff;
+  }
 }
 .zorder-center td {
   font-weight: 600;
+  padding-left: 10px;
 }
 
 /* Prefix bar */

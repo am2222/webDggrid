@@ -61,8 +61,35 @@ const seqNum = dggs.geoToSequenceNum([[0, 0]]);
 
 ## API
 
-### Core Methods
-`setDggs` · `getResolution` · `setResolution` · `geoToSequenceNum` · `sequenceNumToGeo` · `sequenceNumToGrid` · `sequenceNumToGridFeatureCollection` · `geoToGeo` · `cellAreaKM` · `cellDistKM` · `nCells`
+### Lifecycle
+`Webdggrid.load` · `Webdggrid.unload`
+
+### Configuration
+`setDggs` · `getResolution` · `setResolution` · `version`
+
+### Coordinate Conversion
+`geoToSequenceNum` · `sequenceNumToGeo` · `geoToGeo` · `sequenceNumToGrid` · `sequenceNumToGridFeatureCollection`
+
+### Grid Statistics
+`nCells` · `cellAreaKM` · `cellDistKM` · `gridStatCLS`
+
+### Hierarchical Operations
+`sequenceNumNeighbors` · `sequenceNumParent` · `sequenceNumChildren`
+
+### Hierarchical Address Types
+`sequenceNumToVertex2DD` · `vertex2DDToSequenceNum` · `sequenceNumToZOrder` · `zOrderToSequenceNum` · `sequenceNumToZ3` · `z3ToSequenceNum` · `sequenceNumToZ7` · `z7ToSequenceNum`
+
+### Low-Level Coordinate Systems
+`geoToPlane` · `geoToProjtri` · `geoToQ2dd` · `geoToQ2di` · `sequenceNumToPlane` · `sequenceNumToProjtri` · `sequenceNumToQ2dd` · `sequenceNumToQ2di`
+
+### Q2DI Conversions
+`q2diToGeo` · `q2diToSequenceNum` · `q2diToPlane` · `q2diToProjtri` · `q2diToQ2dd`
+
+### Q2DD Conversions
+`q2ddToGeo` · `q2ddToSequenceNum` · `q2ddToPlane` · `q2ddToProjtri` · `q2ddToQ2di`
+
+### PROJTRI Conversions
+`projtriToGeo` · `projtriToSequenceNum` · `projtriToPlane` · `projtriToQ2dd` · `projtriToQ2di`
 
 ### Multi-Aperture Support
 

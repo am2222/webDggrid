@@ -461,7 +461,7 @@ function loadScript(src) {
           <div class="section-title">Address Conversions</div>
           <table class="addr-table">
             <tbody>
-              <tr>
+              <tr class="addr-highlight">
                 <td class="addr-label">SEQNUM</td>
                 <td class="addr-value">{{ state.selectedCell.toString() }}</td>
                 <td class="addr-label">VERTEX2DD</td>
@@ -666,7 +666,7 @@ function loadScript(src) {
   font-family: var(--vp-font-family-mono, monospace);
 }
 .addr-table td {
-  padding: 4px 12px 4px 0;
+  padding: 4px 12px 4px 10px;
   vertical-align: top;
 }
 .addr-label {
@@ -682,3 +682,14 @@ function loadScript(src) {
   padding-right: 24px;
 }
 </style>
+/* Highlighted address row for ZORDER table (theme-aware) */
+.addr-highlight {
+  background: var(--vp-c-brand-soft, #e0f0ff);
+  color: var(--vp-c-text-1, #222);
+}
+@media (prefers-color-scheme: dark) {
+  .addr-highlight {
+    background: #23405a;
+    color: #fff;
+  }
+}

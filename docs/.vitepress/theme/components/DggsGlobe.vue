@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ylOrBrRgba, processFcForGlobe } from '../utils/globeUtils.js'
 
 const props = defineProps({
@@ -50,6 +50,26 @@ const ctrlColorCells   = ref(false)
 const ctrlMultiRes     = ref(false)
 const ctrlZoomOffset   = ref(0)
 const showAperture     = ref(props.initialTopology === 'HEXAGON')
+
+// --- hierarchy selection state ---
+const selectedCellId  = ref(null)
+const selectedCellRes = ref(null)
+const hierarchyInfo   = reactive({
+  parent: null,
+  children: [],
+  neighbors: [],
+})
+const ctrlIndexType   = ref('SEQNUM')
+const availableIndexTypes = computed(() => {
+  const types = ['SEQNUM']
+  if (ctrlTopology.value === 'HEXAGON') {
+    types.push('VERTEX2DD')
+    if (ctrlAperture.value !== 7) types.push('ZORDER')
+    if (ctrlAperture.value === 3) types.push('Z3')
+    if (ctrlAperture.value === 7) types.push('Z7')
+  }
+  return types
+})
 
 // --- non-reactive map state (reactivity on MapLibre objects causes issues) ---
 let map           = null
@@ -119,7 +139,15 @@ function makeCellLayer(id, fc, colored, isBase) {
       }
     },
     onClick: isBase || !props.showControls ? undefined : (info) => {
-      if (info.object) console.log('Cell geometry:', info.object.geometry)
+      if (info.object) {
+        const cellId = info.object.properties?.id ?? info.object.id
+        if (cellId != null) {
+          const resolution = ctrlMultiRes.value
+            ? zoomToResolution(map.getZoom(), ctrlResolution.value)
+            : ctrlResolution.value
+          selectCell(cellId, resolution)
+        }
+      }
     },
     updateTriggers: { getFillColor: [colored] },
   })
@@ -294,6 +322,198 @@ function onMoveEnd() {
 }
 
 // ---------------------------------------------------------------------------
+// Hierarchy selection
+// ---------------------------------------------------------------------------
+
+function getCellIndexLabel(seqnum, resolution) {
+  try {
+    switch (ctrlIndexType.value) {
+      case 'SEQNUM': return seqnum.toString()
+      case 'VERTEX2DD': {
+        const v = webdggrid.sequenceNumToVertex2DD(seqnum, resolution)
+        return `v${v.vertNum} t${v.triNum}`
+      }
+      case 'ZORDER': return webdggrid.sequenceNumToZOrder(seqnum, resolution).toString()
+      case 'Z3': return webdggrid.sequenceNumToZ3(seqnum, resolution).toString()
+      case 'Z7': return webdggrid.sequenceNumToZ7(seqnum, resolution).toString()
+      default: return seqnum.toString()
+    }
+  } catch {
+    return seqnum.toString()
+  }
+}
+
+function selectCell(cellId, resolution) {
+  if (!webdggrid) return
+
+  const seqnum = typeof cellId === 'bigint' ? cellId : BigInt(cellId)
+  selectedCellId.value = seqnum
+  selectedCellRes.value = resolution
+
+  // Get hierarchical relationships
+  try {
+    hierarchyInfo.neighbors = webdggrid.sequenceNumNeighbors([seqnum], resolution)[0]
+  } catch { hierarchyInfo.neighbors = [] }
+  try {
+    hierarchyInfo.parent = resolution > 0 ? webdggrid.sequenceNumParent([seqnum], resolution)[0] : null
+  } catch { hierarchyInfo.parent = null }
+  try {
+    hierarchyInfo.children = webdggrid.sequenceNumChildren([seqnum], resolution)[0]
+  } catch { hierarchyInfo.children = [] }
+
+  updateHierarchyLayers(seqnum, resolution)
+}
+
+function clearSelection() {
+  selectedCellId.value = null
+  selectedCellRes.value = null
+  hierarchyInfo.parent = null
+  hierarchyInfo.children = []
+  hierarchyInfo.neighbors = []
+  // Remove hierarchy layers, keep grid layers
+  if (deckOverlay && lastFineFc) {
+    updateDeckLayers(lastFineFc, lastBaseFc)
+  }
+}
+
+function updateHierarchyLayers(seqnum, resolution) {
+  if (!deckOverlay) return
+
+  const { GeoJsonLayer, TextLayer } = window.deck
+  const colored = ctrlColorCells.value
+  const layers = []
+
+  // Base grid layers
+  if (lastBaseFc) layers.push(makeCellLayer('dggrid-base', lastBaseFc, false, true))
+  if (lastFineFc) layers.push(makeCellLayer('dggrid-cells', lastFineFc, colored, false))
+
+  // Parent cell layer
+  if (hierarchyInfo.parent !== null && resolution > 0) {
+    try {
+      const parentFc = webdggrid.sequenceNumToGridFeatureCollection([hierarchyInfo.parent], resolution - 1)
+      parentFc.features.forEach(f => {
+        if (typeof f.id === 'bigint') f.id = f.id.toString()
+        if (f.properties) for (const k of Object.keys(f.properties)) if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
+      })
+      layers.push(new GeoJsonLayer({
+        id: 'hierarchy-parent',
+        data: processFcForGlobe(parentFc),
+        filled: true,
+        stroked: true,
+        wrapLongitude: true,
+        getFillColor: [51, 204, 51, 50],
+        getLineColor: [51, 204, 51, 220],
+        getLineWidth: 3,
+        lineWidthUnits: 'pixels',
+      }))
+    } catch { /* skip */ }
+  }
+
+  // Children layer
+  if (hierarchyInfo.children.length > 0) {
+    try {
+      const childFc = webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1)
+      childFc.features.forEach(f => {
+        if (typeof f.id === 'bigint') f.id = f.id.toString()
+        if (f.properties) for (const k of Object.keys(f.properties)) if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
+      })
+      layers.push(new GeoJsonLayer({
+        id: 'hierarchy-children',
+        data: processFcForGlobe(childFc),
+        filled: true,
+        stroked: true,
+        wrapLongitude: true,
+        getFillColor: [255, 204, 0, 100],
+        getLineColor: [204, 153, 0, 220],
+        getLineWidth: 2,
+        lineWidthUnits: 'pixels',
+      }))
+    } catch { /* skip */ }
+  }
+
+  // Selected cell highlight
+  try {
+    const centerFc = webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution)
+    centerFc.features.forEach(f => {
+      if (typeof f.id === 'bigint') f.id = f.id.toString()
+      if (f.properties) for (const k of Object.keys(f.properties)) if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
+    })
+    layers.push(new GeoJsonLayer({
+      id: 'hierarchy-selected',
+      data: processFcForGlobe(centerFc),
+      filled: true,
+      stroked: true,
+      wrapLongitude: true,
+      getFillColor: [255, 51, 51, 80],
+      getLineColor: [255, 51, 51, 255],
+      getLineWidth: 4,
+      lineWidthUnits: 'pixels',
+    }))
+  } catch { /* skip */ }
+
+  // --- Text labels for all hierarchical cells ---
+  const labelData = []
+
+  // Selected cell label
+  try {
+    const geo = webdggrid.sequenceNumToGeo([seqnum], resolution)[0]
+    labelData.push({
+      position: [geo[0], geo[1]],
+      text: getCellIndexLabel(seqnum, resolution),
+      color: [255, 51, 51],
+      size: 14,
+    })
+  } catch { /* skip */ }
+
+  // Parent label
+  if (hierarchyInfo.parent !== null && resolution > 0) {
+    try {
+      const geo = webdggrid.sequenceNumToGeo([hierarchyInfo.parent], resolution - 1)[0]
+      labelData.push({
+        position: [geo[0], geo[1]],
+        text: getCellIndexLabel(hierarchyInfo.parent, resolution - 1),
+        color: [30, 150, 30],
+        size: 12,
+      })
+    } catch { /* skip */ }
+  }
+
+  // Children labels
+  for (const child of hierarchyInfo.children) {
+    try {
+      const geo = webdggrid.sequenceNumToGeo([child], resolution + 1)[0]
+      labelData.push({
+        position: [geo[0], geo[1]],
+        text: getCellIndexLabel(child, resolution + 1),
+        color: [180, 130, 0],
+        size: 10,
+      })
+    } catch { /* skip */ }
+  }
+
+  if (labelData.length > 0) {
+    layers.push(new TextLayer({
+      id: 'hierarchy-labels',
+      data: labelData,
+      getPosition: d => d.position,
+      getText: d => d.text,
+      getColor: d => [...d.color, 255],
+      getSize: d => d.size,
+      getTextAnchor: 'middle',
+      getAlignmentBaseline: 'center',
+      fontFamily: 'monospace',
+      fontWeight: 700,
+      outlineWidth: 3,
+      outlineColor: [255, 255, 255, 220],
+      billboard: true,
+      sizeUnits: 'pixels',
+    }))
+  }
+
+  deckOverlay.setProps({ layers })
+}
+
+// ---------------------------------------------------------------------------
 // Lifecycle
 // ---------------------------------------------------------------------------
 
@@ -313,7 +533,7 @@ onMounted(async () => {
       loadScript('https://unpkg.com/deck.gl@9/dist.min.js'),
     ])
 
-    const { Webdggrid } = await new Function('return import("https://cdn.jsdelivr.net/npm/webdggrid/dist/index.js")')()
+    const { Webdggrid } = await import('webdggrid')
 
     const isDark = document.documentElement.classList.contains('dark')
 
