@@ -111,105 +111,120 @@ function verifyRoundTrip(addr, resolution) {
   return checks
 }
 
-// --- Bitarithmetic demonstration ---
+// --- Hierarchical index demonstration ---
+//
+// Z7 and Z3 use FIXED BIT-POSITION encoding (NOT simple positional radix).
+// Layout (64-bit):
+//   Z7: bits[63:60] = quad (4 bits), then 20 x 3-bit digits (res 1..20)
+//   Z3: bits[63:60] = quad (4 bits), then 30 x 2-bit digits (res 1..30)
+//
+// Rather than trying to replicate DGGRID's internal conventions, we use the
+// API for parent/children and then OBSERVE the digit patterns to show how
+// the encoding works.
+
+const Z7_BITS = 3n
+const Z7_MAX = 20
+const Z3_BITS = 2n
+const Z3_MAX = 30
+
+function zGetQuad(value) {
+  return Number((value >> 60n) & 0xFn)
+}
+
+function zGetDigit(value, res, bitsPerDigit, maxRes) {
+  const shift = BigInt(maxRes - res) * bitsPerDigit
+  const mask = (1n << bitsPerDigit) - 1n
+  return Number((value >> shift) & mask)
+}
+
+function zExtractDigits(value, resolution, bitsPerDigit, maxRes) {
+  const digits = []
+  for (let r = 1; r <= resolution; r++) {
+    digits.push(zGetDigit(value, r, bitsPerDigit, maxRes))
+  }
+  return digits
+}
+
+function computeZSection(type, value, seqnum, resolution, bitsPerDigit, maxRes, toZ, fromZ) {
+  const quad = zGetQuad(value)
+  const digits = zExtractDigits(value, resolution, bitsPerDigit, maxRes)
+
+  // Use API for parent, then convert to Z to observe digit change
+  let parentSeq = null
+  let parentZ = null
+  let parentDigits = null
+  let parentQuad = null
+  try {
+    parentSeq = resolution > 0 ? dggs.sequenceNumParent([seqnum], resolution)[0] : null
+    if (parentSeq !== null) {
+      parentZ = toZ(parentSeq, resolution - 1)
+      parentQuad = zGetQuad(parentZ)
+      parentDigits = zExtractDigits(parentZ, resolution - 1, bitsPerDigit, maxRes)
+    }
+  } catch { /* skip */ }
+
+  // Use API for children, then convert each to Z to observe digit patterns
+  let childrenApi = []
+  try { childrenApi = dggs.sequenceNumChildren([seqnum], resolution)[0] } catch { /* skip */ }
+
+  const childrenInfo = childrenApi.map(childSeq => {
+    try {
+      const childZVal = toZ(childSeq, resolution + 1)
+      const childDigits = zExtractDigits(childZVal, resolution + 1, bitsPerDigit, maxRes)
+      return {
+        seqnum: childSeq,
+        zValue: childZVal,
+        hex: '0x' + childZVal.toString(16).padStart(16, '0'),
+        digits: childDigits,
+        newDigit: childDigits[resolution], // the digit at the child's resolution level
+      }
+    } catch {
+      return { seqnum: childSeq, zValue: null, hex: 'err', digits: [], newDigit: '?' }
+    }
+  })
+
+  return {
+    type,
+    base: Number(1n << bitsPerDigit),
+    bitsPerDigit: Number(bitsPerDigit),
+    value,
+    hex: '0x' + value.toString(16).padStart(16, '0'),
+    quad,
+    digits,
+    parent: {
+      seqnum: parentSeq,
+      zValue: parentZ,
+      hex: parentZ !== null ? '0x' + parentZ.toString(16).padStart(16, '0') : null,
+      quad: parentQuad,
+      digits: parentDigits,
+      samePrefix: parentDigits !== null && digits.slice(0, -1).every((d, i) => d === parentDigits[i]),
+    },
+    children: childrenInfo,
+  }
+}
 
 function computeBitOps(addr, resolution) {
   const ops = { sections: [] }
 
-  // Z3 arithmetic (aperture 3)
   if (addr.z3 !== null) {
-    const z3 = addr.z3
-    const base = 3n
-    // Extract digits: each resolution level is one base-3 digit
-    // The Z3 value encodes digits from MSB (coarsest) to LSB (finest)
-    const digits = extractDigits(z3, base, resolution)
-
-    // Parent via bit manipulation: drop the last digit
-    const parentZ3Bits = z3 / base
-    let parentSeqBits = null
-    try { parentSeqBits = dggs.z3ToSequenceNum(parentZ3Bits, resolution - 1) } catch { /* skip */ }
-
-    // Actual parent via API
-    let parentSeqApi = null
-    try { parentSeqApi = dggs.sequenceNumParent([addr.seqnum], resolution)[0] } catch { /* skip */ }
-
-    // Children via bit manipulation: append digits 0,1,2
-    const childrenBits = []
-    for (let d = 0n; d < base; d++) {
-      const childZ3 = z3 * base + d
-      try {
-        const childSeq = dggs.z3ToSequenceNum(childZ3, resolution + 1)
-        childrenBits.push({ digit: Number(d), z3: childZ3, seqnum: childSeq })
-      } catch { childrenBits.push({ digit: Number(d), z3: childZ3, seqnum: null }) }
-    }
-
-    // Actual children via API
-    let childrenApi = []
-    try { childrenApi = dggs.sequenceNumChildren([addr.seqnum], resolution)[0] } catch { /* skip */ }
-
-    ops.sections.push({
-      type: 'Z3',
-      base: 3,
-      value: z3,
-      hex: '0x' + z3.toString(16),
-      digits,
-      parent: {
-        formula: `z3 / ${base} = ${parentZ3Bits}`,
-        bitResult: parentSeqBits,
-        apiResult: parentSeqApi,
-        match: parentSeqBits !== null && parentSeqApi !== null && parentSeqBits === parentSeqApi,
-      },
-      children: childrenBits,
-      childrenApi,
-    })
+    ops.sections.push(computeZSection(
+      'Z3', addr.z3, addr.seqnum, resolution, Z3_BITS, Z3_MAX,
+      (seq, res) => dggs.sequenceNumToZ3(seq, res),
+      (z, res) => dggs.z3ToSequenceNum(z, res),
+    ))
   }
 
-  // Z7 arithmetic (aperture 7)
   if (addr.z7 !== null) {
-    const z7 = addr.z7
-    const base = 7n
-    const digits = extractDigits(z7, base, resolution)
-
-    const parentZ7Bits = z7 / base
-    let parentSeqBits = null
-    try { parentSeqBits = dggs.z7ToSequenceNum(parentZ7Bits, resolution - 1) } catch { /* skip */ }
-
-    let parentSeqApi = null
-    try { parentSeqApi = dggs.sequenceNumParent([addr.seqnum], resolution)[0] } catch { /* skip */ }
-
-    const childrenBits = []
-    for (let d = 0n; d < base; d++) {
-      const childZ7 = z7 * base + d
-      try {
-        const childSeq = dggs.z7ToSequenceNum(childZ7, resolution + 1)
-        childrenBits.push({ digit: Number(d), z7: childZ7, seqnum: childSeq })
-      } catch { childrenBits.push({ digit: Number(d), z7: childZ7, seqnum: null }) }
-    }
-
-    let childrenApi = []
-    try { childrenApi = dggs.sequenceNumChildren([addr.seqnum], resolution)[0] } catch { /* skip */ }
-
-    ops.sections.push({
-      type: 'Z7',
-      base: 7,
-      value: z7,
-      hex: '0x' + z7.toString(16),
-      digits,
-      parent: {
-        formula: `z7 / ${base} = ${parentZ7Bits}`,
-        bitResult: parentSeqBits,
-        apiResult: parentSeqApi,
-        match: parentSeqBits !== null && parentSeqApi !== null && parentSeqBits === parentSeqApi,
-      },
-      children: childrenBits,
-      childrenApi,
-    })
+    ops.sections.push(computeZSection(
+      'Z7', addr.z7, addr.seqnum, resolution, Z7_BITS, Z7_MAX,
+      (seq, res) => dggs.sequenceNumToZ7(seq, res),
+      (z, res) => dggs.z7ToSequenceNum(z, res),
+    ))
   }
 
   // ZORDER spatial locality
   if (addr.zorder !== null) {
     const zorder = addr.zorder
-    // Show neighbor ZORDER values to demonstrate spatial locality
     let neighbors = []
     try {
       const nIds = dggs.sequenceNumNeighbors([addr.seqnum], resolution)[0]
@@ -229,7 +244,6 @@ function computeBitOps(addr, resolution) {
       })
     } catch { /* skip */ }
 
-    // Common prefix with neighbors (shared ancestor)
     const centerHex = zorder.toString(16).padStart(16, '0')
     const prefixes = neighbors.filter(n => n.zorder !== null).map(n => {
       const nHex = n.zorder.toString(16).padStart(16, '0')
@@ -250,16 +264,6 @@ function computeBitOps(addr, resolution) {
   }
 
   return ops.sections.length > 0 ? ops : null
-}
-
-function extractDigits(value, base, numDigits) {
-  const digits = []
-  let v = value
-  for (let i = 0; i < numDigits; i++) {
-    digits.unshift(Number(v % base))
-    v = v / base
-  }
-  return digits
 }
 
 function formatAddress(addr, type) {
@@ -513,76 +517,95 @@ function loadScript(src) {
 
         <div v-for="section in state.bitOps.sections" :key="section.type" class="bitops-section">
 
-          <!-- Z3 / Z7 hierarchical arithmetic -->
+          <!-- Z3 / Z7 hierarchical encoding -->
           <template v-if="section.type === 'Z3' || section.type === 'Z7'">
-            <div class="bitops-title">{{ section.type }} — Base-{{ section.base }} Hierarchical Arithmetic</div>
+            <div class="bitops-title">{{ section.type }} — Fixed Bit-Position Encoding ({{ section.bitsPerDigit }} bits/digit)</div>
 
-            <!-- Digit breakdown -->
+            <!-- Bit layout of selected cell -->
             <div class="digit-row">
-              <span class="digit-label">{{ section.type }} value:</span>
+              <span class="digit-label">Selected cell:</span>
               <span class="digit-value">{{ section.hex }}</span>
             </div>
             <div class="digit-row">
-              <span class="digit-label">Digits (res 1→{{ state.selectedRes }}):</span>
+              <span class="digit-label">Digit layout:</span>
               <span class="digit-cells">
+                <span class="digit-cell digit-quad" title="Quad (icosahedron face)">Q{{ section.quad }}</span>
                 <span
                   v-for="(d, i) in section.digits"
                   :key="i"
                   class="digit-cell"
                   :class="{ 'digit-last': i === section.digits.length - 1 }"
+                  :title="'Res ' + (i + 1) + ' → digit ' + d"
                 >{{ d }}</span>
               </span>
-              <span class="digit-hint">each digit = which child at that level</span>
+              <span class="digit-hint">4-bit quad + {{ section.bitsPerDigit }}-bit digits at fixed bit positions</span>
             </div>
 
-            <!-- Parent via division -->
-            <div class="op-block">
-              <div class="op-title">Find Parent (drop last digit)</div>
-              <div class="op-code">
-                <code>{{ section.type.toLowerCase() }} / {{ section.base }}</code>
-                = <code>{{ section.parent.formula.split('=')[1]?.trim() }}</code>
+            <!-- Parent — observe the digit pattern -->
+            <div class="op-block" v-if="section.parent.seqnum !== null">
+              <div class="op-title">Parent Cell (res {{ state.selectedRes - 1 }})</div>
+              <div class="op-row">
+                <span class="op-label">SEQNUM:</span>
+                <span class="op-val">{{ section.parent.seqnum.toString() }}</span>
               </div>
               <div class="op-row">
-                <span class="op-label">Bit arithmetic result:</span>
-                <span class="op-val">SEQNUM {{ section.parent.bitResult?.toString() ?? 'error' }}</span>
+                <span class="op-label">{{ section.type }}:</span>
+                <span class="op-val">{{ section.parent.hex }}</span>
               </div>
-              <div class="op-row">
-                <span class="op-label">API sequenceNumParent():</span>
-                <span class="op-val">SEQNUM {{ section.parent.apiResult?.toString() ?? 'error' }}</span>
-              </div>
-              <div class="op-row">
-                <span class="op-label">Match:</span>
-                <span :class="section.parent.match ? 'rt-ok' : 'rt-fail'">
-                  {{ section.parent.match ? 'Yes — identical!' : 'No' }}
+              <div class="digit-row" style="margin-top: 4px">
+                <span class="digit-label">Parent digits:</span>
+                <span class="digit-cells">
+                  <span class="digit-cell digit-quad">Q{{ section.parent.quad }}</span>
+                  <span
+                    v-for="(d, i) in section.parent.digits"
+                    :key="i"
+                    class="digit-cell"
+                    :class="{ 'digit-match': i < section.digits.length - 1 && d === section.digits[i] }"
+                  >{{ d }}</span>
                 </span>
               </div>
+              <div class="digit-row">
+                <span class="digit-label">Selected digits:</span>
+                <span class="digit-cells">
+                  <span class="digit-cell digit-quad">Q{{ section.quad }}</span>
+                  <span
+                    v-for="(d, i) in section.digits"
+                    :key="i"
+                    class="digit-cell"
+                    :class="{ 'digit-match': i < section.digits.length - 1 && section.parent.digits && d === section.parent.digits[i], 'digit-last': i === section.digits.length - 1 }"
+                  >{{ d }}</span>
+                </span>
+              </div>
+              <p class="op-hint" v-if="section.parent.samePrefix">
+                The parent shares digits 1–{{ state.selectedRes - 1 }} with the selected cell. Only the last digit differs — it encodes which child this cell is within its parent.
+              </p>
             </div>
 
-            <!-- Children via multiplication -->
-            <div class="op-block">
-              <div class="op-title">Find Children (append digit 0–{{ section.base - 1 }})</div>
+            <!-- Children — observe how each gets a unique digit -->
+            <div class="op-block" v-if="section.children.length">
+              <div class="op-title">Children ({{ section.children.length }} cells, res {{ state.selectedRes + 1 }})</div>
+              <p class="op-hint">Each child inherits the selected cell's digits and adds one new digit at resolution {{ state.selectedRes + 1 }}.</p>
               <table class="children-table">
                 <thead>
                   <tr>
-                    <th>Digit</th>
-                    <th>Formula</th>
-                    <th>{{ section.type }}</th>
-                    <th>SEQNUM (bit)</th>
-                    <th>SEQNUM (API)</th>
-                    <th>Match</th>
+                    <th>SEQNUM</th>
+                    <th>{{ section.type }} (hex)</th>
+                    <th>Digits 1–{{ state.selectedRes }}</th>
+                    <th>New digit</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="child in section.children" :key="child.digit">
-                    <td class="digit-cell-inline">{{ child.digit }}</td>
-                    <td><code>{{ section.type.toLowerCase() }} * {{ section.base }} + {{ child.digit }}</code></td>
-                    <td class="mono">{{ child[section.type.toLowerCase()]?.toString() ?? '?' }}</td>
+                  <tr class="zorder-center">
+                    <td class="mono">{{ state.selectedCell.toString() }} (selected)</td>
+                    <td class="mono">{{ section.hex }}</td>
+                    <td class="mono">{{ section.digits.join(' ') }}</td>
+                    <td>—</td>
+                  </tr>
+                  <tr v-for="child in section.children" :key="child.seqnum?.toString()">
                     <td class="mono">{{ child.seqnum?.toString() ?? 'err' }}</td>
-                    <td class="mono">{{ section.childrenApi[child.digit]?.toString() ?? 'err' }}</td>
-                    <td>
-                      <span v-if="child.seqnum !== null && section.childrenApi[child.digit] !== undefined && child.seqnum === section.childrenApi[child.digit]" class="rt-ok">OK</span>
-                      <span v-else class="rt-fail">—</span>
-                    </td>
+                    <td class="mono">{{ child.hex }}</td>
+                    <td class="mono">{{ child.digits.slice(0, state.selectedRes).join(' ') }}</td>
+                    <td class="digit-cell-inline">{{ child.newDigit }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -853,6 +876,17 @@ function loadScript(src) {
   font-weight: 600;
   background: var(--vp-c-bg, #fff);
   color: var(--vp-c-text-1);
+}
+.digit-quad {
+  background: #7c3aed;
+  color: #fff;
+  border-color: #7c3aed;
+  font-weight: 700;
+}
+.digit-match {
+  background: #ecfdf5;
+  border-color: #2ba52b;
+  color: #2ba52b;
 }
 .digit-last {
   background: #e8f4fd;

@@ -22,9 +22,58 @@ import { Webdggrid } from 'webdggrid';
 const dggs = await Webdggrid.load();
 ```
 
+## Bit Layout
+
+Z3 and Z7 use **fixed bit-position encoding** within a 64-bit integer — NOT simple positional radix numbers. Understanding this layout is essential for correct bit manipulation.
+
+```
+64-bit layout:
+┌──────┬────────┬────────┬────────┬─────┬────────┐
+│ Quad │ Res 1  │ Res 2  │ Res 3  │ ... │ Res N  │
+│4 bits│ B bits │ B bits │ B bits │     │ B bits │
+└──────┴────────┴────────┴────────┴─────┴────────┘
+
+Z3: B = 2 bits per digit, max 30 resolution levels, invalid marker = 3
+Z7: B = 3 bits per digit, max 20 resolution levels, invalid marker = 7
+```
+
+The **quad** (bits 63–60) identifies which icosahedron face the cell belongs to. Each resolution digit occupies a fixed bit position — unused slots are filled with the invalid marker.
+
+::: warning
+Simple division (`z3 / 3n`) and multiplication (`z3 * 3n + digit`) will NOT work — they shift all bits and corrupt the fixed-position layout. Use bitwise operations instead.
+:::
+
+## Helper Functions
+
+These utility functions work for both Z3 and Z7:
+
+```typescript
+const Z3_BITS = 2n, Z3_MAX = 30, Z3_INVALID = 3n;
+const Z7_BITS = 3n, Z7_MAX = 20, Z7_INVALID = 7n;
+
+// Read the digit at a given resolution level
+function getDigit(value: bigint, res: number, bitsPerDigit: bigint, maxRes: number): number {
+  const shift = BigInt(maxRes - res) * bitsPerDigit;
+  const mask = (1n << bitsPerDigit) - 1n;
+  return Number((value >> shift) & mask);
+}
+
+// Write a digit at a given resolution level
+function setDigit(value: bigint, res: number, digit: number, bitsPerDigit: bigint, maxRes: number): bigint {
+  const shift = BigInt(maxRes - res) * bitsPerDigit;
+  const mask = (1n << bitsPerDigit) - 1n;
+  return (value & ~(mask << shift)) | (BigInt(digit) << shift);
+}
+
+// Read the quad (icosahedron face)
+function getQuad(value: bigint): number {
+  return Number((value >> 60n) & 0xFn);
+}
+```
+
 ## Z3 Arithmetic (Aperture 3)
 
-Z3 encodes each cell as a base-3 number where each digit (0, 1, 2) represents which of the 3 children was chosen at that resolution level.
+Z3 encodes each cell with a 4-bit quad header and 2-bit digits at fixed positions (one per resolution level, max 30).
 
 ```typescript
 dggs.setDggs({
@@ -39,12 +88,13 @@ const cellId = 50n;
 const z3 = dggs.sequenceNumToZ3(cellId, 5);
 ```
 
-### Find Parent — Integer Division
+### Find Parent — Clear Last Digit
 
-Drop the last base-3 digit by dividing by 3. This is equivalent to `sequenceNumParent()`.
+Set the digit at the current resolution to the invalid marker (3):
 
 ```typescript
-const parentZ3 = z3 / 3n;
+// Parent = clear digit at resolution 5 (set to invalid marker 3)
+const parentZ3 = setDigit(z3, 5, 3, Z3_BITS, Z3_MAX);
 const parentSeq = dggs.z3ToSequenceNum(parentZ3, 4);
 
 // Verify: identical to the API
@@ -52,13 +102,13 @@ const parentApi = dggs.sequenceNumParent([cellId], 5)[0];
 console.log(parentSeq === parentApi); // true
 ```
 
-### Find Children — Multiply and Append
+### Find Children — Write Next Digit
 
-Multiply by 3 and add digits 0, 1, 2. This is equivalent to `sequenceNumChildren()`.
+Write digits 0, 1, 2 at the next resolution position:
 
 ```typescript
-const children = [0n, 1n, 2n].map(digit => {
-  const childZ3 = z3 * 3n + digit;
+const children = [0, 1, 2].map(digit => {
+  const childZ3 = setDigit(z3, 6, digit, Z3_BITS, Z3_MAX);
   return dggs.z3ToSequenceNum(childZ3, 6);
 });
 
@@ -67,49 +117,46 @@ const childrenApi = dggs.sequenceNumChildren([cellId], 5)[0];
 console.log(children.every((c, i) => c === childrenApi[i])); // true
 ```
 
-### Extract Resolution Level — Modulo
-
-Read which child was chosen at the finest level:
+### Extract Digit at a Resolution
 
 ```typescript
-const lastDigit = z3 % 3n;
-console.log(lastDigit); // 0n, 1n, or 2n — the child index at this resolution
+const digit = getDigit(z3, 5, Z3_BITS, Z3_MAX);
+console.log(digit); // 0, 1, or 2 — the child index at resolution 5
 ```
 
-### Walk the Hierarchy — Digit Extraction
+### Walk the Hierarchy
 
 Extract the full hierarchical path from coarsest to finest:
 
 ```typescript
-function extractDigits(z3Value, resolution) {
-  const digits = [];
-  let v = z3Value;
-  for (let i = 0; i < resolution; i++) {
-    digits.unshift(Number(v % 3n));
-    v = v / 3n;
-  }
-  return digits;
+const quad = getQuad(z3);
+const path = [];
+for (let r = 1; r <= 5; r++) {
+  path.push(getDigit(z3, r, Z3_BITS, Z3_MAX));
 }
-
-const path = extractDigits(z3, 5);
-console.log(path); // e.g. [1, 0, 2, 1, 0] — the path from root to cell
+console.log(`Quad ${quad}, path: [${path}]`);
+// e.g. "Quad 1, path: [1, 0, 2, 1, 0]"
 ```
 
 ### Check if Cell is Ancestor
 
-Cell A is an ancestor of cell B if B's Z3 value starts with A's digits:
+Two cells share an ancestor if they have the same quad and matching digits up to the ancestor's resolution:
 
 ```typescript
-function isAncestor(ancestorZ3, descendantZ3, resAncestor, resDescendant) {
-  const shift = BigInt(resDescendant - resAncestor);
-  const base = 3n;
-  return descendantZ3 / (base ** shift) === ancestorZ3;
+function isAncestor(ancestorZ3: bigint, descendantZ3: bigint, resAncestor: number): boolean {
+  if (getQuad(ancestorZ3) !== getQuad(descendantZ3)) return false;
+  for (let r = 1; r <= resAncestor; r++) {
+    if (getDigit(ancestorZ3, r, Z3_BITS, Z3_MAX) !== getDigit(descendantZ3, r, Z3_BITS, Z3_MAX)) {
+      return false;
+    }
+  }
+  return true;
 }
 ```
 
 ## Z7 Arithmetic (Aperture 7)
 
-Z7 works identically to Z3 but in base 7. Each parent has exactly 7 children (digits 0–6).
+Z7 uses 3-bit digits (values 0–6) at fixed positions, with invalid marker 7. Max 20 resolution levels.
 
 ```typescript
 dggs.setDggs({
@@ -127,34 +174,17 @@ const z7 = dggs.sequenceNumToZ7(cellId, 5);
 ### Find Parent
 
 ```typescript
-const parentZ7 = z7 / 7n;
+const parentZ7 = setDigit(z7, 5, 7, Z7_BITS, Z7_MAX);  // set digit 5 to invalid (7)
 const parentSeq = dggs.z7ToSequenceNum(parentZ7, 4);
 ```
 
 ### Find Children
 
 ```typescript
-const children = [0n, 1n, 2n, 3n, 4n, 5n, 6n].map(digit => {
-  const childZ7 = z7 * 7n + digit;
+const children = [0, 1, 2, 3, 4, 5, 6].map(digit => {
+  const childZ7 = setDigit(z7, 6, digit, Z7_BITS, Z7_MAX);
   return dggs.z7ToSequenceNum(childZ7, 6);
 });
-```
-
-### Extract Digits
-
-```typescript
-function extractZ7Digits(z7Value, resolution) {
-  const digits = [];
-  let v = z7Value;
-  for (let i = 0; i < resolution; i++) {
-    digits.unshift(Number(v % 7n));
-    v = v / 7n;
-  }
-  return digits;
-}
-
-const path = extractZ7Digits(z7, 5);
-// e.g. [3, 1, 5, 0, 2] — 7-ary hierarchical path
 ```
 
 ### Sibling Enumeration
@@ -162,9 +192,9 @@ const path = extractZ7Digits(z7, 5);
 Find all cells that share the same parent (siblings):
 
 ```typescript
-const parentZ7 = z7 / 7n;
-const siblings = [0n, 1n, 2n, 3n, 4n, 5n, 6n].map(digit => {
-  return dggs.z7ToSequenceNum(parentZ7 * 7n + digit, 5);
+const siblings = [0, 1, 2, 3, 4, 5, 6].map(digit => {
+  const sibZ7 = setDigit(z7, 5, digit, Z7_BITS, Z7_MAX);
+  return dggs.z7ToSequenceNum(sibZ7, 5);
 });
 // siblings contains all 7 children of the same parent, including the original cell
 ```
@@ -243,9 +273,9 @@ const targetZorder = dggs.sequenceNumToZOrder(targetCell, 5);
 
 | Operation | Z3/Z7 | ZORDER | SEQNUM |
 |-----------|-------|--------|--------|
-| Find parent | `z / base` | N/A | `sequenceNumParent()` |
-| Find children | `z * base + digit` | N/A | `sequenceNumChildren()` |
-| Check ancestry | `descendant / base^n === ancestor` | Prefix comparison | N/A |
+| Find parent | `setDigit(z, res, INVALID)` | N/A | `sequenceNumParent()` |
+| Find children | `setDigit(z, res+1, digit)` | N/A | `sequenceNumChildren()` |
+| Check ancestry | Compare digits 1..N | Hex prefix comparison | N/A |
 | Range query | N/A | `BETWEEN zMin AND zMax` | N/A |
 | Spatial proximity | Compare digit prefixes | Compare values | N/A |
 | Database index | Good for hierarchy | Good for spatial | Just an ID |
@@ -255,11 +285,11 @@ const targetZorder = dggs.sequenceNumToZOrder(targetCell, 5);
 
 **SEQNUM** is just a flat ID — arithmetic on it is meaningless.
 
-**Z3/Z7** encode the hierarchical path, so division and multiplication navigate up and down the tree.
+**Z3/Z7** use fixed bit-position encoding. Each digit occupies a predetermined bit slot within a 64-bit integer (2 bits for Z3, 3 bits for Z7), with a 4-bit quad header. Navigate the hierarchy by reading/writing digits at specific bit positions using shift and mask operations. Simple division/multiplication will NOT work.
 
 **ZORDER** encodes spatial position, so numerical proximity equals spatial proximity — perfect for range queries and database indexing.
 
-All operations are plain BigInt math. The API's `sequenceNumToZ3()` / `z3ToSequenceNum()` (and Z7/ZORDER equivalents) are the only bridge you need.
+The API's `sequenceNumToZ3()` / `z3ToSequenceNum()` (and Z7/ZORDER equivalents) convert between SEQNUM and these index types. The `getDigit()` / `setDigit()` helpers above are all you need for hierarchical navigation.
 
 ## API Reference
 

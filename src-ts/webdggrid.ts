@@ -1496,6 +1496,250 @@ export class Webdggrid {
     }
 
     // =========================================================================
+    // Index digit manipulation
+    // Pure bitwise operations on Z7, Z3, and ZORDER packed indices.
+    // These match DGGRID's internal macros (Z7_GET_INDEX_DIGIT, etc.)
+    // and do NOT require WASM calls.
+    // =========================================================================
+
+    // --- Z7 constants (3 bits per digit, max 20 resolutions) ---
+    /** @internal */ static readonly Z7_MAX_RES = 20;
+    /** @internal */ static readonly Z7_BITS_PER_DIGIT = 3n;
+    /** @internal */ static readonly Z7_DIGIT_MASK = 7n;
+    /** @internal */ static readonly Z7_QUAD_OFFSET = 60n;
+    /** @internal */ static readonly Z7_QUAD_MASK = 0xF000000000000000n;
+
+    // --- Z3 constants (2 bits per digit, max 30 resolutions) ---
+    /** @internal */ static readonly Z3_MAX_RES = 30;
+    /** @internal */ static readonly Z3_BITS_PER_DIGIT = 2n;
+    /** @internal */ static readonly Z3_DIGIT_MASK = 3n;
+    /** @internal */ static readonly Z3_QUAD_OFFSET = 60n;
+    /** @internal */ static readonly Z3_QUAD_MASK = 0xF000000000000000n;
+
+    // --- ZORDER constants (2 bits per digit, max 30 resolutions) ---
+    /** @internal */ static readonly ZORDER_MAX_RES = 30;
+    /** @internal */ static readonly ZORDER_BITS_PER_DIGIT = 2n;
+    /** @internal */ static readonly ZORDER_DIGIT_MASK = 3n;
+    /** @internal */ static readonly ZORDER_QUAD_OFFSET = 60n;
+    /** @internal */ static readonly ZORDER_QUAD_MASK = 0xF000000000000000n;
+
+    /**
+     * Get the quad (icosahedron face) number from a Z7 index.
+     *
+     * The quad occupies bits 63–60 of the 64-bit packed value.
+     *
+     * ```ts
+     * const quad = dggs.z7GetQuad(z7Value); // 0–11
+     * ```
+     *
+     * @param z7Value - A Z7 packed index (BigInt).
+     * @returns The quad number (0–11).
+     */
+    z7GetQuad(z7Value: bigint): number {
+        return Number((z7Value & Webdggrid.Z7_QUAD_MASK) >> Webdggrid.Z7_QUAD_OFFSET);
+    }
+
+    /**
+     * Get the digit at a specific resolution level from a Z7 index.
+     *
+     * Each digit is 3 bits wide and occupies a fixed position in the 64-bit value.
+     * Valid digits are 0–6; the value 7 is the invalid/padding marker.
+     *
+     * ```ts
+     * const digit = dggs.z7GetDigit(z7Value, 3); // 0–6 (or 7 = invalid)
+     * ```
+     *
+     * @param z7Value - A Z7 packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 20).
+     * @returns The digit value (0–7).
+     */
+    z7GetDigit(z7Value: bigint, res: number): number {
+        const shift = BigInt(Webdggrid.Z7_MAX_RES - res) * Webdggrid.Z7_BITS_PER_DIGIT;
+        return Number((z7Value >> shift) & Webdggrid.Z7_DIGIT_MASK);
+    }
+
+    /**
+     * Set the digit at a specific resolution level in a Z7 index.
+     *
+     * Returns a new Z7 value with the digit at position `res` replaced.
+     *
+     * ```ts
+     * const child = dggs.z7SetDigit(z7Value, 6, 3); // set res-6 digit to 3
+     * ```
+     *
+     * @param z7Value - A Z7 packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 20).
+     * @param digit - The digit value to set (0–6, or 7 for invalid).
+     * @returns A new Z7 value with the digit replaced.
+     */
+    z7SetDigit(z7Value: bigint, res: number, digit: number): bigint {
+        const shift = BigInt(Webdggrid.Z7_MAX_RES - res) * Webdggrid.Z7_BITS_PER_DIGIT;
+        return (z7Value & ~(Webdggrid.Z7_DIGIT_MASK << shift)) | (BigInt(digit) << shift);
+    }
+
+    /**
+     * Extract all digits from a Z7 index up to a given resolution.
+     *
+     * ```ts
+     * const { quad, digits } = dggs.z7ExtractDigits(z7Value, 5);
+     * // quad: 1, digits: [2, 0, 3, 4, 1]
+     * ```
+     *
+     * @param z7Value - A Z7 packed index (BigInt).
+     * @param resolution - Number of digits to extract (1-based).
+     * @returns Object with `quad` (number) and `digits` (number array).
+     */
+    z7ExtractDigits(z7Value: bigint, resolution: number): { quad: number; digits: number[] } {
+        const quad = this.z7GetQuad(z7Value);
+        const digits: number[] = [];
+        for (let r = 1; r <= resolution; r++) {
+            digits.push(this.z7GetDigit(z7Value, r));
+        }
+        return { quad, digits };
+    }
+
+    /**
+     * Get the quad (icosahedron face) number from a Z3 index.
+     *
+     * ```ts
+     * const quad = dggs.z3GetQuad(z3Value); // 0–11
+     * ```
+     *
+     * @param z3Value - A Z3 packed index (BigInt).
+     * @returns The quad number (0–11).
+     */
+    z3GetQuad(z3Value: bigint): number {
+        return Number((z3Value & Webdggrid.Z3_QUAD_MASK) >> Webdggrid.Z3_QUAD_OFFSET);
+    }
+
+    /**
+     * Get the digit at a specific resolution level from a Z3 index.
+     *
+     * Each digit is 2 bits wide. Valid digits are 0–2; the value 3 is the
+     * invalid/padding marker.
+     *
+     * ```ts
+     * const digit = dggs.z3GetDigit(z3Value, 3); // 0–2 (or 3 = invalid)
+     * ```
+     *
+     * @param z3Value - A Z3 packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 30).
+     * @returns The digit value (0–3).
+     */
+    z3GetDigit(z3Value: bigint, res: number): number {
+        const shift = BigInt(Webdggrid.Z3_MAX_RES - res) * Webdggrid.Z3_BITS_PER_DIGIT;
+        return Number((z3Value >> shift) & Webdggrid.Z3_DIGIT_MASK);
+    }
+
+    /**
+     * Set the digit at a specific resolution level in a Z3 index.
+     *
+     * ```ts
+     * const child = dggs.z3SetDigit(z3Value, 6, 1); // set res-6 digit to 1
+     * ```
+     *
+     * @param z3Value - A Z3 packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 30).
+     * @param digit - The digit value to set (0–2, or 3 for invalid).
+     * @returns A new Z3 value with the digit replaced.
+     */
+    z3SetDigit(z3Value: bigint, res: number, digit: number): bigint {
+        const shift = BigInt(Webdggrid.Z3_MAX_RES - res) * Webdggrid.Z3_BITS_PER_DIGIT;
+        return (z3Value & ~(Webdggrid.Z3_DIGIT_MASK << shift)) | (BigInt(digit) << shift);
+    }
+
+    /**
+     * Extract all digits from a Z3 index up to a given resolution.
+     *
+     * ```ts
+     * const { quad, digits } = dggs.z3ExtractDigits(z3Value, 5);
+     * // quad: 1, digits: [1, 0, 2, 1, 0]
+     * ```
+     *
+     * @param z3Value - A Z3 packed index (BigInt).
+     * @param resolution - Number of digits to extract (1-based).
+     * @returns Object with `quad` (number) and `digits` (number array).
+     */
+    z3ExtractDigits(z3Value: bigint, resolution: number): { quad: number; digits: number[] } {
+        const quad = this.z3GetQuad(z3Value);
+        const digits: number[] = [];
+        for (let r = 1; r <= resolution; r++) {
+            digits.push(this.z3GetDigit(z3Value, r));
+        }
+        return { quad, digits };
+    }
+
+    /**
+     * Get the quad (icosahedron face) number from a ZORDER index.
+     *
+     * ```ts
+     * const quad = dggs.zOrderGetQuad(zorderValue); // 0–11
+     * ```
+     *
+     * @param zorderValue - A ZORDER packed index (BigInt).
+     * @returns The quad number (0–11).
+     */
+    zOrderGetQuad(zorderValue: bigint): number {
+        return Number((zorderValue & Webdggrid.ZORDER_QUAD_MASK) >> Webdggrid.ZORDER_QUAD_OFFSET);
+    }
+
+    /**
+     * Get the digit at a specific resolution level from a ZORDER index.
+     *
+     * Each digit is 2 bits wide (values 0–3).
+     *
+     * ```ts
+     * const digit = dggs.zOrderGetDigit(zorderValue, 3); // 0–3
+     * ```
+     *
+     * @param zorderValue - A ZORDER packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 30).
+     * @returns The digit value (0–3).
+     */
+    zOrderGetDigit(zorderValue: bigint, res: number): number {
+        const shift = BigInt(Webdggrid.ZORDER_MAX_RES - res) * Webdggrid.ZORDER_BITS_PER_DIGIT;
+        return Number((zorderValue >> shift) & Webdggrid.ZORDER_DIGIT_MASK);
+    }
+
+    /**
+     * Set the digit at a specific resolution level in a ZORDER index.
+     *
+     * ```ts
+     * const modified = dggs.zOrderSetDigit(zorderValue, 3, 2);
+     * ```
+     *
+     * @param zorderValue - A ZORDER packed index (BigInt).
+     * @param res - Resolution level (1-based, 1 to 30).
+     * @param digit - The digit value to set (0–3).
+     * @returns A new ZORDER value with the digit replaced.
+     */
+    zOrderSetDigit(zorderValue: bigint, res: number, digit: number): bigint {
+        const shift = BigInt(Webdggrid.ZORDER_MAX_RES - res) * Webdggrid.ZORDER_BITS_PER_DIGIT;
+        return (zorderValue & ~(Webdggrid.ZORDER_DIGIT_MASK << shift)) | (BigInt(digit) << shift);
+    }
+
+    /**
+     * Extract all digits from a ZORDER index up to a given resolution.
+     *
+     * ```ts
+     * const { quad, digits } = dggs.zOrderExtractDigits(zorderValue, 5);
+     * // quad: 1, digits: [2, 0, 3, 1, 0]
+     * ```
+     *
+     * @param zorderValue - A ZORDER packed index (BigInt).
+     * @param resolution - Number of digits to extract (1-based).
+     * @returns Object with `quad` (number) and `digits` (number array).
+     */
+    zOrderExtractDigits(zorderValue: bigint, resolution: number): { quad: number; digits: number[] } {
+        const quad = this.zOrderGetQuad(zorderValue);
+        const digits: number[] = [];
+        for (let r = 1; r <= resolution; r++) {
+            digits.push(this.zOrderGetDigit(zorderValue, r));
+        }
+        return { quad, digits };
+    }
+
+    // =========================================================================
     // Low-level coordinate transformation methods
     // These methods expose all DGGRID coordinate systems beyond GEO/SEQNUM
     // =========================================================================

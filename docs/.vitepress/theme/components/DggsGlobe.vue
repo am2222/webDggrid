@@ -50,6 +50,8 @@ const ctrlColorCells   = ref(false)
 const ctrlMultiRes     = ref(false)
 const ctrlZoomOffset   = ref(0)
 const showAperture     = ref(props.initialTopology === 'HEXAGON')
+const ctrlMixedAperture = ref(false)
+const ctrlApertureSeq   = ref('434747')
 
 // --- hierarchy selection state ---
 const selectedCellId  = ref(null)
@@ -212,7 +214,10 @@ function generateGrid() {
 
   const maxRes     = ctrlResolution.value
   const multiRes   = ctrlMultiRes.value
-  const resolution = multiRes ? zoomToResolution(map.getZoom(), maxRes) : maxRes
+  const isMixed    = ctrlMixedAperture.value && ctrlTopology.value === 'HEXAGON'
+  const resolution = multiRes
+    ? zoomToResolution(map.getZoom(), isMixed ? ctrlApertureSeq.value.length : maxRes)
+    : isMixed ? Math.min(maxRes, ctrlApertureSeq.value.length) : maxRes
   const topology   = ctrlTopology.value
   const projection = ctrlProjection.value
   const aperture   = ctrlAperture.value
@@ -220,10 +225,13 @@ function generateGrid() {
   const poleLng    = ctrlPoleLng.value
   const poleLat    = ctrlPoleLat.value
 
-  webdggrid.setDggs({
+  const dggsConfig = {
     poleCoordinates: { lat: poleLat, lng: poleLng },
     azimuth, topology, projection, aperture,
-  }, resolution)
+  }
+  if (isMixed) dggsConfig.apertureSequence = ctrlApertureSeq.value
+
+  webdggrid.setDggs(dggsConfig, resolution)
 
   ctrlResolution.value = resolution
   status.value = 'Generating grid…'
@@ -255,17 +263,11 @@ function generateGrid() {
         seqNums = viewportSeqNums(resolution)
 
         const baseRes = Math.max(1, resolution - 1)
-        webdggrid.setDggs({
-          poleCoordinates: { lat: poleLat, lng: poleLng },
-          azimuth, topology, projection, aperture,
-        }, baseRes)
+        webdggrid.setDggs(dggsConfig, baseRes)
         const baseSeqNums = viewportSeqNums(baseRes)
         baseFc = buildFc(baseSeqNums, baseRes)
 
-        webdggrid.setDggs({
-          poleCoordinates: { lat: poleLat, lng: poleLng },
-          azimuth, topology, projection, aperture,
-        }, resolution)
+        webdggrid.setDggs(dggsConfig, resolution)
       } else {
         const total = webdggrid.nCells(resolution)
         seqNums = Array.from({ length: total }, (_, i) => BigInt(i + 1))
@@ -277,7 +279,8 @@ function generateGrid() {
       updateDeckLayers(fineFc, baseFc)
 
       const modeLabel = multiRes ? `res ${resolution} · viewport` : `res ${resolution} · globe`
-      status.value = `${seqNums.length} cells · ${modeLabel} · ${topology}`
+      const apLabel = isMixed ? `mixed [${dggsConfig.apertureSequence}]` : topology
+      status.value = `${seqNums.length} cells · ${modeLabel} · ${apLabel}`
     } catch (err) {
       const msg = (err instanceof Error && err.message) ? err.message : String(err)
       status.value = `Error: ${msg}`
@@ -294,7 +297,10 @@ function generateGrid() {
 
 watch(ctrlTopology, (val) => {
   showAperture.value = val === 'HEXAGON'
-  if (val !== 'HEXAGON') ctrlAperture.value = 4
+  if (val !== 'HEXAGON') {
+    ctrlAperture.value = 4
+    ctrlMixedAperture.value = false
+  }
 })
 
 watch(ctrlColorCells, () => {
@@ -686,13 +692,43 @@ defineExpose({ getMap: () => map })
         </select>
       </div>
 
-      <div v-if="showAperture" class="field">
+      <h4>Aperture</h4>
+
+      <label v-if="showAperture" class="field-inline">
+        <input v-model="ctrlMixedAperture" type="checkbox" />
+        Mixed aperture sequence
+      </label>
+
+      <div v-if="showAperture && !ctrlMixedAperture" class="field">
         <label>Aperture</label>
         <select v-model.number="ctrlAperture">
           <option :value="3">3</option>
           <option :value="4">4</option>
           <option :value="7">7</option>
         </select>
+      </div>
+
+      <div v-if="ctrlMixedAperture && showAperture" class="field">
+        <label>
+          Sequence (digits 3, 4, 7)
+          <span>{{ ctrlApertureSeq.length }} levels</span>
+        </label>
+        <input
+          v-model="ctrlApertureSeq"
+          type="text"
+          placeholder="e.g. 434747"
+          pattern="[347]*"
+          class="aperture-seq-input"
+        />
+        <div class="aperture-seq-preview">
+          <span
+            v-for="(ch, i) in ctrlApertureSeq.split('')"
+            :key="i"
+            class="aperture-digit"
+            :class="{ 'digit-3': ch === '3', 'digit-4': ch === '4', 'digit-7': ch === '7' }"
+            :title="'Res ' + (i + 1) + ' → aperture ' + ch"
+          >{{ ch }}</span>
+        </div>
       </div>
 
       <div class="field">
@@ -756,20 +792,38 @@ defineExpose({ getMap: () => map })
         </select>
       </div>
 
+      <!-- Mixed aperture per-level display -->
+      <div v-if="ctrlMixedAperture && showAperture" class="hier-group">
+        <div class="hier-label">Aperture per level</div>
+        <div class="aperture-seq-preview">
+          <span
+            v-for="(ch, i) in ctrlApertureSeq.split('')"
+            :key="i"
+            class="aperture-digit"
+            :class="{ 'digit-3': ch === '3', 'digit-4': ch === '4', 'digit-7': ch === '7', 'digit-active': selectedCellRes !== null && i + 1 === selectedCellRes }"
+            :title="'Res ' + (i + 1) + ' → aperture ' + ch"
+          >{{ ch }}</span>
+        </div>
+      </div>
+
       <template v-if="selectedCellId">
         <div class="hier-cell-id">
           Selected: <strong>{{ selectedCellId.toString() }}</strong>
-          <span class="hier-res">res {{ selectedCellRes }}</span>
+          <span class="hier-res">res {{ selectedCellRes }}<template v-if="ctrlMixedAperture && showAperture && ctrlApertureSeq[selectedCellRes - 1]"> (a{{ ctrlApertureSeq[selectedCellRes - 1] }})</template></span>
           <button class="hier-clear-btn" @click="clearSelection">Clear</button>
         </div>
 
         <div v-if="hierarchyInfo.parent !== null" class="hier-group">
-          <div class="hier-label hier-parent-label">Parent (res {{ selectedCellRes - 1 }})</div>
+          <div class="hier-label hier-parent-label">
+            Parent (res {{ selectedCellRes - 1 }}<template v-if="ctrlMixedAperture && showAperture && ctrlApertureSeq[selectedCellRes - 2]">, a{{ ctrlApertureSeq[selectedCellRes - 2] }}</template>)
+          </div>
           <div class="hier-value">{{ hierarchyInfo.parent.toString() }}</div>
         </div>
 
         <div v-if="hierarchyInfo.children.length" class="hier-group">
-          <div class="hier-label hier-child-label">Children ({{ hierarchyInfo.children.length }}, res {{ selectedCellRes + 1 }})</div>
+          <div class="hier-label hier-child-label">
+            Children ({{ hierarchyInfo.children.length }}, res {{ selectedCellRes + 1 }}<template v-if="ctrlMixedAperture && showAperture && ctrlApertureSeq[selectedCellRes]">, a{{ ctrlApertureSeq[selectedCellRes] }}</template>)
+          </div>
           <div class="hier-chips">
             <span v-for="(c, i) in hierarchyInfo.children" :key="i" class="hier-chip hier-chip-child">{{ c.toString() }}</span>
           </div>
@@ -949,6 +1003,34 @@ defineExpose({ getMap: () => map })
   white-space: nowrap;
   color: var(--vp-c-text-1);
 }
+
+/* ---- aperture sequence ---- */
+.aperture-seq-input {
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+.aperture-seq-preview {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.aperture-digit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: monospace;
+  color: #fff;
+}
+.digit-3 { background: #2b7fd4; }
+.digit-4 { background: #cc9900; }
+.digit-7 { background: #cc4c02; }
+.digit-active { outline: 2px solid var(--vp-c-brand-1); outline-offset: 1px; }
 
 /* ---- hierarchy panel (top-left) ---- */
 .dggs-hierarchy {
