@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 
 const svgRef = ref(null)
 const info = ref('')
@@ -21,6 +21,16 @@ const state = reactive({
   poleLat: 0,
   poleLng: 0,
   azimuth: 0,
+  // Index type displayed on cells
+  indexType: 'SEQNUM',
+})
+
+const availableIndexTypes = computed(() => {
+  const types = ['SEQNUM', 'VERTEX2DD']
+  if (state.aperture !== 7) types.push('ZORDER')
+  if (state.aperture === 3 && state.topology === 'HEXAGON') types.push('Z3')
+  if (state.aperture === 7 && state.topology === 'HEXAGON') types.push('Z7')
+  return types
 })
 
 let dggs = null
@@ -44,6 +54,11 @@ function applySettings() {
     projection: state.projection,
   }, state.resolution)
 
+  // Reset index type if no longer available
+  if (!availableIndexTypes.value.includes(state.indexType)) {
+    state.indexType = 'SEQNUM'
+  }
+
   state.ready = true
   state.loading = false
   state.history = []
@@ -52,6 +67,29 @@ function applySettings() {
   const maxId = Math.min(totalCells, 10000)
   const startCell = BigInt(Math.floor(Math.random() * maxId) + 1)
   selectCell(startCell, state.resolution)
+}
+
+function getCellLabel(seqnum, resolution) {
+  try {
+    switch (state.indexType) {
+      case 'SEQNUM':
+        return seqnum.toString()
+      case 'VERTEX2DD': {
+        const v = dggs.sequenceNumToVertex2DD(seqnum, resolution)
+        return `v${v.vertNum} t${v.triNum} (${v.x.toFixed(2)},${v.y.toFixed(2)})`
+      }
+      case 'ZORDER':
+        return dggs.sequenceNumToZOrder(seqnum, resolution).toString()
+      case 'Z3':
+        return dggs.sequenceNumToZ3(seqnum, resolution).toString()
+      case 'Z7':
+        return dggs.sequenceNumToZ7(seqnum, resolution).toString()
+      default:
+        return seqnum.toString()
+    }
+  } catch {
+    return seqnum.toString()
+  }
 }
 
 function selectCell(cellId, resolution) {
@@ -76,13 +114,16 @@ function selectCell(cellId, resolution) {
     state.childrenCells = []
   }
 
+  // Compute all address conversions for the panel
   try {
     const v2dd = dggs.sequenceNumToVertex2DD(cellId, resolution)
     let zorder = null
-    if (state.aperture !== 7) {
-      zorder = dggs.sequenceNumToZOrder(cellId, resolution)
-    }
-    state.addressInfo = { vertex2dd: v2dd, zorder }
+    let z3 = null
+    let z7 = null
+    try { if (state.aperture !== 7) zorder = dggs.sequenceNumToZOrder(cellId, resolution) } catch { /* unsupported */ }
+    try { if (state.aperture === 3 && state.topology === 'HEXAGON') z3 = dggs.sequenceNumToZ3(cellId, resolution) } catch { /* unsupported */ }
+    try { if (state.aperture === 7 && state.topology === 'HEXAGON') z7 = dggs.sequenceNumToZ7(cellId, resolution) } catch { /* unsupported */ }
+    state.addressInfo = { vertex2dd: v2dd, zorder, z3, z7 }
   } catch {
     state.addressInfo = null
   }
@@ -104,14 +145,13 @@ function drawScene(cellId, resolution) {
     parentGeom = dggs.sequenceNumToGridFeatureCollection([state.parentCell], resolution - 1)
   }
 
-  // Draw order: parent -> neighbors -> children -> center outline on top
+  // Draw order: parent -> neighbors -> children -> center
   const features = []
   if (parentGeom) {
     features.push(...parentGeom.features.map(f => ({ ...f, _type: 'parent', _res: resolution - 1 })))
   }
   features.push(...neighborGeom.features.map(f => ({ ...f, _type: 'neighbor', _res: resolution })))
   features.push(...childrenGeom.features.map(f => ({ ...f, _type: 'child', _res: resolution + 1 })))
-  // Center as filled polygon drawn after children
   features.push(...centerGeom.features.map(f => ({ ...f, _type: 'center', _res: resolution })))
 
   // Compute bounding box for auto-fit
@@ -146,6 +186,7 @@ function drawScene(cellId, resolution) {
     child: 0.6,
   }
 
+  // Draw filled polygons
   svg.selectAll('polygon.cell')
     .data(features)
     .enter()
@@ -164,7 +205,7 @@ function drawScene(cellId, resolution) {
     })
     .on('mouseout', function (_event, d) {
       info.value = ''
-      d3.select(this).attr('stroke', '#333').attr('stroke-width', d._type === 'center-outline' ? 3 : 1)
+      d3.select(this).attr('stroke', '#333').attr('stroke-width', 1)
     })
     .on('click', (_event, d) => {
       if (d._type === 'center') return
@@ -172,10 +213,9 @@ function drawScene(cellId, resolution) {
       navigateTo(id, d._res)
     })
 
-  // Draw parent outline on top so it's visible above neighbors/children
+  // Parent outline on top
   if (parentGeom) {
     svg.append('polygon')
-      .attr('class', 'parent-outline')
       .attr('points', parentGeom.features[0].geometry.coordinates[0].map(c => proj(c)).join(' '))
       .attr('fill', 'none')
       .attr('stroke', '#33cc33')
@@ -184,14 +224,40 @@ function drawScene(cellId, resolution) {
       .attr('pointer-events', 'none')
   }
 
-  // Draw center outline on top so it's always visible
+  // Center outline on top
   svg.append('polygon')
-    .attr('class', 'center-outline')
     .attr('points', centerGeom.features[0].geometry.coordinates[0].map(c => proj(c)).join(' '))
     .attr('fill', 'none')
     .attr('stroke', '#ff3333')
     .attr('stroke-width', 3)
     .attr('pointer-events', 'none')
+
+  // Draw index labels on cells (skip parent — too large)
+  const labelFeatures = features.filter(f => f._type !== 'parent')
+  const labelGroup = svg.append('g').attr('pointer-events', 'none')
+
+  labelGroup.selectAll('text.cell-label')
+    .data(labelFeatures)
+    .enter()
+    .append('text')
+    .attr('class', 'cell-label')
+    .attr('x', d => {
+      const pts = d.geometry.coordinates[0].map(c => proj(c))
+      return pts.reduce((s, p) => s + p[0], 0) / pts.length
+    })
+    .attr('y', d => {
+      const pts = d.geometry.coordinates[0].map(c => proj(c))
+      return pts.reduce((s, p) => s + p[1], 0) / pts.length
+    })
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'central')
+    .attr('font-size', d => d._type === 'child' ? 8 : 10)
+    .attr('fill', '#222')
+    .attr('font-family', 'var(--vp-font-family-mono, monospace)')
+    .text(d => {
+      const seqnum = BigInt(d.properties?.id ?? d.id)
+      return getCellLabel(seqnum, d._res)
+    })
 
   // Legend
   const legend = [
@@ -225,6 +291,12 @@ function drawScene(cellId, resolution) {
     .attr('text-anchor', 'end')
     .attr('font-size', 13).attr('fill', 'var(--vp-c-text-3, #666)')
     .text(`Resolution ${resolution}`)
+}
+
+function onIndexTypeChange() {
+  if (state.selectedCell !== null) {
+    drawScene(state.selectedCell, state.selectedRes)
+  }
 }
 
 function navigateTo(cellId, resolution) {
@@ -315,6 +387,13 @@ function loadScript(src) {
           <label>Azimuth</label>
           <input type="number" v-model.number="state.azimuth" step="1" @change="applySettings" />
         </div>
+        <div class="setting-separator"></div>
+        <div class="setting">
+          <label>Cell Index</label>
+          <select v-model="state.indexType" @change="onIndexTypeChange">
+            <option v-for="t in availableIndexTypes" :key="t" :value="t">{{ t }}</option>
+          </select>
+        </div>
       </div>
 
       <!-- SVG viewport -->
@@ -391,6 +470,10 @@ function loadScript(src) {
               </td>
               <td v-if="state.addressInfo.zorder !== null" class="addr-label">ZORDER</td>
               <td v-if="state.addressInfo.zorder !== null" class="addr-value">{{ state.addressInfo.zorder.toString() }}</td>
+              <td v-if="state.addressInfo.z3 !== null" class="addr-label">Z3</td>
+              <td v-if="state.addressInfo.z3 !== null" class="addr-value">{{ state.addressInfo.z3.toString() }}</td>
+              <td v-if="state.addressInfo.z7 !== null" class="addr-label">Z7</td>
+              <td v-if="state.addressInfo.z7 !== null" class="addr-value">{{ state.addressInfo.z7.toString() }}</td>
             </tr>
           </table>
         </div>
@@ -440,6 +523,12 @@ function loadScript(src) {
 }
 .setting input[type="number"] {
   width: 70px;
+}
+.setting-separator {
+  width: 1px;
+  background: var(--vp-c-divider, #e2e2e3);
+  align-self: stretch;
+  margin: 0 4px;
 }
 
 /* SVG */
