@@ -21,6 +21,8 @@ features:
     details: The full DGGRID C++ library compiled to WASM — no server required. Runs in any modern browser or Node.js environment.
   - title: Multiple Grid Topologies
     details: Supports HEXAGON, TRIANGLE, SQUARE, and DIAMOND topologies with ISEA and FULLER projections at any resolution.
+  - title: Multi-Aperture Grids
+    details: Configure grids with mixed aperture sequences (e.g., "434747") for flexible grid refinement strategies and custom analysis needs.
   - title: GeoJSON Ready
     details: Convert coordinates to DGGS cell IDs and back, or export entire grid regions directly as GeoJSON FeatureCollections for use with mapping libraries.
 ---

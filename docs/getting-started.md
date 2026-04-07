@@ -52,6 +52,7 @@ const geojson = dggs.sequenceNumToGridFeatureCollection(seqNums, 5);
 ### Configure the grid system
 
 ```js
+// Standard single-aperture grid
 dggs.setDggs({
   poleCoordinates: { lat: 0, lng: 0 },
   azimuth: 0,
@@ -59,7 +60,18 @@ dggs.setDggs({
   projection: 'ISEA',
   aperture: 4,
 }, /* resolution */ 3);
+
+// Multi-aperture grid (NEW!)
+dggs.setDggs({
+  poleCoordinates: { lat: 0, lng: 0 },
+  azimuth: 0,
+  topology: 'HEXAGON',
+  projection: 'ISEA',
+  apertureSequence: "434747",  // Different aperture per resolution
+}, /* resolution */ 5);
 ```
+
+See the [multi-aperture documentation](multi-aperture.md) for more details.
 
 ## Grid Statistics
 
@@ -118,3 +130,47 @@ For renderers that **require strictly valid GeoJSON** (`[-180, 180]`), use the r
 | MapLibre GL / Mapbox GL globe | `sequenceNumToGridFeatureCollection` (built-in) |
 | Leaflet, OpenLayers, D3 | `sequenceNumToGrid` — raw `[-180, 180]` |
 | Turf.js / PostGIS | `sequenceNumToGrid` — raw `[-180, 180]` |
+
+
+
+## Additional Examples
+
+More examples can be found in the [tests](../tests/unit/) directory:
+- [geo.test.ts](../tests/unit/geo.test.ts) - Basic grid operations
+- [transforms.test.ts](../tests/unit/transforms.test.ts) - Coordinate transformations  
+- [multi-aperture.test.ts](../tests/unit/multi-aperture.test.ts) - Multi-aperture grids (21 passing tests)
+
+## Quick Start Snippet
+
+```typescript
+import { Webdggrid } from 'webdggrid';
+
+const dggs = await Webdggrid.load();
+
+// Configure a multi-aperture grid
+dggs.setDggs({
+    poleCoordinates: { lat: 0, lng: 0 },
+    azimuth: 0,
+    apertureSequence: "434747",  // Custom sequence
+    topology: 'HEXAGON',
+    projection: 'ISEA',
+}, 5);
+
+// Get grid statistics
+console.log('Cells at resolution 5:', dggs.nCells(5));
+console.log('Cell area:', dggs.cellAreaKM(5), 'km²');
+
+// Convert coordinates to cell IDs
+const cellIds = dggs.geoToSequenceNum([[0, 0], [-73.99, 40.75]], 5);
+console.log('Cell IDs:', cellIds);
+
+// Generate GeoJSON geometry
+const geojson = dggs.sequenceNumToGridFeatureCollection(cellIds, 5);
+console.log('GeoJSON features:', geojson.features.length);
+```
+
+## See Also
+
+- [Multi-Aperture Documentation](multi-aperture.md) - Complete technical reference
+- [API Reference](api/) - Full API documentation
+- [Getting Started](getting-started.md) - Installation and basic usage

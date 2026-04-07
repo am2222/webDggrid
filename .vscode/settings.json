@@ -1,3 +1,14 @@
 {
-  "cSpell.words": ["Dggs", "dglib", "IDGGS", "Webdggrid"]
+  "cSpell.words": [
+    "Dggs",
+    "dglib",
+    "IDGGS",
+    "Webdggrid"
+  ],
+  "chat.tools.terminal.autoApprove": {
+    "/^python3 update_sigs\\.py$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
+  }
 }

@@ -21,9 +21,19 @@ A WebAssembly wrapper for [DGGRID](https://github.com/sahrk/DGGRID), the C++ lib
 
 ------------
 
+## Features
+
+- 🚀 **WebAssembly Performance** - Full DGGRID C++ library compiled to WASM
+- 🌐 **Browser & Node.js** - Works in any modern JavaScript environment
+- 🔷 **Multiple Topologies** - HEXAGON, TRIANGLE, DIAMOND shapes supported
+- 📐 **ISEA & FULLER** - Both projection systems available
+- 🎯 **Multi-Aperture Grids** - Define custom aperture sequences (e.g., `"434747"`) for mixed refinement
+- 🗺️ **GeoJSON Output** - Direct export to GeoJSON FeatureCollections
+- 📊 **Grid Statistics** - Cell counts, areas, and spacing at any resolution
+
 ## How to use
 
-Please check `tests` folder for more examples.
+Please check `tests` folder and [examples documentation](https://am2222.github.io/webDggrid/examples) for more examples.
 
 in browser
 
@@ -51,9 +61,23 @@ const seqNum = dggs.geoToSequenceNum([[0, 0]]);
 
 ## API
 
+### Core Methods
 `setDggs` · `getResolution` · `setResolution` · `geoToSequenceNum` · `sequenceNumToGeo` · `sequenceNumToGrid` · `sequenceNumToGridFeatureCollection` · `geoToGeo` · `cellAreaKM` · `cellDistKM` · `nCells`
 
-See the [full API reference](https://am2222.github.io/webDggrid/api/) for details and type signatures.
+### Multi-Aperture Support
+
+```javascript
+// Configure a grid with mixed apertures
+dggs.setDggs({
+    poleCoordinates: { lat: 0, lng: 0 },
+    azimuth: 0,
+    apertureSequence: "434747",  // Custom aperture per resolution
+    topology: Topology.HEXAGON,
+    projection: Projection.ISEA,
+}, 5);
+```
+
+See the [full API reference](https://am2222.github.io/webDggrid/api/) and [examples](https://am2222.github.io/webDggrid/examples) for details.
 
 ## Contributing & Development
 

@@ -24,6 +24,12 @@ struct DggsParams {
     double       azimuth_deg  = 0.0;
     double       pole_lat_deg = 58.28252559;
     double       pole_lon_deg = 11.25;
+    
+    // Multi-aperture support: if is_aperture_sequence is true,
+    // aperture_sequence defines the aperture for each resolution level.
+    // Only valid for HEXAGON topology.
+    bool         is_aperture_sequence = false;
+    std::string  aperture_sequence    = "";  // e.g., "434747"
 
     DggsParams withRes(int r) const {
         DggsParams p = *this;
@@ -61,7 +67,9 @@ DggsParams            construct(const std::string& projection,
                                  int                res,
                                  double             azimuth_deg,
                                  double             pole_lat_deg,
-                                 double             pole_lon_deg);
+                                 double             pole_lon_deg,
+                                 bool               is_aperture_sequence = false,
+                                 const std::string& aperture_sequence = "");
 
 DggsParams            setRes(const DggsParams& p, int res);
 std::vector<ResInfo>  getRes(const DggsParams& p);
@@ -130,5 +138,25 @@ ProjTriCoord seqNumToProjTri(const DggsParams& p, SeqNum seqnum);
 Q2DDCoord    seqNumToQ2DD   (const DggsParams& p, SeqNum seqnum);
 Q2DICoord    seqNumToQ2DI   (const DggsParams& p, SeqNum seqnum);
 SeqNum       seqNumToSeqNum (const DggsParams& p, SeqNum seqnum);
+
+// ---------------------------------------------------------------------------
+// NEIGHBORS - Get topologically adjacent cells (share an edge)
+// ---------------------------------------------------------------------------
+std::vector<SeqNum> seqNumNeighbors (const DggsParams& p, SeqNum seqnum);
+std::vector<SeqNum> seqNumsNeighbors (const DggsParams& p, 
+                                       const std::vector<SeqNum>& seqnums);
+
+// ---------------------------------------------------------------------------
+// PARENT/CHILD - Hierarchical relationships between resolutions
+// ---------------------------------------------------------------------------
+// Get parent cell at the previous (coarser) resolution
+SeqNum              seqNumParent (const DggsParams& p, SeqNum seqnum);
+std::vector<SeqNum> seqNumsParents (const DggsParams& p, 
+                                     const std::vector<SeqNum>& seqnums);
+
+// Get all child cells at the next (finer) resolution
+std::vector<SeqNum> seqNumChildren (const DggsParams& p, SeqNum seqnum);
+std::vector<std::vector<SeqNum>> seqNumsChildren (const DggsParams& p,
+                                                    const std::vector<SeqNum>& seqnums);
 
 } // namespace dggrid

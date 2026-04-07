@@ -138,8 +138,28 @@ export interface IDGGSProps {
      * | 7 | 2 + 10 × 7^r |
      *
      * Aperture `4` is the most common choice and is the default.
+     * Ignored if `apertureSequence` is specified.
      */
-    aperture: 3 | 4 | 5 | 7;
+    aperture?: 3 | 4 | 5 | 7;
+    /**
+     * Mixed aperture sequence (e.g., `"434747"`).
+     * 
+     * When specified, each character defines the aperture for that resolution level.
+     * The maximum resolution is limited to the length of the sequence string.
+     * 
+     * **Constraints:**
+     * - Only valid for `HEXAGON` topology
+     * - Only characters `'3'`, `'4'`, and `'7'` are allowed
+     * - SEQNUM addressing is not supported (operations will fail)
+     * - Z3/Z7 hierarchical indexing is not supported
+     * 
+     * @example
+     * ```ts
+     * // Resolution 1 uses aperture 4, res 2 uses aperture 3, etc.
+     * apertureSequence: "434747"
+     * ```
+     */
+    apertureSequence?: string;
     /** Shape of each cell. See {@link Topology}. */
     topology: Topology;
     /** Projection used to map the polyhedron faces onto the sphere. See {@link Projection}. */
@@ -379,7 +399,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const cellCount = this._module.nCells(
             lng,
@@ -388,7 +412,9 @@ export class Webdggrid {
             aperture,
             resolution,
             topology,
-            projection
+            projection,
+            isApertureSequence,
+            apSeq
         );
 
         return cellCount as number;
@@ -416,7 +442,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const cellCount = this._module.cellAreaKM(
             lng,
@@ -425,7 +455,9 @@ export class Webdggrid {
             aperture,
             resolution,
             topology,
-            projection
+            projection,
+            isApertureSequence,
+            apSeq
         );
 
         return cellCount as number;
@@ -453,7 +485,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const cellCount = this._module.cellDistKM(
             lng,
@@ -462,7 +498,9 @@ export class Webdggrid {
             aperture,
             resolution,
             topology,
-            projection
+            projection,
+            isApertureSequence,
+            apSeq
         );
 
         return cellCount as number;
@@ -491,7 +529,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const cellCount = this._module.gridStatCLS(
             lng,
@@ -500,7 +542,9 @@ export class Webdggrid {
             aperture,
             resolution,
             topology,
-            projection
+            projection,
+            isApertureSequence,
+            apSeq
         );
 
         return cellCount as number;
@@ -545,7 +589,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const xCoords = coordinates.map((coord) => coord[0]);
         const yCoords = coordinates.map((coord) => coord[1]);
@@ -558,6 +606,8 @@ export class Webdggrid {
             resolution,
             topology,
             projection,
+            isApertureSequence,
+            apSeq,
             xCoords,
             yCoords
         );
@@ -593,7 +643,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const resultArray = this._module.SEQNUM_to_GEO(
             lng,
@@ -603,6 +657,8 @@ export class Webdggrid {
             resolution,
             topology,
             projection,
+            isApertureSequence,
+            apSeq,
             sequenceNum
         );
 
@@ -652,7 +708,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const xCoords = coordinates.map((coord) => coord[0]);
         const yCoords = coordinates.map((coord) => coord[1]);
@@ -665,6 +725,8 @@ export class Webdggrid {
             resolution,
             topology,
             projection,
+            isApertureSequence,
+            apSeq,
             xCoords,
             yCoords
         );
@@ -711,7 +773,11 @@ export class Webdggrid {
             topology,
             projection,
             aperture,
+            apertureSequence,
         } = this.dggs;
+
+        const isApertureSequence = !!apertureSequence;
+        const apSeq = apertureSequence || "";
 
         const inputSize = sequenceNum.length;
 
@@ -725,11 +791,13 @@ export class Webdggrid {
                 resolution,
                 topology,
                 projection,
+                isApertureSequence,
+                apSeq,
                 sequenceNum
             );
         } catch (e) {
             console.error(this._module.getExceptionMessage(e).toString());
-            throw(e);
+            throw (e);
         }
 
         const allShapeVertexes = resultArray.slice(0, inputSize);
