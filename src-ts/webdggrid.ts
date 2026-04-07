@@ -70,6 +70,25 @@ export interface Coordinate {
 }
 
 /**
+ * VERTEX2DD coordinate representation.
+ * 
+ * Represents a position relative to the icosahedron vertices and triangular
+ * faces in DGGRID's coordinate system.
+ */
+export interface Vertex2DDCoordinate {
+    /** Whether to keep this vertex. */
+    keep: boolean;
+    /** Vertex number (0-11 for icosahedron). */
+    vertNum: number;
+    /** Triangle number on the icosahedron. */
+    triNum: number;
+    /** X coordinate within the triangle. */
+    x: number;
+    /** Y coordinate within the triangle. */
+    y: number;
+}
+
+/**
  * GeoJSON `properties` object attached to every cell feature returned by
  * {@link Webdggrid.sequenceNumToGridFeatureCollection}.
  *
@@ -1109,6 +1128,369 @@ export class Webdggrid {
             return children;
         } catch (e) {
             console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    // =========================================================================
+    // Hierarchical Address Type Conversions
+    // These methods convert between SEQNUM and hierarchical indexing systems
+    // =========================================================================
+
+    /**
+     * Convert a SEQNUM cell ID to VERTEX2DD (icosahedral vertex) coordinates.
+     *
+     * VERTEX2DD addresses represent positions relative to the vertices and
+     * triangular faces of the underlying icosahedron.
+     *
+     * ```ts
+     * const vertex = dggs.sequenceNumToVertex2DD(100n, 5);
+     * // vertex = { keep: true, vertNum: 1, triNum: 1, x: 0.0625, y: 0.054... }
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell. Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns An object with `{keep, vertNum, triNum, x, y}` representing
+     *   the vertex coordinate.
+     */
+    sequenceNumToVertex2DD(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): Vertex2DDCoordinate {
+        try {
+            const result = this._module.SEQNUM_to_VERTEX2DD(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+            return result;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
+     * Convert VERTEX2DD (icosahedral vertex) coordinates to a SEQNUM cell ID.
+     *
+     * ```ts
+     * const seqnum = dggs.vertex2DDToSequenceNum(true, 1, 1, 0.0625, 0.054, 5);
+     * // seqnum = 100n
+     * ```
+     *
+     * @param keep - Whether to keep this vertex.
+     * @param vertNum - Vertex number (0-11 for icosahedron).
+     * @param triNum - Triangle number on the icosahedron.
+     * @param x - X coordinate within the triangle.
+     * @param y - Y coordinate within the triangle.
+     * @param resolution - Resolution at which to compute the cell ID. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns The sequence number (BigInt) of the cell containing this coordinate.
+     */
+    vertex2DDToSequenceNum(
+        keep: boolean,
+        vertNum: number,
+        triNum: number,
+        x: number,
+        y: number,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        try {
+            return this._module.VERTEX2DD_to_SEQNUM(
+                ...this._getParams(resolution),
+                keep,
+                vertNum,
+                triNum,
+                x,
+                y
+            );
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a SEQNUM cell ID to ZORDER (Z-order curve) coordinate.
+     *
+     * ZORDER uses digit-interleaved coordinates to create a space-filling
+     * curve index. This provides good spatial locality for range queries.
+     *
+     * **Compatibility:** ZORDER is only available for **aperture 3 and 4**
+     * hexagon grids. It is **NOT supported** for aperture 7.
+     *
+     * ```ts
+     * // With aperture 4:
+     * const zorder = dggs.sequenceNumToZOrder(100n, 5);
+     * // zorder = 1168684103302643712n
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell. Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns A BigInt representing the Z-order coordinate.
+     * @throws If used with an incompatible aperture (7) or topology.
+     */
+    sequenceNumToZOrder(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, apertureSequence } = this.dggs;
+
+        // Check aperture compatibility
+        if (aperture === 7 && !apertureSequence) {
+            throw new Error(
+                'ZORDER is not available for aperture 7. ' +
+                'Use Z7 hierarchical indexing instead, or switch to aperture 3 or 4.'
+            );
+        }
+
+        try {
+            return this._module.SEQNUM_to_ZORDER(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture')) {
+                throw new Error(
+                    `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a ZORDER (Z-order curve) coordinate to a SEQNUM cell ID.
+     *
+     * ```ts
+     * const seqnum = dggs.zOrderToSequenceNum(1168684103302643712n, 5);
+     * // seqnum = 100n
+     * ```
+     *
+     * @param zorderValue - The Z-order coordinate value (BigInt).
+     * @param resolution - Resolution at which to compute the cell ID. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns The sequence number (BigInt) corresponding to this Z-order value.
+     * @throws If used with an incompatible aperture (7) or topology.
+     */
+    zOrderToSequenceNum(
+        zorderValue: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, apertureSequence } = this.dggs;
+
+        if (aperture === 7 && !apertureSequence) {
+            throw new Error(
+                'ZORDER is not available for aperture 7. ' +
+                'Use Z7 hierarchical indexing instead, or switch to aperture 3 or 4.'
+            );
+        }
+
+        try {
+            return this._module.ZORDER_to_SEQNUM(
+                ...this._getParams(resolution),
+                zorderValue
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture')) {
+                throw new Error(
+                    `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a SEQNUM cell ID to Z3 (base-3 Central Place Indexing) coordinate.
+     *
+     * Z3 uses base-3 digit encoding optimized for aperture 3 hexagon grids.
+     * Each parent cell contains exactly 3 children in the hierarchy.
+     *
+     * **Compatibility:** Z3 is **only available for aperture 3** hexagon grids.
+     *
+     * ```ts
+     * // With aperture 3:
+     * const z3 = dggs.sequenceNumToZ3(100n, 5);
+     * // z3 = 1773292353277132799n
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell. Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns A BigInt representing the Z3 coordinate (INT64 format).
+     * @throws If used with an incompatible aperture (not 3) or topology.
+     */
+    sequenceNumToZ3(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, topology, apertureSequence } = this.dggs;
+
+        if ((aperture !== 3 || topology !== 'HEXAGON') && !apertureSequence) {
+            throw new Error(
+                'Z3 is only available for aperture 3 hexagon grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
+        }
+
+        try {
+            return this._module.SEQNUM_to_Z3(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
+                throw new Error(
+                    `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a Z3 (base-3 Central Place Indexing) coordinate to a SEQNUM cell ID.
+     *
+     * ```ts
+     * const seqnum = dggs.z3ToSequenceNum(1773292353277132799n, 5);
+     * // seqnum = 100n
+     * ```
+     *
+     * @param z3Value - The Z3 coordinate value (BigInt, INT64 format).
+     * @param resolution - Resolution at which to compute the cell ID. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns The sequence number (BigInt) corresponding to this Z3 value.
+     * @throws If used with an incompatible aperture (not 3) or topology.
+     */
+    z3ToSequenceNum(
+        z3Value: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, topology, apertureSequence } = this.dggs;
+
+        if ((aperture !== 3 || topology !== 'HEXAGON') && !apertureSequence) {
+            throw new Error(
+                'Z3 is only available for aperture 3 hexagon grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
+        }
+
+        try {
+            return this._module.Z3_to_SEQNUM(
+                ...this._getParams(resolution),
+                z3Value
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
+                throw new Error(
+                    `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a SEQNUM cell ID to Z7 (base-7 Central Place Indexing) coordinate.
+     *
+     * Z7 uses base-7 digit encoding with pure bitarithmetic operations,
+     * optimized for aperture 7 hexagon grids. Each parent cell contains
+     * exactly 7 children in the hierarchy.
+     *
+     * **Compatibility:** Z7 is **only available for aperture 7** hexagon grids.
+     *
+     * ```ts
+     * // With aperture 7:
+     * const z7 = dggs.sequenceNumToZ7(100n, 5);
+     * // z7 = 1153167795211468799n (displayed as hex: 0x1000000000000fff)
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell. Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns A BigInt representing the Z7 coordinate (INT64/hex format).
+     * @throws If used with an incompatible aperture (not 7) or topology.
+     */
+    sequenceNumToZ7(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, topology, apertureSequence } = this.dggs;
+
+        if ((aperture !== 7 || topology !== 'HEXAGON') && !apertureSequence) {
+            throw new Error(
+                'Z7 is only available for aperture 7 hexagon grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
+        }
+
+        try {
+            return this._module.SEQNUM_to_Z7(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
+                throw new Error(
+                    `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`
+                );
+            }
+            console.error(errMsg);
+            throw e;
+        }
+    }
+
+    /**
+     * Convert a Z7 (base-7 Central Place Indexing) coordinate to a SEQNUM cell ID.
+     *
+     * ```ts
+     * const seqnum = dggs.z7ToSequenceNum(1153167795211468799n, 5);
+     * // seqnum = 100n
+     * ```
+     *
+     * @param z7Value - The Z7 coordinate value (BigInt, INT64/hex format).
+     * @param resolution - Resolution at which to compute the cell ID. Defaults
+     *   to the instance's current {@link resolution}.
+     * @returns The sequence number (BigInt) corresponding to this Z7 value.
+     * @throws If used with an incompatible aperture (not 7) or topology.
+     */
+    z7ToSequenceNum(
+        z7Value: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        const { aperture, topology, apertureSequence } = this.dggs;
+
+        if ((aperture !== 7 || topology !== 'HEXAGON') && !apertureSequence) {
+            throw new Error(
+                'Z7 is only available for aperture 7 hexagon grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
+        }
+
+        try {
+            return this._module.Z7_to_SEQNUM(
+                ...this._getParams(resolution),
+                z7Value
+            );
+        } catch (e) {
+            const errMsg = this._module.getExceptionMessage(e).toString();
+            if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
+                throw new Error(
+                    `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`
+                );
+            }
+            console.error(errMsg);
             throw e;
         }
     }

@@ -31,6 +31,7 @@ export default defineConfig({
           { text: 'Geometry Notes', link: '/getting-started#geometry-notes' },
           { text: 'Multi-Aperture', link: '/multi-aperture' },
           { text: 'Hierarchical Operations', link: '/hierarchical-operations' },
+          { text: 'Hierarchical Address Types', link: '/hierarchical-addresses' },
         ],
       },
       {
