@@ -24,6 +24,8 @@ const state = reactive({
   visibleCells: [],
   // Round-trip check
   roundTrip: null,
+  // Bitarithmetic results
+  bitOps: null,
 })
 
 const availableTypes = computed(() => {
@@ -62,7 +64,7 @@ async function applySettings() {
   state.ready = true
   state.loading = false
 
-  await nextTick() // wait for SVG to appear in DOM
+  await nextTick()
 
   const totalCells = dggs.nCells(state.resolution)
   const maxId = Math.min(totalCells, 10000)
@@ -109,6 +111,157 @@ function verifyRoundTrip(addr, resolution) {
   return checks
 }
 
+// --- Bitarithmetic demonstration ---
+
+function computeBitOps(addr, resolution) {
+  const ops = { sections: [] }
+
+  // Z3 arithmetic (aperture 3)
+  if (addr.z3 !== null) {
+    const z3 = addr.z3
+    const base = 3n
+    // Extract digits: each resolution level is one base-3 digit
+    // The Z3 value encodes digits from MSB (coarsest) to LSB (finest)
+    const digits = extractDigits(z3, base, resolution)
+
+    // Parent via bit manipulation: drop the last digit
+    const parentZ3Bits = z3 / base
+    let parentSeqBits = null
+    try { parentSeqBits = dggs.z3ToSequenceNum(parentZ3Bits, resolution - 1) } catch { /* skip */ }
+
+    // Actual parent via API
+    let parentSeqApi = null
+    try { parentSeqApi = dggs.sequenceNumParent([addr.seqnum], resolution)[0] } catch { /* skip */ }
+
+    // Children via bit manipulation: append digits 0,1,2
+    const childrenBits = []
+    for (let d = 0n; d < base; d++) {
+      const childZ3 = z3 * base + d
+      try {
+        const childSeq = dggs.z3ToSequenceNum(childZ3, resolution + 1)
+        childrenBits.push({ digit: Number(d), z3: childZ3, seqnum: childSeq })
+      } catch { childrenBits.push({ digit: Number(d), z3: childZ3, seqnum: null }) }
+    }
+
+    // Actual children via API
+    let childrenApi = []
+    try { childrenApi = dggs.sequenceNumChildren([addr.seqnum], resolution)[0] } catch { /* skip */ }
+
+    ops.sections.push({
+      type: 'Z3',
+      base: 3,
+      value: z3,
+      hex: '0x' + z3.toString(16),
+      digits,
+      parent: {
+        formula: `z3 / ${base} = ${parentZ3Bits}`,
+        bitResult: parentSeqBits,
+        apiResult: parentSeqApi,
+        match: parentSeqBits !== null && parentSeqApi !== null && parentSeqBits === parentSeqApi,
+      },
+      children: childrenBits,
+      childrenApi,
+    })
+  }
+
+  // Z7 arithmetic (aperture 7)
+  if (addr.z7 !== null) {
+    const z7 = addr.z7
+    const base = 7n
+    const digits = extractDigits(z7, base, resolution)
+
+    const parentZ7Bits = z7 / base
+    let parentSeqBits = null
+    try { parentSeqBits = dggs.z7ToSequenceNum(parentZ7Bits, resolution - 1) } catch { /* skip */ }
+
+    let parentSeqApi = null
+    try { parentSeqApi = dggs.sequenceNumParent([addr.seqnum], resolution)[0] } catch { /* skip */ }
+
+    const childrenBits = []
+    for (let d = 0n; d < base; d++) {
+      const childZ7 = z7 * base + d
+      try {
+        const childSeq = dggs.z7ToSequenceNum(childZ7, resolution + 1)
+        childrenBits.push({ digit: Number(d), z7: childZ7, seqnum: childSeq })
+      } catch { childrenBits.push({ digit: Number(d), z7: childZ7, seqnum: null }) }
+    }
+
+    let childrenApi = []
+    try { childrenApi = dggs.sequenceNumChildren([addr.seqnum], resolution)[0] } catch { /* skip */ }
+
+    ops.sections.push({
+      type: 'Z7',
+      base: 7,
+      value: z7,
+      hex: '0x' + z7.toString(16),
+      digits,
+      parent: {
+        formula: `z7 / ${base} = ${parentZ7Bits}`,
+        bitResult: parentSeqBits,
+        apiResult: parentSeqApi,
+        match: parentSeqBits !== null && parentSeqApi !== null && parentSeqBits === parentSeqApi,
+      },
+      children: childrenBits,
+      childrenApi,
+    })
+  }
+
+  // ZORDER spatial locality
+  if (addr.zorder !== null) {
+    const zorder = addr.zorder
+    // Show neighbor ZORDER values to demonstrate spatial locality
+    let neighbors = []
+    try {
+      const nIds = dggs.sequenceNumNeighbors([addr.seqnum], resolution)[0]
+      neighbors = nIds.map(n => {
+        try {
+          const nz = dggs.sequenceNumToZOrder(n, resolution)
+          const diff = nz > zorder ? nz - zorder : zorder - nz
+          return { seqnum: n, zorder: nz, diff, hex: '0x' + nz.toString(16) }
+        } catch {
+          return { seqnum: n, zorder: null, diff: null, hex: 'N/A' }
+        }
+      })
+      neighbors.sort((a, b) => {
+        if (a.diff === null) return 1
+        if (b.diff === null) return -1
+        return a.diff < b.diff ? -1 : a.diff > b.diff ? 1 : 0
+      })
+    } catch { /* skip */ }
+
+    // Common prefix with neighbors (shared ancestor)
+    const centerHex = zorder.toString(16).padStart(16, '0')
+    const prefixes = neighbors.filter(n => n.zorder !== null).map(n => {
+      const nHex = n.zorder.toString(16).padStart(16, '0')
+      let common = 0
+      for (let i = 0; i < centerHex.length; i++) {
+        if (centerHex[i] === nHex[i]) common++
+        else break
+      }
+      return { ...n, commonPrefix: common, totalDigits: centerHex.length }
+    })
+
+    ops.sections.push({
+      type: 'ZORDER',
+      value: zorder,
+      hex: '0x' + zorder.toString(16).padStart(16, '0'),
+      neighbors: prefixes,
+    })
+  }
+
+  return ops.sections.length > 0 ? ops : null
+}
+
+function extractDigits(value, base, numDigits) {
+  const digits = []
+  let v = value
+  for (let i = 0; i < numDigits; i++) {
+    digits.unshift(Number(v % base))
+    v = v / base
+  }
+  return digits
+}
+
 function formatAddress(addr, type) {
   if (!addr) return '?'
   switch (type) {
@@ -129,22 +282,20 @@ function pickCell(cellId, resolution) {
   state.selectedCell = cellId
   state.selectedRes = resolution
 
-  // Get neighbors to form the visible cluster
   let neighbors = []
   try { neighbors = dggs.sequenceNumNeighbors([cellId], resolution)[0] } catch { /* skip */ }
 
   state.visibleCells = [cellId, ...neighbors]
 
-  // Convert all visible cells
   const addrMap = new Map()
   for (const c of state.visibleCells) {
     addrMap.set(c.toString(), convertCell(c, resolution))
   }
   state.cellAddresses = addrMap
 
-  // Full conversion for selected cell
   state.addresses = convertCell(cellId, resolution)
   state.roundTrip = verifyRoundTrip(state.addresses, resolution)
+  state.bitOps = computeBitOps(state.addresses, resolution)
 
   drawScene(resolution)
 }
@@ -162,7 +313,6 @@ function drawScene(resolution) {
     _seqnum: state.visibleCells[i],
   }))
 
-  // Bounding box
   const allCoords = features.flatMap(f => f.geometry.coordinates[0])
   const lngs = allCoords.map(c => c[0])
   const lats = allCoords.map(c => c[1])
@@ -177,7 +327,6 @@ function drawScene(resolution) {
   const cy = (minLat + maxLat) / 2
   const proj = ([lng, lat]) => [320 + (lng - cx) * scale, 200 - (lat - cy) * scale]
 
-  // Polygons
   svg.selectAll('polygon.cell')
     .data(features)
     .enter()
@@ -203,7 +352,6 @@ function drawScene(resolution) {
       pickCell(d._seqnum, resolution)
     })
 
-  // Labels
   const labelGroup = svg.append('g').attr('pointer-events', 'none')
   labelGroup.selectAll('text.cell-label')
     .data(features)
@@ -228,7 +376,6 @@ function drawScene(resolution) {
       return formatAddress(addr, state.displayType)
     })
 
-  // Type badge
   svg.append('text')
     .attr('x', 630).attr('y', 16)
     .attr('text-anchor', 'end')
@@ -296,7 +443,7 @@ function loadScript(src) {
         <div v-else class="hover-info hint">Click a cell to inspect its address conversions</div>
       </div>
 
-      <!-- Conversion table for selected cell -->
+      <!-- Conversion table -->
       <div class="panel" v-if="state.addresses">
         <div class="panel-header">
           Cell <strong>{{ state.selectedCell.toString() }}</strong>
@@ -358,6 +505,143 @@ function loadScript(src) {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Bitarithmetic demonstration -->
+      <div v-if="state.bitOps" class="panel bitops-panel">
+        <div class="panel-header">Index Arithmetic — Live Demonstration</div>
+
+        <div v-for="section in state.bitOps.sections" :key="section.type" class="bitops-section">
+
+          <!-- Z3 / Z7 hierarchical arithmetic -->
+          <template v-if="section.type === 'Z3' || section.type === 'Z7'">
+            <div class="bitops-title">{{ section.type }} — Base-{{ section.base }} Hierarchical Arithmetic</div>
+
+            <!-- Digit breakdown -->
+            <div class="digit-row">
+              <span class="digit-label">{{ section.type }} value:</span>
+              <span class="digit-value">{{ section.hex }}</span>
+            </div>
+            <div class="digit-row">
+              <span class="digit-label">Digits (res 1→{{ state.selectedRes }}):</span>
+              <span class="digit-cells">
+                <span
+                  v-for="(d, i) in section.digits"
+                  :key="i"
+                  class="digit-cell"
+                  :class="{ 'digit-last': i === section.digits.length - 1 }"
+                >{{ d }}</span>
+              </span>
+              <span class="digit-hint">each digit = which child at that level</span>
+            </div>
+
+            <!-- Parent via division -->
+            <div class="op-block">
+              <div class="op-title">Find Parent (drop last digit)</div>
+              <div class="op-code">
+                <code>{{ section.type.toLowerCase() }} / {{ section.base }}</code>
+                = <code>{{ section.parent.formula.split('=')[1]?.trim() }}</code>
+              </div>
+              <div class="op-row">
+                <span class="op-label">Bit arithmetic result:</span>
+                <span class="op-val">SEQNUM {{ section.parent.bitResult?.toString() ?? 'error' }}</span>
+              </div>
+              <div class="op-row">
+                <span class="op-label">API sequenceNumParent():</span>
+                <span class="op-val">SEQNUM {{ section.parent.apiResult?.toString() ?? 'error' }}</span>
+              </div>
+              <div class="op-row">
+                <span class="op-label">Match:</span>
+                <span :class="section.parent.match ? 'rt-ok' : 'rt-fail'">
+                  {{ section.parent.match ? 'Yes — identical!' : 'No' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Children via multiplication -->
+            <div class="op-block">
+              <div class="op-title">Find Children (append digit 0–{{ section.base - 1 }})</div>
+              <table class="children-table">
+                <thead>
+                  <tr>
+                    <th>Digit</th>
+                    <th>Formula</th>
+                    <th>{{ section.type }}</th>
+                    <th>SEQNUM (bit)</th>
+                    <th>SEQNUM (API)</th>
+                    <th>Match</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="child in section.children" :key="child.digit">
+                    <td class="digit-cell-inline">{{ child.digit }}</td>
+                    <td><code>{{ section.type.toLowerCase() }} * {{ section.base }} + {{ child.digit }}</code></td>
+                    <td class="mono">{{ child[section.type.toLowerCase()]?.toString() ?? '?' }}</td>
+                    <td class="mono">{{ child.seqnum?.toString() ?? 'err' }}</td>
+                    <td class="mono">{{ section.childrenApi[child.digit]?.toString() ?? 'err' }}</td>
+                    <td>
+                      <span v-if="child.seqnum !== null && section.childrenApi[child.digit] !== undefined && child.seqnum === section.childrenApi[child.digit]" class="rt-ok">OK</span>
+                      <span v-else class="rt-fail">—</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
+
+          <!-- ZORDER spatial locality -->
+          <template v-if="section.type === 'ZORDER'">
+            <div class="bitops-title">ZORDER — Spatial Locality via Bit Proximity</div>
+
+            <div class="digit-row">
+              <span class="digit-label">Selected cell:</span>
+              <span class="digit-value">{{ section.hex }}</span>
+            </div>
+
+            <div class="op-block">
+              <div class="op-title">Neighbor ZORDER values (sorted by distance)</div>
+              <p class="op-hint">Cells that are spatially close have numerically close ZORDER values. Shared hex prefix = shared ancestor in the hierarchy.</p>
+              <table class="children-table">
+                <thead>
+                  <tr>
+                    <th>SEQNUM</th>
+                    <th>ZORDER (hex)</th>
+                    <th>Distance</th>
+                    <th>Shared Prefix</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="zorder-center">
+                    <td class="mono">{{ state.selectedCell.toString() }} (selected)</td>
+                    <td class="mono">{{ section.hex }}</td>
+                    <td>—</td>
+                    <td>—</td>
+                  </tr>
+                  <tr v-for="(n, i) in section.neighbors" :key="i">
+                    <td class="mono">{{ n.seqnum.toString() }}</td>
+                    <td class="mono">{{ n.hex }}</td>
+                    <td class="mono">{{ n.diff?.toString() ?? 'N/A' }}</td>
+                    <td>
+                      <span class="prefix-bar">
+                        <span class="prefix-shared" :style="{ width: (n.commonPrefix / n.totalDigits * 100) + '%' }"></span>
+                      </span>
+                      <span class="prefix-text">{{ n.commonPrefix }}/{{ n.totalDigits }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Explainer when no bitops available -->
+      <div v-else-if="state.addresses && state.topology === 'HEXAGON'" class="panel note-panel">
+        <strong>Note:</strong> Aperture {{ state.aperture }} with HEXAGON topology supports
+        <template v-if="state.aperture === 4">ZORDER</template>
+        <template v-if="state.aperture === 3">ZORDER and Z3</template>
+        <template v-if="state.aperture === 7">Z7</template>
+        arithmetic. Select one of these display types above to see the demonstration.
       </div>
     </template>
   </div>
@@ -441,7 +725,7 @@ function loadScript(src) {
   color: var(--vp-c-text-2);
 }
 
-/* Panel */
+/* Panels */
 .panel {
   margin-top: 10px;
   padding: 12px 14px;
@@ -452,6 +736,7 @@ function loadScript(src) {
 .panel-header {
   font-size: 14px;
   margin-bottom: 10px;
+  font-weight: 600;
 }
 .res-badge {
   display: inline-block;
@@ -461,6 +746,11 @@ function loadScript(src) {
   border-radius: 4px;
   font-size: 11px;
   margin-left: 4px;
+  font-weight: normal;
+}
+.note-panel {
+  font-size: 13px;
+  color: var(--vp-c-text-2);
 }
 
 /* Conversion table */
@@ -509,5 +799,180 @@ function loadScript(src) {
   color: #d43b2b;
   font-weight: 600;
   font-size: 12px;
+}
+
+/* Bitarithmetic panel */
+.bitops-panel {
+  margin-top: 10px;
+}
+.bitops-section + .bitops-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--vp-c-divider, #e2e2e3);
+}
+.bitops-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  margin-bottom: 10px;
+}
+
+/* Digit breakdown */
+.digit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.digit-label {
+  color: var(--vp-c-text-2);
+  font-weight: 600;
+  font-size: 12px;
+  min-width: 140px;
+}
+.digit-value {
+  font-family: var(--vp-font-family-mono, monospace);
+  color: var(--vp-c-text-1);
+}
+.digit-cells {
+  display: flex;
+  gap: 2px;
+}
+.digit-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--vp-c-divider, #ddd);
+  border-radius: 3px;
+  font-family: var(--vp-font-family-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--vp-c-bg, #fff);
+  color: var(--vp-c-text-1);
+}
+.digit-last {
+  background: #e8f4fd;
+  border-color: #2b7fd4;
+  color: #2b7fd4;
+}
+.digit-hint {
+  font-size: 11px;
+  color: var(--vp-c-text-3, #999);
+  font-style: italic;
+}
+
+/* Operation blocks */
+.op-block {
+  margin: 12px 0;
+  padding: 10px 12px;
+  background: var(--vp-c-bg, #fff);
+  border: 1px solid var(--vp-c-divider, #e2e2e3);
+  border-radius: 6px;
+}
+.op-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.op-hint {
+  font-size: 12px;
+  color: var(--vp-c-text-2);
+  margin: 0 0 8px;
+}
+.op-code {
+  font-family: var(--vp-font-family-mono, monospace);
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--vp-c-text-1);
+}
+.op-code code {
+  background: var(--vp-c-default-soft, #e8e8e8);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+.op-row {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 4px;
+  align-items: center;
+}
+.op-label {
+  color: var(--vp-c-text-2);
+  min-width: 180px;
+}
+.op-val {
+  font-family: var(--vp-font-family-mono, monospace);
+  color: var(--vp-c-text-1);
+}
+
+/* Children / ZORDER tables */
+.children-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.children-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--vp-c-text-3, #999);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 4px 8px 4px 0;
+  border-bottom: 1px solid var(--vp-c-divider, #e2e2e3);
+}
+.children-table td {
+  padding: 4px 8px 4px 0;
+  border-bottom: 1px solid var(--vp-c-divider, #eee);
+  vertical-align: middle;
+}
+.children-table .mono {
+  font-family: var(--vp-font-family-mono, monospace);
+  font-size: 11px;
+}
+.digit-cell-inline {
+  font-family: var(--vp-font-family-mono, monospace);
+  font-weight: 600;
+  color: #2b7fd4;
+  width: 30px;
+}
+.zorder-center {
+  background: #e8f4fd;
+}
+.zorder-center td {
+  font-weight: 600;
+}
+
+/* Prefix bar */
+.prefix-bar {
+  display: inline-block;
+  width: 60px;
+  height: 8px;
+  background: var(--vp-c-divider, #e2e2e3);
+  border-radius: 4px;
+  overflow: hidden;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.prefix-shared {
+  display: block;
+  height: 100%;
+  background: #2ba52b;
+  border-radius: 4px;
+}
+.prefix-text {
+  font-size: 10px;
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono, monospace);
 }
 </style>
