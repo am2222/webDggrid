@@ -208,6 +208,7 @@ function generateGrid() {
   hierarchyInfo.parent = null
   hierarchyInfo.children = []
   hierarchyInfo.neighbors = []
+  removeHierarchyMapLayers()
 
   const maxRes     = ctrlResolution.value
   const multiRes   = ctrlMultiRes.value
@@ -377,150 +378,147 @@ function clearSelection() {
   hierarchyInfo.parent = null
   hierarchyInfo.children = []
   hierarchyInfo.neighbors = []
-  // Remove hierarchy layers, keep grid layers
-  if (deckOverlay && lastFineFc) {
-    updateDeckLayers(lastFineFc, lastBaseFc)
+  removeHierarchyMapLayers()
+}
+
+// MapLibre source/layer IDs for hierarchy
+const HIER_SOURCES = ['hier-parent', 'hier-children', 'hier-selected', 'hier-labels-selected', 'hier-labels-parent', 'hier-labels-children']
+
+function removeHierarchyMapLayers() {
+  if (!map) return
+  for (const id of HIER_SOURCES) {
+    for (const suffix of ['-fill', '-line', '-text']) {
+      if (map.getLayer(id + suffix)) map.removeLayer(id + suffix)
+    }
+    if (map.getSource(id)) map.removeSource(id)
   }
 }
 
+function sanitizeFc(fc) {
+  fc.features.forEach(f => {
+    if (typeof f.id === 'bigint') f.id = f.id.toString()
+    if (f.properties) {
+      for (const k of Object.keys(f.properties)) {
+        if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
+      }
+    }
+  })
+  return fc
+}
+
 function updateHierarchyLayers(seqnum, resolution) {
-  if (!deckOverlay) return
+  if (!map) return
 
-  const { GeoJsonLayer, TextLayer } = window.deck
-  const colored = ctrlColorCells.value
-  const layers = []
+  // Restore base deck.gl grid layers
+  if (deckOverlay && lastFineFc) {
+    updateDeckLayers(lastFineFc, lastBaseFc)
+  }
 
-  // Base grid layers
-  if (lastBaseFc) layers.push(makeCellLayer('dggrid-base', lastBaseFc, false, true))
-  if (lastFineFc) layers.push(makeCellLayer('dggrid-cells', lastFineFc, colored, false))
+  // Remove previous MapLibre hierarchy layers
+  removeHierarchyMapLayers()
 
-  // Parent cell layer
+  // --- Parent polygon ---
   if (hierarchyInfo.parent !== null && resolution > 0) {
     try {
-      const parentFc = webdggrid.sequenceNumToGridFeatureCollection([hierarchyInfo.parent], resolution - 1)
-      parentFc.features.forEach(f => {
-        if (typeof f.id === 'bigint') f.id = f.id.toString()
-        if (f.properties) for (const k of Object.keys(f.properties)) if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
+      const parentFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([hierarchyInfo.parent], resolution - 1))
+      console.log('Parent cell geometry:', JSON.stringify(parentFc.features[0]?.geometry))
+      map.addSource('hier-parent', { type: 'geojson', data: parentFc })
+      map.addLayer({ id: 'hier-parent-fill', type: 'fill', source: 'hier-parent', paint: { 'fill-color': '#33cc33', 'fill-opacity': 0.15 } })
+      map.addLayer({ id: 'hier-parent-line', type: 'line', source: 'hier-parent', paint: { 'line-color': '#33cc33', 'line-width': 3, 'line-dasharray': [3, 2] } })
+
+      // Parent label — offset upward so it doesn't overlap selected cell
+      const geo = webdggrid.sequenceNumToGeo([hierarchyInfo.parent], resolution - 1)[0]
+      const parentLabelFc = { type: 'FeatureCollection', features: [{
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
+        properties: { label: getCellIndexLabel(hierarchyInfo.parent, resolution - 1) },
+      }] }
+      map.addSource('hier-labels-parent', { type: 'geojson', data: parentLabelFc })
+      map.addLayer({
+        id: 'hier-labels-parent-text',
+        type: 'symbol',
+        source: 'hier-labels-parent',
+        layout: {
+          'text-field': ['get', 'label'],
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-size': 13,
+          'text-offset': [0, -2],
+          'text-allow-overlap': false,
+        },
+        paint: { 'text-color': '#1a8a1a', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 2 },
       })
-      console.log('Parent cell geometry (raw):', JSON.stringify(parentFc.features[0]?.geometry))
-      const parentProcessed = processFcForGlobe(parentFc)
-      console.log('Parent cell geometry (globe-processed):', JSON.stringify(parentProcessed.features[0]?.geometry))
-      layers.push(new GeoJsonLayer({
-        id: 'hierarchy-parent',
-        data: parentProcessed,
-        filled: true,
-        stroked: true,
-        wrapLongitude: true,
-        getFillColor: [51, 204, 51, 50],
-        getLineColor: [51, 204, 51, 220],
-        getLineWidth: 3,
-        lineWidthUnits: 'pixels',
-      }))
     } catch (err) { console.error('Parent geometry error:', err) }
   }
 
-  // Children layer
+  // --- Children polygons ---
   if (hierarchyInfo.children.length > 0) {
     try {
-      const childFc = webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1)
-      childFc.features.forEach(f => {
-        if (typeof f.id === 'bigint') f.id = f.id.toString()
-        if (f.properties) for (const k of Object.keys(f.properties)) if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
-      })
-      layers.push(new GeoJsonLayer({
-        id: 'hierarchy-children',
-        data: processFcForGlobe(childFc),
-        filled: true,
-        stroked: true,
-        wrapLongitude: true,
-        getFillColor: [255, 204, 0, 100],
-        getLineColor: [204, 153, 0, 220],
-        getLineWidth: 2,
-        lineWidthUnits: 'pixels',
-      }))
+      const childFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1))
+      map.addSource('hier-children', { type: 'geojson', data: childFc })
+      map.addLayer({ id: 'hier-children-fill', type: 'fill', source: 'hier-children', paint: { 'fill-color': '#ffcc00', 'fill-opacity': 0.3 } })
+      map.addLayer({ id: 'hier-children-line', type: 'line', source: 'hier-children', paint: { 'line-color': '#cc9900', 'line-width': 2 } })
+
+      // Children labels — collision detection auto-hides overlapping ones
+      const childLabelFeatures = []
+      for (const child of hierarchyInfo.children) {
+        try {
+          const geo = webdggrid.sequenceNumToGeo([child], resolution + 1)[0]
+          childLabelFeatures.push({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
+            properties: { label: getCellIndexLabel(child, resolution + 1) },
+          })
+        } catch { /* skip */ }
+      }
+      if (childLabelFeatures.length > 0) {
+        const childLabelFc = { type: 'FeatureCollection', features: childLabelFeatures }
+        map.addSource('hier-labels-children', { type: 'geojson', data: childLabelFc })
+        map.addLayer({
+          id: 'hier-labels-children-text',
+          type: 'symbol',
+          source: 'hier-labels-children',
+          layout: {
+            'text-field': ['get', 'label'],
+            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+            'text-size': 10,
+            'text-allow-overlap': false,
+            'text-optional': true,
+          },
+          paint: { 'text-color': '#886600', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.5 },
+        })
+      }
     } catch { /* skip */ }
   }
 
-  // Selected cell highlight
+  // --- Selected cell highlight (always on top) ---
   try {
-    const centerFc = webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution)
-    centerFc.features.forEach(f => {
-      if (typeof f.id === 'bigint') f.id = f.id.toString()
-      if (f.properties) for (const k of Object.keys(f.properties)) if (typeof f.properties[k] === 'bigint') f.properties[k] = f.properties[k].toString()
-    })
-    layers.push(new GeoJsonLayer({
-      id: 'hierarchy-selected',
-      data: processFcForGlobe(centerFc),
-      filled: true,
-      stroked: true,
-      wrapLongitude: true,
-      getFillColor: [255, 51, 51, 80],
-      getLineColor: [255, 51, 51, 255],
-      getLineWidth: 4,
-      lineWidthUnits: 'pixels',
-    }))
-  } catch { /* skip */ }
+    const centerFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution))
+    map.addSource('hier-selected', { type: 'geojson', data: centerFc })
+    map.addLayer({ id: 'hier-selected-fill', type: 'fill', source: 'hier-selected', paint: { 'fill-color': '#ff3333', 'fill-opacity': 0.25 } })
+    map.addLayer({ id: 'hier-selected-line', type: 'line', source: 'hier-selected', paint: { 'line-color': '#ff3333', 'line-width': 4 } })
 
-  // --- Text labels for all hierarchical cells ---
-  const labelData = []
-
-  // Selected cell label
-  try {
+    // Selected label — always visible, ignores collisions
     const geo = webdggrid.sequenceNumToGeo([seqnum], resolution)[0]
-    labelData.push({
-      position: [geo[0], geo[1]],
-      text: getCellIndexLabel(seqnum, resolution),
-      color: [255, 51, 51],
-      size: 14,
+    const selLabelFc = { type: 'FeatureCollection', features: [{
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
+      properties: { label: getCellIndexLabel(seqnum, resolution) },
+    }] }
+    map.addSource('hier-labels-selected', { type: 'geojson', data: selLabelFc })
+    map.addLayer({
+      id: 'hier-labels-selected-text',
+      type: 'symbol',
+      source: 'hier-labels-selected',
+      layout: {
+        'text-field': ['get', 'label'],
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-size': 14,
+        'text-allow-overlap': true,
+        'text-ignore-placement': true,
+      },
+      paint: { 'text-color': '#ff3333', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 2.5 },
     })
   } catch { /* skip */ }
-
-  // Parent label
-  if (hierarchyInfo.parent !== null && resolution > 0) {
-    try {
-      const geo = webdggrid.sequenceNumToGeo([hierarchyInfo.parent], resolution - 1)[0]
-      labelData.push({
-        position: [geo[0], geo[1]],
-        text: getCellIndexLabel(hierarchyInfo.parent, resolution - 1),
-        color: [30, 150, 30],
-        size: 12,
-      })
-    } catch { /* skip */ }
-  }
-
-  // Children labels
-  for (const child of hierarchyInfo.children) {
-    try {
-      const geo = webdggrid.sequenceNumToGeo([child], resolution + 1)[0]
-      labelData.push({
-        position: [geo[0], geo[1]],
-        text: getCellIndexLabel(child, resolution + 1),
-        color: [180, 130, 0],
-        size: 10,
-      })
-    } catch { /* skip */ }
-  }
-
-  if (labelData.length > 0) {
-    layers.push(new TextLayer({
-      id: 'hierarchy-labels',
-      data: labelData,
-      getPosition: d => d.position,
-      getText: d => d.text,
-      getColor: d => [...d.color, 255],
-      getSize: d => d.size,
-      getTextAnchor: 'middle',
-      getAlignmentBaseline: 'center',
-      fontFamily: 'monospace',
-      fontWeight: 700,
-      outlineWidth: 3,
-      outlineColor: [255, 255, 255, 220],
-      billboard: true,
-      sizeUnits: 'pixels',
-    }))
-  }
-
-  deckOverlay.setProps({ layers })
 }
 
 // ---------------------------------------------------------------------------
