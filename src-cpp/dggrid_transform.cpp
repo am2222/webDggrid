@@ -64,9 +64,11 @@
 #include <dglib/DgZ3RF.h>           // DgZ3RF, DgZ3Coord
 #include <dglib/DgZ7RF.h>           // DgZ7RF, DgZ7Coord
 
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
@@ -1032,15 +1034,69 @@ SeqNum seqNumParent(const DggsParams &p, SeqNum seqnum) {
     return geoToSeqNum(parentParams, lon_deg, lat_deg);
 }
 
-std::vector<SeqNum> seqNumsParents(const DggsParams &p, 
+std::vector<SeqNum> seqNumsParents(const DggsParams &p,
                                     const std::vector<SeqNum>& seqnums) {
     std::vector<SeqNum> result;
     result.reserve(seqnums.size());
-    
+
     for (const auto& seqnum : seqnums) {
         result.push_back(seqNumParent(p, seqnum));
     }
-    
+
+    return result;
+}
+
+std::vector<SeqNum> seqNumAllParents(const DggsParams &p, SeqNum seqnum) {
+    if (p.res <= 0) {
+        throw std::runtime_error("Cannot get parents: already at resolution 0");
+    }
+
+    // Use DGGRID's setParents which finds all parent cells that touch the
+    // child cell (via edge midpoint sampling). For interior cells this
+    // typically returns 1 parent; for cells on a parent boundary it may
+    // return 2 or more.
+    auto t = getTransformer(p);
+
+    auto loc = t->inSEQNUM(seqnum);
+    const DgQ2DICoord *q2di = t->dgg->getAddress(*loc);
+
+    DgLocVector parents(*(t->idggs));
+    t->idggs->setParents(p.res, *loc, parents);
+
+    const DgIDGGBase &parent_dgg = t->idggs->idggBase(p.res - 1);
+
+    std::vector<SeqNum> result;
+    // Deduplicate: setParents may return the same cell more than once
+    std::set<uint64_t> seen;
+    for (int i = 0; i < parents.size(); i++) {
+        DgLocation parent_loc(parents[i]);
+        parent_dgg.convert(&parent_loc);
+        const DgQ2DICoord *parent_q2di = parent_dgg.getAddress(parent_loc);
+        uint64_t parent_seqnum = parent_dgg.bndRF().seqNumAddress(*parent_q2di);
+        if (seen.insert(parent_seqnum).second) {
+            result.push_back(static_cast<SeqNum>(parent_seqnum));
+        }
+    }
+
+    // Ensure the primary (containing) parent is first
+    SeqNum primary = seqNumParent(p, seqnum);
+    auto it = std::find(result.begin(), result.end(), primary);
+    if (it != result.end() && it != result.begin()) {
+        std::iter_swap(result.begin(), it);
+    } else if (it == result.end()) {
+        result.insert(result.begin(), primary);
+    }
+
+    return result;
+}
+
+std::vector<std::vector<SeqNum>> seqNumsAllParents(const DggsParams &p,
+                                                     const std::vector<SeqNum>& seqnums) {
+    std::vector<std::vector<SeqNum>> result;
+    result.reserve(seqnums.size());
+    for (const auto& seqnum : seqnums) {
+        result.push_back(seqNumAllParents(p, seqnum));
+    }
     return result;
 }
 

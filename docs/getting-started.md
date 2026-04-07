@@ -130,7 +130,8 @@ const distkm    = dggs.cellDistKM(3);   // average cell spacing in km
 | Method | Description |
 |--------|-------------|
 | [`sequenceNumNeighbors()`](api/classes/Webdggrid.md#sequencenumneighbors) | Find edge-sharing neighbor cells |
-| [`sequenceNumParent()`](api/classes/Webdggrid.md#sequencenumparent) | Get parent cell at coarser resolution |
+| [`sequenceNumParent()`](api/classes/Webdggrid.md#sequencenumparent) | Get primary (containing) parent at coarser resolution |
+| [`sequenceNumAllParents()`](api/classes/Webdggrid.md#sequencenumallparents) | Get all touching parent cells (primary first) |
 | [`sequenceNumChildren()`](api/classes/Webdggrid.md#sequencenumchildren) | Get child cells at finer resolution |
 
 ### Hierarchical Address Types

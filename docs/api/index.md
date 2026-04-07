@@ -56,10 +56,47 @@ const seqNum = dggs.geoToSequenceNum([[0, 0]]);
 
 ```
 
+## Live Demos
+
+- [Globe Demo](https://am2222.github.io/webDggrid/demo) — interactive MapLibre globe with topology switching, multi-aperture grids, and hierarchical cell selection
+- [Hierarchical Operations Demo](https://am2222.github.io/webDggrid/hierarchical-operations#interactive-demo) — explore parent, children, and neighbor relationships
+- [Address Types Demo](https://am2222.github.io/webDggrid/hierarchical-addresses#interactive-demo) — compare index types and see bitwise digit breakdowns
+- [Index Arithmetic Demo](https://am2222.github.io/webDggrid/index-arithmetic#interactive-demo) — live demonstration of digit manipulation on Z3, Z7, and ZORDER indices
+
 ## API
 
-### Core Methods
-`setDggs` · `getResolution` · `setResolution` · `geoToSequenceNum` · `sequenceNumToGeo` · `sequenceNumToGrid` · `sequenceNumToGridFeatureCollection` · `geoToGeo` · `cellAreaKM` · `cellDistKM` · `nCells`
+### Lifecycle
+`Webdggrid.load` · `Webdggrid.unload`
+
+### Configuration
+`setDggs` · `getResolution` · `setResolution` · `version`
+
+### Coordinate Conversion
+`geoToSequenceNum` · `sequenceNumToGeo` · `geoToGeo` · `sequenceNumToGrid` · `sequenceNumToGridFeatureCollection`
+
+### Grid Statistics
+`nCells` · `cellAreaKM` · `cellDistKM` · `gridStatCLS`
+
+### Hierarchical Operations
+`sequenceNumNeighbors` · `sequenceNumParent` · `sequenceNumAllParents` · `sequenceNumChildren`
+
+### Hierarchical Address Types
+`sequenceNumToVertex2DD` · `vertex2DDToSequenceNum` · `sequenceNumToZOrder` · `zOrderToSequenceNum` · `sequenceNumToZ3` · `z3ToSequenceNum` · `sequenceNumToZ7` · `z7ToSequenceNum`
+
+### Index Digit Manipulation
+`z7GetQuad` · `z7GetDigit` · `z7SetDigit` · `z7ExtractDigits` · `z3GetQuad` · `z3GetDigit` · `z3SetDigit` · `z3ExtractDigits` · `zOrderGetQuad` · `zOrderGetDigit` · `zOrderSetDigit` · `zOrderExtractDigits`
+
+### Low-Level Coordinate Systems
+`geoToPlane` · `geoToProjtri` · `geoToQ2dd` · `geoToQ2di` · `sequenceNumToPlane` · `sequenceNumToProjtri` · `sequenceNumToQ2dd` · `sequenceNumToQ2di`
+
+### Q2DI Conversions
+`q2diToGeo` · `q2diToSequenceNum` · `q2diToPlane` · `q2diToProjtri` · `q2diToQ2dd`
+
+### Q2DD Conversions
+`q2ddToGeo` · `q2ddToSequenceNum` · `q2ddToPlane` · `q2ddToProjtri` · `q2ddToQ2di`
+
+### PROJTRI Conversions
+`projtriToGeo` · `projtriToSequenceNum` · `projtriToPlane` · `projtriToQ2dd` · `projtriToQ2di`
 
 ### Multi-Aperture Support
 

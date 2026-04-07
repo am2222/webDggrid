@@ -116,6 +116,59 @@ describe('sequenceNumParent', () => {
     });
 });
 
+// ── All Parents ─────────────────────────────────────────────────────────────
+
+describe('sequenceNumAllParents', () => {
+    test('returns at least one parent with primary first', () => {
+        const allParents = dggs.sequenceNumAllParents([100n], 5);
+
+        expect(allParents).toHaveLength(1); // one input cell
+        expect(allParents[0].length).toBeGreaterThanOrEqual(1);
+
+        // Primary parent should match sequenceNumParent
+        const primary = dggs.sequenceNumParent([100n], 5)[0];
+        expect(allParents[0][0]).toBe(primary);
+    });
+
+    test('primary parent contains the child in its children', () => {
+        const cellId = 256n;
+        const allParents = dggs.sequenceNumAllParents([cellId], 3);
+        const primary = allParents[0][0];
+
+        const children = dggs.sequenceNumChildren([primary], 2)[0];
+        expect(children).toContain(cellId);
+    });
+
+    test('boundary cells may have multiple parents', () => {
+        // Test many cells — some should have >1 parent
+        let foundMultiple = false;
+        for (let i = 1n; i <= 300n; i++) {
+            const allParents = dggs.sequenceNumAllParents([i], 3);
+            if (allParents[0].length > 1) {
+                foundMultiple = true;
+                // Primary should still be first
+                const primary = dggs.sequenceNumParent([i], 3)[0];
+                expect(allParents[0][0]).toBe(primary);
+                break;
+            }
+        }
+        expect(foundMultiple).toBe(true);
+    });
+
+    test('works for multiple cells at once', () => {
+        const allParents = dggs.sequenceNumAllParents([100n, 200n], 5);
+        expect(allParents).toHaveLength(2);
+        expect(allParents[0].length).toBeGreaterThanOrEqual(1);
+        expect(allParents[1].length).toBeGreaterThanOrEqual(1);
+    });
+
+    test('throws error when resolution is 0', () => {
+        expect(() => {
+            dggs.sequenceNumAllParents([1n], 0);
+        }).toThrow();
+    });
+});
+
 // ── Children ─────────────────────────────────────────────────────────────────
 
 describe('sequenceNumChildren', () => {

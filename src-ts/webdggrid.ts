@@ -1053,6 +1053,63 @@ export class Webdggrid {
     }
 
     /**
+     * Returns **all** parent cells that touch each input cell at the coarser
+     * resolution (resolution - 1).
+     *
+     * Unlike {@link sequenceNumParent} which returns only the primary
+     * (containing) parent, this method returns every parent cell whose area
+     * overlaps with the child cell. For interior cells this is typically 1;
+     * for cells on a parent boundary it may be 2 or more.
+     *
+     * The **first element** of each inner array is always the primary
+     * (containing) parent — the same value returned by
+     * {@link sequenceNumParent}.
+     *
+     * ```ts
+     * const allParents = dggs.sequenceNumAllParents([256n], 3);
+     * // allParents[0] = [65n, 66n]  — 65 is the containing parent,
+     * //                               66 is a touching neighbor parent
+     * ```
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs to query.
+     * @param resolution - Resolution at which the input IDs were generated
+     *   (must be > 0). Defaults to the instance's current {@link resolution}.
+     * @returns A 2-D array: `result[i]` contains all parent cell IDs that
+     *   touch `sequenceNum[i]`, with the primary parent first.
+     * @throws If `resolution` is 0 or negative, or if an invalid cell ID is
+     *   provided.
+     */
+    sequenceNumAllParents(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint[][] {
+        if (resolution <= 0) {
+            throw new Error('Cannot get parents at resolution 0 or below');
+        }
+
+        try {
+            const resultArray = this._module.SEQNUMS_all_parents(
+                ...this._getParams(resolution),
+                sequenceNum
+            );
+
+            // Convert from JS array of arrays to bigint[][]
+            const result: bigint[][] = [];
+            for (let i = 0; i < resultArray.length; i++) {
+                const inner: bigint[] = [];
+                for (let j = 0; j < resultArray[i].length; j++) {
+                    inner.push(resultArray[i][j]);
+                }
+                result.push(inner);
+            }
+            return result;
+        } catch (e) {
+            console.error(this._module.getExceptionMessage(e).toString());
+            throw e;
+        }
+    }
+
+    /**
      * Returns all child cells at the next finer resolution (resolution + 1)
      * for each input cell.
      *
