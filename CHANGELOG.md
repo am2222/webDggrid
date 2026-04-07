@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.0](https://github.com/am2222/webDggrid/compare/v1.6.0...v1.7.0) (2026-04-07)
+
+
+### Features
+
+* add sequenceNumAllParents method to retrieve all parent cells for given child cells ([7917cb4](https://github.com/am2222/webDggrid/commit/7917cb44f49dfd54c006cb0b682993cf9f954743))
+* optimize parent cell retrieval by converting child cell center to GEO and then to SEQNUM ([3579dfb](https://github.com/am2222/webDggrid/commit/3579dfb7e3c2bffc807aae448b47bef20e7b9865))
+
 ## [1.6.0](https://github.com/am2222/webDggrid/compare/v1.5.0...v1.6.0) (2026-04-07)
 
 
