@@ -13,31 +13,46 @@ const state = reactive({
   neighborCells: [],
   addressInfo: null,
   history: [],
+  // DGGS settings
+  aperture: 4,
+  topology: 'HEXAGON',
+  projection: 'ISEA',
+  resolution: 5,
+  poleLat: 0,
+  poleLng: 0,
+  azimuth: 0,
 })
 
 let dggs = null
 let d3 = null
-let currentProjection = null
 
 onMounted(async () => {
   await loadScript('https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js')
   const { Webdggrid } = await import('webdggrid')
   dggs = await Webdggrid.load()
-  dggs.setDggs({
-    poleCoordinates: { lat: 0, lng: 0 },
-    azimuth: 0,
-    aperture: 4,
-    topology: 'HEXAGON',
-    projection: 'ISEA',
-  }, 5)
   d3 = window.d3
+  applySettings()
+})
+
+function applySettings() {
+  if (!dggs) return
+  dggs.setDggs({
+    poleCoordinates: { lat: state.poleLat, lng: state.poleLng },
+    azimuth: state.azimuth,
+    aperture: state.aperture,
+    topology: state.topology,
+    projection: state.projection,
+  }, state.resolution)
+
   state.ready = true
   state.loading = false
+  state.history = []
 
-  // Start with a random cell
-  const startCell = BigInt(Math.floor(Math.random() * 10000))
-  selectCell(startCell, 5)
-})
+  const totalCells = dggs.nCells(state.resolution)
+  const maxId = Math.min(totalCells, 10000)
+  const startCell = BigInt(Math.floor(Math.random() * maxId) + 1)
+  selectCell(startCell, state.resolution)
+}
 
 function selectCell(cellId, resolution) {
   if (!dggs || !d3) return
@@ -45,15 +60,28 @@ function selectCell(cellId, resolution) {
   state.selectedCell = cellId
   state.selectedRes = resolution
 
-  // Get hierarchical data
-  state.neighborCells = dggs.sequenceNumNeighbors([cellId], resolution)[0]
-  state.parentCell = resolution > 0 ? dggs.sequenceNumParent([cellId], resolution)[0] : null
-  state.childrenCells = dggs.sequenceNumChildren([cellId], resolution)[0]
+  try {
+    state.neighborCells = dggs.sequenceNumNeighbors([cellId], resolution)[0]
+  } catch {
+    state.neighborCells = []
+  }
+  try {
+    state.parentCell = resolution > 0 ? dggs.sequenceNumParent([cellId], resolution)[0] : null
+  } catch {
+    state.parentCell = null
+  }
+  try {
+    state.childrenCells = dggs.sequenceNumChildren([cellId], resolution)[0]
+  } catch {
+    state.childrenCells = []
+  }
 
-  // Get address conversions
   try {
     const v2dd = dggs.sequenceNumToVertex2DD(cellId, resolution)
-    const zorder = dggs.sequenceNumToZOrder(cellId, resolution)
+    let zorder = null
+    if (state.aperture !== 7) {
+      zorder = dggs.sequenceNumToZOrder(cellId, resolution)
+    }
     state.addressInfo = { vertex2dd: v2dd, zorder }
   } catch {
     state.addressInfo = null
@@ -65,9 +93,8 @@ function selectCell(cellId, resolution) {
 function drawScene(cellId, resolution) {
   const svg = d3.select(svgRef.value)
   svg.selectAll('*').remove()
-  svg.attr('width', 640).attr('height', 440)
+  svg.attr('viewBox', '0 0 640 440').attr('preserveAspectRatio', 'xMidYMid meet')
 
-  // Collect geometries
   const centerGeom = dggs.sequenceNumToGridFeatureCollection([cellId], resolution)
   const neighborGeom = dggs.sequenceNumToGridFeatureCollection(state.neighborCells, resolution)
   const childrenGeom = dggs.sequenceNumToGridFeatureCollection(state.childrenCells, resolution + 1)
@@ -77,17 +104,18 @@ function drawScene(cellId, resolution) {
     parentGeom = dggs.sequenceNumToGridFeatureCollection([state.parentCell], resolution - 1)
   }
 
+  // Draw order: parent -> neighbors -> children -> center outline on top
   const features = []
   if (parentGeom) {
     features.push(...parentGeom.features.map(f => ({ ...f, _type: 'parent', _res: resolution - 1 })))
   }
   features.push(...neighborGeom.features.map(f => ({ ...f, _type: 'neighbor', _res: resolution })))
-  features.push(...centerGeom.features.map(f => ({ ...f, _type: 'center', _res: resolution })))
   features.push(...childrenGeom.features.map(f => ({ ...f, _type: 'child', _res: resolution + 1 })))
+  // Center as filled polygon drawn after children
+  features.push(...centerGeom.features.map(f => ({ ...f, _type: 'center', _res: resolution })))
 
   // Compute bounding box for auto-fit
   const allCoords = features.flatMap(f => f.geometry.coordinates[0])
-
   const lngs = allCoords.map(c => c[0])
   const lats = allCoords.map(c => c[1])
   const minLng = Math.min(...lngs), maxLng = Math.max(...lngs)
@@ -99,11 +127,10 @@ function drawScene(cellId, resolution) {
   const scaleX = w / (maxLng - minLng || 1)
   const scaleY = h / (maxLat - minLat || 1)
   const scale = Math.min(scaleX, scaleY)
-
   const cx = (minLng + maxLng) / 2
   const cy = (minLat + maxLat) / 2
 
-  currentProjection = ([lng, lat]) => [320 + (lng - cx) * scale, 220 - (lat - cy) * scale]
+  const proj = ([lng, lat]) => [320 + (lng - cx) * scale, 220 - (lat - cy) * scale]
 
   const colorMap = {
     parent: '#33cc33',
@@ -113,36 +140,58 @@ function drawScene(cellId, resolution) {
   }
 
   const opacityMap = {
-    parent: 0.3,
+    parent: 0.25,
     neighbor: 0.85,
-    center: 1,
+    center: 0.35,
     child: 0.6,
   }
 
-  svg.selectAll('polygon')
+  svg.selectAll('polygon.cell')
     .data(features)
     .enter()
     .append('polygon')
-    .attr('points', d => d.geometry.coordinates[0].map(c => currentProjection(c)).join(' '))
+    .attr('class', 'cell')
+    .attr('points', d => d.geometry.coordinates[0].map(c => proj(c)).join(' '))
     .attr('fill', d => colorMap[d._type])
-    .attr('stroke', '#222')
-    .attr('stroke-width', d => d._type === 'center' ? 2.5 : 1)
+    .attr('stroke', '#333')
+    .attr('stroke-width', 1)
     .attr('opacity', d => opacityMap[d._type])
-    .attr('cursor', d => (d._type !== 'center') ? 'pointer' : 'default')
+    .attr('cursor', d => d._type !== 'center' ? 'pointer' : 'default')
     .on('mouseover', function (_event, d) {
       const label = d._type.charAt(0).toUpperCase() + d._type.slice(1)
-      info.value = `${label} — ID: ${d.properties?.seqnum ?? d.id ?? '?'} (res ${d._res})`
+      info.value = `${label} — ID: ${d.properties?.id ?? d.id ?? '?'} (res ${d._res})`
       d3.select(this).attr('stroke', '#fff').attr('stroke-width', 2.5)
     })
     .on('mouseout', function (_event, d) {
       info.value = ''
-      d3.select(this).attr('stroke', '#222').attr('stroke-width', d._type === 'center' ? 2.5 : 1)
+      d3.select(this).attr('stroke', '#333').attr('stroke-width', d._type === 'center-outline' ? 3 : 1)
     })
     .on('click', (_event, d) => {
       if (d._type === 'center') return
-      const id = BigInt(d.properties?.seqnum ?? d.id)
+      const id = BigInt(d.properties?.id ?? d.id)
       navigateTo(id, d._res)
     })
+
+  // Draw parent outline on top so it's visible above neighbors/children
+  if (parentGeom) {
+    svg.append('polygon')
+      .attr('class', 'parent-outline')
+      .attr('points', parentGeom.features[0].geometry.coordinates[0].map(c => proj(c)).join(' '))
+      .attr('fill', 'none')
+      .attr('stroke', '#33cc33')
+      .attr('stroke-width', 2.5)
+      .attr('stroke-dasharray', '6,3')
+      .attr('pointer-events', 'none')
+  }
+
+  // Draw center outline on top so it's always visible
+  svg.append('polygon')
+    .attr('class', 'center-outline')
+    .attr('points', centerGeom.features[0].geometry.coordinates[0].map(c => proj(c)).join(' '))
+    .attr('fill', 'none')
+    .attr('stroke', '#ff3333')
+    .attr('stroke-width', 3)
+    .attr('pointer-events', 'none')
 
   // Legend
   const legend = [
@@ -168,13 +217,13 @@ function drawScene(cellId, resolution) {
     .attr('y', (_d, i) => 12 + i * 20)
     .text(d => d.label)
     .attr('font-size', 12)
-    .attr('fill', '#333')
+    .attr('fill', 'var(--vp-c-text-2, #555)')
 
   // Resolution label
   svg.append('text')
     .attr('x', 630).attr('y', 16)
     .attr('text-anchor', 'end')
-    .attr('font-size', 13).attr('fill', '#666')
+    .attr('font-size', 13).attr('fill', 'var(--vp-c-text-3, #666)')
     .text(`Resolution ${resolution}`)
 }
 
@@ -223,9 +272,51 @@ function loadScript(src) {
 
 <template>
   <div class="hierarchy-demo">
-    <div v-if="state.loading" class="loading">Loading DGGS engine…</div>
+    <div v-if="state.loading" class="loading">Loading DGGS engine...</div>
 
     <template v-if="state.ready">
+      <!-- Settings bar -->
+      <div class="settings-bar">
+        <div class="setting">
+          <label>Projection</label>
+          <select v-model="state.projection" @change="applySettings">
+            <option>ISEA</option>
+            <option>FULLER</option>
+          </select>
+        </div>
+        <div class="setting">
+          <label>Aperture</label>
+          <select v-model.number="state.aperture" @change="applySettings">
+            <option :value="3">3</option>
+            <option :value="4">4</option>
+            <option :value="7">7</option>
+          </select>
+        </div>
+        <div class="setting">
+          <label>Topology</label>
+          <select v-model="state.topology" @change="applySettings">
+            <option>HEXAGON</option>
+            <option>DIAMOND</option>
+          </select>
+        </div>
+        <div class="setting">
+          <label>Resolution</label>
+          <input type="number" v-model.number="state.resolution" min="1" max="12" @change="applySettings" />
+        </div>
+        <div class="setting">
+          <label>Pole Lat</label>
+          <input type="number" v-model.number="state.poleLat" step="1" @change="applySettings" />
+        </div>
+        <div class="setting">
+          <label>Pole Lng</label>
+          <input type="number" v-model.number="state.poleLng" step="1" @change="applySettings" />
+        </div>
+        <div class="setting">
+          <label>Azimuth</label>
+          <input type="number" v-model.number="state.azimuth" step="1" @change="applySettings" />
+        </div>
+      </div>
+
       <!-- SVG viewport -->
       <div class="viz-container">
         <svg ref="svgRef"></svg>
@@ -233,72 +324,73 @@ function loadScript(src) {
         <div v-else class="hover-info hint">Click any cell to select it</div>
       </div>
 
-      <!-- Control panel -->
+      <!-- Details panel — full width -->
       <div class="panel" v-if="state.selectedCell !== null">
-        <div class="panel-section">
-          <div class="cell-id">
-            Cell <strong>{{ state.selectedCell.toString() }}</strong>
-            <span class="res-badge">res {{ state.selectedRes }}</span>
+        <!-- Top row: selected cell + hierarchy -->
+        <div class="panel-row">
+          <div class="panel-cell selected-info">
+            <span class="cell-id">
+              Cell <strong>{{ state.selectedCell.toString() }}</strong>
+              <span class="res-badge">res {{ state.selectedRes }}</span>
+            </span>
+            <button v-if="state.history.length" class="btn btn-back" @click="goBack">Back</button>
           </div>
 
-          <button v-if="state.history.length" class="btn btn-back" @click="goBack">
-            ← Back
-          </button>
-        </div>
-
-        <!-- Parent -->
-        <div class="panel-section">
-          <div class="section-title parent-title">Parent</div>
-          <div v-if="state.parentCell !== null" class="cell-list">
-            <button class="btn btn-parent" @click="goToParent">
-              {{ state.parentCell.toString() }}
-              <span class="res-badge small">res {{ state.selectedRes - 1 }}</span>
-            </button>
+          <!-- Parent -->
+          <div class="panel-cell">
+            <div class="section-title parent-title">Parent</div>
+            <div v-if="state.parentCell !== null" class="cell-list">
+              <button class="btn btn-parent" @click="goToParent">
+                {{ state.parentCell.toString() }}
+                <span class="res-badge small">res {{ state.selectedRes - 1 }}</span>
+              </button>
+            </div>
+            <div v-else class="muted">Root</div>
           </div>
-          <div v-else class="muted">No parent (root resolution)</div>
-        </div>
 
-        <!-- Neighbors -->
-        <div class="panel-section">
-          <div class="section-title neighbor-title">Neighbors ({{ state.neighborCells.length }})</div>
-          <div class="cell-list">
-            <button
-              v-for="(n, i) in state.neighborCells"
-              :key="i"
-              class="btn btn-neighbor"
-              @click="goToNeighbor(i)"
-            >{{ n.toString() }}</button>
+          <!-- Neighbors -->
+          <div class="panel-cell">
+            <div class="section-title neighbor-title">Neighbors ({{ state.neighborCells.length }})</div>
+            <div class="cell-list">
+              <button
+                v-for="(n, i) in state.neighborCells"
+                :key="i"
+                class="btn btn-neighbor"
+                @click="goToNeighbor(i)"
+              >{{ n.toString() }}</button>
+            </div>
           </div>
-        </div>
 
-        <!-- Children -->
-        <div class="panel-section">
-          <div class="section-title child-title">Children ({{ state.childrenCells.length }})</div>
-          <div class="cell-list">
-            <button
-              v-for="(c, i) in state.childrenCells"
-              :key="i"
-              class="btn btn-child"
-              @click="goToChild(i)"
-            >{{ c.toString() }}</button>
+          <!-- Children -->
+          <div class="panel-cell">
+            <div class="section-title child-title">Children ({{ state.childrenCells.length }})</div>
+            <div class="cell-list">
+              <button
+                v-for="(c, i) in state.childrenCells"
+                :key="i"
+                class="btn btn-child"
+                @click="goToChild(i)"
+              >{{ c.toString() }}</button>
+            </div>
           </div>
         </div>
 
-        <!-- Address conversions -->
-        <div class="panel-section" v-if="state.addressInfo">
+        <!-- Address conversions — full width row -->
+        <div class="addr-row" v-if="state.addressInfo">
           <div class="section-title">Address Conversions</div>
           <table class="addr-table">
             <tr>
+              <td class="addr-label">SEQNUM</td>
+              <td class="addr-value">{{ state.selectedCell.toString() }}</td>
               <td class="addr-label">VERTEX2DD</td>
-              <td>
-                v{{ state.addressInfo.vertex2dd.vertNum }},
-                tri{{ state.addressInfo.vertex2dd.triNum }},
-                ({{ state.addressInfo.vertex2dd.x.toFixed(4) }}, {{ state.addressInfo.vertex2dd.y.toFixed(4) }})
+              <td class="addr-value">
+                vertex {{ state.addressInfo.vertex2dd.vertNum }},
+                tri {{ state.addressInfo.vertex2dd.triNum }},
+                x={{ state.addressInfo.vertex2dd.x.toFixed(6) }},
+                y={{ state.addressInfo.vertex2dd.y.toFixed(6) }}
               </td>
-            </tr>
-            <tr>
-              <td class="addr-label">ZORDER</td>
-              <td>{{ state.addressInfo.zorder.toString() }}</td>
+              <td v-if="state.addressInfo.zorder !== null" class="addr-label">ZORDER</td>
+              <td v-if="state.addressInfo.zorder !== null" class="addr-value">{{ state.addressInfo.zorder.toString() }}</td>
             </tr>
           </table>
         </div>
@@ -309,15 +401,50 @@ function loadScript(src) {
 
 <style scoped>
 .hierarchy-demo {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
   margin-bottom: 1em;
 }
+
+/* Settings bar */
+.settings-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--vp-c-bg-soft, #f6f6f7);
+  border: 1px solid var(--vp-c-divider, #e2e2e3);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  align-items: end;
+}
+.setting {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.setting label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vp-c-text-3, #999);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.setting select,
+.setting input {
+  padding: 4px 8px;
+  border: 1px solid var(--vp-c-divider, #ddd);
+  border-radius: 4px;
+  background: var(--vp-c-bg, #fff);
+  color: var(--vp-c-text-1);
+  font-size: 13px;
+  min-width: 70px;
+}
+.setting input[type="number"] {
+  width: 70px;
+}
+
+/* SVG */
 .viz-container {
   position: relative;
-  flex: 1 1 640px;
-  min-width: 320px;
 }
 .viz-container svg {
   width: 100%;
@@ -346,28 +473,37 @@ function loadScript(src) {
   color: var(--vp-c-text-2);
 }
 
-/* Panel */
+/* Panel — full width */
 .panel {
-  flex: 0 0 260px;
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--vp-c-bg-soft, #f6f6f7);
+  border: 1px solid var(--vp-c-divider, #e2e2e3);
+  border-radius: 8px;
   font-size: 13px;
-  max-height: 480px;
-  overflow-y: auto;
 }
-.panel-section {
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--vp-c-divider, #e2e2e3);
+.panel-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }
-.panel-section:last-child {
-  border-bottom: none;
+.panel-cell {
+  flex: 1 1 0;
+  min-width: 140px;
+}
+.panel-cell.selected-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
 }
 .cell-id {
-  font-size: 15px;
-  margin-bottom: 6px;
+  font-size: 14px;
+  white-space: nowrap;
 }
 .res-badge {
   display: inline-block;
-  background: var(--vp-c-bg-soft, #f0f0f0);
+  background: var(--vp-c-default-soft, #e8e8e8);
   color: var(--vp-c-text-2);
   padding: 1px 6px;
   border-radius: 4px;
@@ -380,14 +516,14 @@ function loadScript(src) {
 }
 .section-title {
   font-weight: 600;
-  margin-bottom: 6px;
-  font-size: 12px;
+  margin-bottom: 4px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.parent-title { color: #33cc33; }
-.neighbor-title { color: #3399ff; }
-.child-title { color: #cc9900; }
+.parent-title { color: #2ba52b; }
+.neighbor-title { color: #2b7fd4; }
+.child-title { color: #c29200; }
 
 .cell-list {
   display: flex;
@@ -408,44 +544,48 @@ function loadScript(src) {
   transition: background 0.15s;
 }
 .btn:hover {
-  background: var(--vp-c-bg-soft, #f0f0f0);
+  background: var(--vp-c-default-soft, #e8e8e8);
 }
 .btn-back {
   font-family: inherit;
   font-size: 12px;
+  color: var(--vp-c-text-2);
 }
-.btn-parent {
-  border-left: 3px solid #33cc33;
-}
-.btn-neighbor {
-  border-left: 3px solid #3399ff;
-}
-.btn-child {
-  border-left: 3px solid #ffcc00;
-}
+.btn-parent { border-left: 3px solid #33cc33; }
+.btn-neighbor { border-left: 3px solid #3399ff; }
+.btn-child { border-left: 3px solid #ffcc00; }
 .muted {
   color: var(--vp-c-text-3, #999);
   font-style: italic;
+  font-size: 12px;
 }
 
-/* Address table */
+/* Address row — full width beneath hierarchy */
+.addr-row {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--vp-c-divider, #e2e2e3);
+}
 .addr-table {
   width: 100%;
-  font-size: 12px;
+  font-size: 13px;
   border-collapse: collapse;
+  font-family: var(--vp-font-family-mono, monospace);
 }
 .addr-table td {
-  padding: 3px 0;
+  padding: 4px 12px 4px 0;
   vertical-align: top;
 }
 .addr-label {
   font-weight: 600;
   color: var(--vp-c-text-2);
-  width: 80px;
-  font-family: var(--vp-font-family-mono, monospace);
+  white-space: nowrap;
   font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
-.addr-table tr + tr td {
-  border-top: 1px solid var(--vp-c-divider, #eee);
+.addr-value {
+  color: var(--vp-c-text-1);
+  padding-right: 24px;
 }
 </style>
