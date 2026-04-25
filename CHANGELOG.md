@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.0](https://github.com/am2222/webDggrid/compare/v1.7.0...v1.8.0) (2026-04-25)
+
+
+### Features
+
+* add igeo7_duckdb submodule for enhanced functionality ([6a20c6a](https://github.com/am2222/webDggrid/commit/6a20c6a662c56fec4ef89c53e60cb9df7b144cb1))
+* add IGEO7/Z7 hexagonal hierarchical index support ([f3b93b4](https://github.com/am2222/webDggrid/commit/f3b93b4574858938866d0f33dc8f2045cd2b550a))
+
 ## [1.7.0](https://github.com/am2222/webDggrid/compare/v1.6.0...v1.7.0) (2026-04-07)
 
 
