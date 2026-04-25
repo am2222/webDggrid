@@ -5,6 +5,7 @@ import DggsD3Globe from './components/DggsD3Globe.vue'
 import DggsHeroBackground from './components/DggsHeroBackground.vue'
 import DggsAddressTypesDemo from './components/DggsAddressTypesDemo.vue'
 import DggsD3HierarchyDemo from './components/DggsD3HierarchyDemo.vue'
+import Igeo7Demo from './components/Igeo7Demo.vue'
 
 export default {
   extends: DefaultTheme,
@@ -15,6 +16,7 @@ export default {
     app.component('DggsHeroBackground', DggsHeroBackground)
     app.component('DggsAddressTypesDemo', DggsAddressTypesDemo)
     app.component('DggsD3HierarchyDemo', DggsD3HierarchyDemo)
+    app.component('Igeo7Demo', Igeo7Demo)
   },
 
   Layout() {

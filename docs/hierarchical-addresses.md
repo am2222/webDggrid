@@ -13,6 +13,11 @@ In addition to the standard SEQNUM (sequence number) addressing, WebDGGRID provi
 | **Z3** | Base-3 Central Place Indexing | Aperture 3 hexagons only | Aperture 3 hierarchical indexing |
 | **Z7** | Base-7 Central Place Indexing | Aperture 7 hexagons only | Aperture 7 hierarchical indexing |
 
+> **See also:** [IGEO7 / Z7 Index](./igeo7.md) — a stateless, standalone API
+> for bit-level manipulation of packed Z7 indices (parent, neighbours,
+> encode/decode) wire-compatible with the
+> [igeo7 DuckDB extension](https://github.com/allixender/igeo7_duckdb).
+
 ## Interactive Demo
 
 Select an address type to see how cell identifiers change across different indexing systems. Click any cell to inspect all its address representations and verify round-trip conversions.
