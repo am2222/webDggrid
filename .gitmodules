@@ -1,3 +1,6 @@
 [submodule "submodules/DGGRID"]
 	path = submodules/DGGRID
 	url = https://github.com/sahrk/DGGRID.git
+[submodule "submodules/igeo7_duckdb"]
+	path = submodules/igeo7_duckdb
+	url = https://github.com/allixender/igeo7_duckdb
