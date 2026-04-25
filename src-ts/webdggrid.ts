@@ -2370,4 +2370,227 @@ export class Webdggrid {
     // There are no PLANE_to_* transformations available.
     // Use other coordinate systems (GEO, SEQNUM, Q2DI, Q2DD, PROJTRI) as input.
     // -------------------------------------------------------------------------
+
+    // =========================================================================
+    // IGEO7 / Z7 — hexagonal hierarchical index (packed UBIGINT)
+    //
+    // Wraps the upstream Z7 C++ core library (from allixender/igeo7_duckdb).
+    // These are **stateless** bit-level operations on a packed 64-bit index —
+    // they do **not** use the active DGGS configuration and can be called
+    // without first invoking {@link setDggs}.
+    //
+    // Index layout (MSB → LSB):
+    //   [63:60]  base cell  (0-11)
+    //   [59:57]  digit  1   (0-6; 7 = padding / unused slot)
+    //   [56:54]  digit  2
+    //   ...
+    //   [ 2: 0]  digit 20
+    //
+    // The "compact string" form from {@link igeo7ToString} is a 2-digit
+    // zero-padded base cell followed by the non-padding digit characters —
+    // e.g. `'0800432'` (base 08, digits 0,0,4,3,2, resolution 5).
+    //
+    // The invalid sentinel is `UINT64_MAX` (`0xFFFFFFFFFFFFFFFFn`), returned
+    // by {@link igeo7Neighbours} for pentagon-excluded directions and by
+    // {@link igeo7Neighbour} for out-of-range direction arguments.
+    // =========================================================================
+
+    /**
+     * Normalize a 64-bit integer (possibly returned as signed BigInt by the
+     * WASM boundary when bit 63 is set) to its canonical unsigned form.
+     * @internal
+     */
+    private _u64(x: bigint): bigint {
+        return BigInt.asUintN(64, x);
+    }
+
+    /**
+     * Parse a Z7 compact string into a packed 64-bit index.
+     *
+     * ```ts
+     * const idx = dggs.igeo7FromString('0800432');
+     * // idx is a BigInt packed index for base=8, digits=[0,0,4,3,2], res=5
+     * ```
+     *
+     * @param s - Compact Z7 string (2-digit base + digit characters).
+     * @returns Packed index as BigInt (unsigned).
+     */
+    igeo7FromString(s: string): bigint {
+        return this._u64(this._module.igeo7_from_string(s));
+    }
+
+    /**
+     * Render a packed Z7 index as its compact string form.
+     *
+     * Stops at the first padding digit (value 7), producing a string whose
+     * length reflects the cell's resolution (`2 + resolution` characters).
+     *
+     * ```ts
+     * dggs.igeo7ToString(dggs.igeo7FromString('0800432')); // '0800432'
+     * ```
+     *
+     * @param index - Packed Z7 index.
+     * @returns Compact Z7 string.
+     */
+    igeo7ToString(index: bigint): string {
+        return this._module.igeo7_to_string(index);
+    }
+
+    /**
+     * Pack a base cell and exactly 20 digit slots into a 64-bit Z7 index.
+     *
+     * Use digit value `7` for every slot beyond the desired resolution.
+     * Field values are masked internally — no range-check is required.
+     *
+     * ```ts
+     * // Reconstruct '0800432' — base=8, resolution=5
+     * const idx = dggs.igeo7Encode(
+     *   8, [0,0,4,3,2, 7,7,7,7,7, 7,7,7,7,7, 7,7,7,7,7]
+     * );
+     * // idx === dggs.igeo7FromString('0800432')
+     * ```
+     *
+     * @param base - Base cell (0-11).
+     * @param digits - Exactly 20 digit values (0-7 each).
+     * @returns Packed Z7 index as BigInt.
+     * @throws If `digits.length !== 20`.
+     */
+    igeo7Encode(base: number, digits: number[]): bigint {
+        if (digits.length !== 20) {
+            throw new Error(`igeo7Encode requires exactly 20 digits, got ${digits.length}`);
+        }
+        return this._u64(this._module.igeo7_encode(
+            base,
+            digits[0], digits[1], digits[2], digits[3], digits[4],
+            digits[5], digits[6], digits[7], digits[8], digits[9],
+            digits[10], digits[11], digits[12], digits[13], digits[14],
+            digits[15], digits[16], digits[17], digits[18], digits[19]
+        ));
+    }
+
+    /**
+     * Extract the resolution (0-20) of a packed Z7 index.
+     *
+     * @param index - Packed Z7 index.
+     * @returns Resolution level.
+     */
+    igeo7GetResolution(index: bigint): number {
+        return this._module.igeo7_get_resolution(index);
+    }
+
+    /**
+     * Extract the base cell (0-11) of a packed Z7 index.
+     *
+     * @param index - Packed Z7 index.
+     * @returns Base cell ID.
+     */
+    igeo7GetBaseCell(index: bigint): number {
+        return this._module.igeo7_get_base_cell(index);
+    }
+
+    /**
+     * Extract the `i`-th digit (1-20) of a packed Z7 index.
+     * Positions outside `[1, 20]` return `7` (matches DuckDB extension).
+     *
+     * @param index - Packed Z7 index.
+     * @param position - Digit position, 1-based.
+     * @returns Digit value (0-7).
+     */
+    igeo7GetDigit(index: bigint, position: number): number {
+        return this._module.igeo7_get_digit(index, position);
+    }
+
+    /**
+     * Parent of a Z7 cell — one hierarchy level up.
+     *
+     * At resolution 0 the cell is its own parent (the result has resolution 0
+     * and the same base cell).
+     *
+     * ```ts
+     * const child = dggs.igeo7FromString('0800432');
+     * dggs.igeo7ToString(dggs.igeo7Parent(child)); // '080043'
+     * ```
+     *
+     * @param index - Packed Z7 index.
+     * @returns Parent index as BigInt.
+     */
+    igeo7Parent(index: bigint): bigint {
+        return this._u64(this._module.igeo7_parent(index));
+    }
+
+    /**
+     * Ancestor of a Z7 cell at a specific resolution.
+     *
+     * Keeps digits `1..resolution` and fills the remainder with padding
+     * (`7`). The argument is clamped to `[0, 20]`.
+     *
+     * ```ts
+     * const cell = dggs.igeo7FromString('0800432');
+     * dggs.igeo7ToString(dggs.igeo7ParentAt(cell, 3)); // '08004'
+     * ```
+     *
+     * @param index - Packed Z7 index.
+     * @param resolution - Target resolution (0-20).
+     * @returns Ancestor index as BigInt.
+     */
+    igeo7ParentAt(index: bigint, resolution: number): bigint {
+        return this._u64(this._module.igeo7_parent_at(index, resolution));
+    }
+
+    /**
+     * Return all 6 neighbour indices of a Z7 cell, in GBT directions 1-6.
+     *
+     * Invalid neighbours (e.g. one direction on the 12 pentagons) are the
+     * sentinel `UINT64_MAX` (`0xFFFFFFFFFFFFFFFFn`). Use {@link igeo7IsValid}
+     * to filter them out.
+     *
+     * ```ts
+     * const cell = dggs.igeo7FromString('0800432');
+     * const ns = dggs.igeo7Neighbours(cell)
+     *   .filter(n => dggs.igeo7IsValid(n))
+     *   .map(n => dggs.igeo7ToString(n));
+     * ```
+     *
+     * @param index - Packed Z7 index.
+     * @returns Array of exactly 6 BigInt neighbour indices.
+     */
+    igeo7Neighbours(index: bigint): bigint[] {
+        const raw = this._module.igeo7_get_neighbours(index) as bigint[];
+        return raw.map(n => this._u64(n));
+    }
+
+    /**
+     * Single neighbour of a Z7 cell by GBT direction (1-6).
+     *
+     * Returns the invalid sentinel (`UINT64_MAX`) when `direction` is outside
+     * `[1, 6]` or when the requested neighbour is excluded (pentagons).
+     *
+     * @param index - Packed Z7 index.
+     * @param direction - Direction number, 1-6.
+     * @returns Neighbour index as BigInt.
+     */
+    igeo7Neighbour(index: bigint, direction: number): bigint {
+        return this._u64(this._module.igeo7_get_neighbour(index, direction));
+    }
+
+    /**
+     * Position (1-20) of the first non-zero digit slot in a Z7 index.
+     * Returns `0` when no non-zero digit exists (centre of the base cell).
+     *
+     * @param index - Packed Z7 index.
+     * @returns Position of first non-zero digit, or 0.
+     */
+    igeo7FirstNonZero(index: bigint): number {
+        return this._module.igeo7_first_non_zero(index);
+    }
+
+    /**
+     * Whether a packed Z7 index is valid (i.e. not the `UINT64_MAX` sentinel).
+     *
+     * @param index - Packed Z7 index.
+     * @returns `true` if valid, `false` for the invalid sentinel.
+     */
+    igeo7IsValid(index: bigint): boolean {
+        return this._module.igeo7_is_valid(index);
+    }
 }

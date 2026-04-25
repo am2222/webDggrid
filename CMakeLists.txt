@@ -21,6 +21,13 @@ set(SHAPE_INC  "${DGGRID_DIR}/src/lib/shapelib/include/shapelib"
                "${DGGRID_DIR}/src/lib/shapelib/include")
 set(SHAPE_LIB  "${DGGRID_DIR}/src/lib/shapelib/lib")
 
+# ── IGEO7 / Z7 paths (from allixender/igeo7_duckdb submodule) ──────────────
+# We compile only the upstream Z7 C++ core — the DuckDB extension glue
+# (src/igeo7_extension.cpp) is intentionally excluded.
+set(IGEO7_DIR "${CMAKE_SOURCE_DIR}/submodules/igeo7_duckdb")
+set(IGEO7_Z7_INC "${IGEO7_DIR}/src")
+set(IGEO7_Z7_SOURCES "${IGEO7_DIR}/src/z7/library.cpp")
+
 # ── Source files ──────────────────────────────────────────────────────────
 file(GLOB DGLIB_SOURCES  "${DGLIB_LIB}/*.cpp")
 file(GLOB PROJ4_SOURCES  "${PROJ4_LIB}/*.cpp")
@@ -29,6 +36,7 @@ file(GLOB SHAPE_SOURCES  "${SHAPE_LIB}/*.c")
 set(WRAPPER_SOURCES
     "${CMAKE_SOURCE_DIR}/src-cpp/dggrid_transform.cpp"
     "${CMAKE_SOURCE_DIR}/src-cpp/webdggrid.cpp"
+    "${CMAKE_SOURCE_DIR}/src-cpp/igeo7_bindings.cpp"
 )
 
 # ── Target ────────────────────────────────────────────────────────────────
@@ -36,6 +44,7 @@ add_executable(libdggrid
     ${DGLIB_SOURCES}
     ${PROJ4_SOURCES}
     ${SHAPE_SOURCES}
+    ${IGEO7_Z7_SOURCES}
     ${WRAPPER_SOURCES}
 )
 
@@ -43,6 +52,7 @@ target_include_directories(libdggrid PRIVATE
     "${DGLIB_INC}"
     "${PROJ4_INC}"
     "${SHAPE_INC}"
+    "${IGEO7_Z7_INC}"
     "${CMAKE_SOURCE_DIR}/src-cpp"
 )
 

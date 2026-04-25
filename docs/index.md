@@ -25,4 +25,6 @@ features:
     details: Configure grids with mixed aperture sequences (e.g., "434747") for flexible grid refinement strategies and custom analysis needs.
   - title: GeoJSON Ready
     details: Convert coordinates to DGGS cell IDs and back, or export entire grid regions directly as GeoJSON FeatureCollections for use with mapping libraries.
+  - title: IGEO7 / Z7 Index
+    details: Stateless bit-level operations on packed 64-bit Z7 indices — parent, neighbours, encode/decode — wire-compatible with the <a href="https://github.com/allixender/igeo7_duckdb">igeo7 DuckDB extension</a>. <a href="/webDggrid/igeo7">Learn more →</a>
 ---

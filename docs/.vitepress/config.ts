@@ -42,6 +42,7 @@ export default defineConfig({
           { text: 'Hierarchical Operations', link: '/hierarchical-operations' },
           { text: 'Hierarchical Address Types', link: '/hierarchical-addresses' },
           { text: 'Index Arithmetic', link: '/index-arithmetic' },
+          { text: 'IGEO7 / Z7 Index', link: '/igeo7' },
           { text: 'Multi-Aperture', link: '/multi-aperture' },
         ],
       },
