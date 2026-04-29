@@ -118,27 +118,12 @@ function loadLink(href) {
 // Coordinate / camera helpers
 // ---------------------------------------------------------------------------
 
-// webDggrid pre-applies unwrapAntimeridianRing for MapLibre's globe projection,
-// which produces longitudes outside [-180, 180]. Cesium expects standard
-// coordinates and does its own geodesic interpolation, so we reverse the unwrap
-// before handing the FeatureCollection to GeoJsonDataSource.
-function rewrapRing(ring) {
-  return ring.map(([lon, lat]) => {
-    let l = lon
-    while (l > 180) l -= 360
-    while (l < -180) l += 360
-    return [l, lat]
-  })
-}
-
-function preprocessFc(fc) {
-  for (const f of fc.features) {
-    if (f.geometry?.type === 'Polygon') {
-      f.geometry.coordinates = f.geometry.coordinates.map(rewrapRing)
-    } else if (f.geometry?.type === 'MultiPolygon') {
-      f.geometry.coordinates = f.geometry.coordinates.map(p => p.map(rewrapRing))
-    }
-  }
+// True pass-through. Both the naive rewrap and the heavier
+// processFcForGlobe (centroid recenter + pole-vertex injection) end up
+// breaking polar cells in Cesium more than they help — keep the FC
+// untouched and let Cesium's GEODESIC arcType + the raw vertex order from
+// DGGRID do the work.
+function prepareFc(fc) {
   return fc
 }
 
@@ -325,7 +310,7 @@ function generateGrid() {
               : 0
           }
         })
-        return preprocessFc(fc)
+        return prepareFc(fc)
       }
 
       let seqNums
@@ -445,6 +430,20 @@ function selectCell(cellId, resolution) {
   selectedCellRes.value = resolution
 
   try {
+    const fc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution))
+    const geom = fc.features[0]?.geometry
+    console.log('[DggsGlobe] selected cell', {
+      seqnum: seqnum.toString(),
+      resolution,
+      indexLabel: getCellIndexLabel(seqnum, resolution),
+      geometry: geom,
+      geojson: JSON.stringify(geom),
+    })
+  } catch (e) {
+    console.warn('[DggsGlobe] could not log selected geometry:', e)
+  }
+
+  try {
     hierarchyInfo.neighbors = webdggrid.sequenceNumNeighbors([seqnum], resolution)[0]
   } catch { hierarchyInfo.neighbors = [] }
   try {
@@ -501,7 +500,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
   // --- Parent polygons (all touching parents) ---
   if (hierarchyInfo.allParents.length > 0 && resolution > 0) {
     try {
-      const parentFc = preprocessFc(sanitizeFc(
+      const parentFc = prepareFc(sanitizeFc(
         webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.allParents, resolution - 1)
       ))
       parentFc.features.forEach((f, i) => { f.properties._primary = i === 0 })
@@ -545,7 +544,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
   // --- Children polygons ---
   if (hierarchyInfo.children.length > 0) {
     try {
-      const childFc = preprocessFc(sanitizeFc(
+      const childFc = prepareFc(sanitizeFc(
         webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1)
       ))
       childrenDataSource = await Cesium.GeoJsonDataSource.load(childFc, { clampToGround: false })
@@ -583,7 +582,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
 
   // --- Selected cell highlight (always on top) ---
   try {
-    const centerFc = preprocessFc(sanitizeFc(
+    const centerFc = prepareFc(sanitizeFc(
       webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution)
     ))
     selectedDataSource = await Cesium.GeoJsonDataSource.load(centerFc, { clampToGround: false })
@@ -672,6 +671,21 @@ onMounted(async () => {
     if (!props.interactive) {
       const c = viewer.scene.screenSpaceCameraController
       c.enableRotate = c.enableTranslate = c.enableZoom = c.enableTilt = c.enableLook = false
+    } else {
+      // Cesium's default scroll-wheel zoom keeps the cursor's globe point
+      // anchored, which causes the camera to roll/tilt as it approaches the
+      // surface — feels like unintentional rotation. Kill inertia, take
+      // middle-click off the look/tilt path so a brushed wheel never
+      // injects roll, and clamp the minimum zoom distance so the cursor
+      // anchor doesn't go ill-conditioned at very close range.
+      const c = viewer.scene.screenSpaceCameraController
+      c.enableLook = false
+      c.inertiaSpin = 0
+      c.inertiaTranslate = 0
+      c.inertiaZoom = 0
+      c.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH]
+      c.tiltEventTypes = [Cesium.CameraEventType.MIDDLE_DRAG]
+      c.minimumZoomDistance = 1000
     }
 
     viewer.camera.setView({

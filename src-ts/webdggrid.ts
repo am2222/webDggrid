@@ -1,6 +1,6 @@
 // @ts-ignore
 import { loadWasm, unloadWasm } from './libdggrid.wasm.js';
-import { Feature, FeatureCollection, GeoJsonProperties, Polygon, Position } from 'geojson';
+import { Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Polygon, Position } from 'geojson';
 
 /**
  * The shape of each cell in the Discrete Global Grid System.
@@ -2592,5 +2592,111 @@ export class Webdggrid {
      */
     igeo7IsValid(index: bigint): boolean {
         return this._module.igeo7_is_valid(index);
+    }
+
+    /**
+     * Convert a geodetic latitude (WGS84 ellipsoid) to its authalic latitude
+     * on the equal-area sphere. Implementation follows Karney (2022) — same
+     * polynomial used by the `igeo7_geo_to_authalic` DuckDB scalar function.
+     *
+     * Longitude is unaffected; only latitude is transformed.
+     *
+     * @param latDeg - Geodetic latitude in degrees, range `[-90, 90]`.
+     * @returns Authalic latitude in degrees.
+     */
+    igeo7GeoToAuthalic(latDeg: number): number {
+        return this._module.igeo7_geo_to_authalic(latDeg);
+    }
+
+    /**
+     * Inverse of {@link igeo7GeoToAuthalic} — convert an authalic latitude
+     * back to geodetic.
+     *
+     * @param latDeg - Authalic latitude in degrees.
+     * @returns Geodetic latitude (WGS84) in degrees.
+     */
+    igeo7AuthalicToGeo(latDeg: number): number {
+        return this._module.igeo7_authalic_to_geo(latDeg);
+    }
+
+    /**
+     * Apply {@link igeo7GeoToAuthalic} (or its inverse) to every coordinate of
+     * a GeoJSON geometry, feature, or feature collection. Mirrors the
+     * `igeo7_geo_to_authalic` / `igeo7_authalic_to_geo` DuckDB functions
+     * (which take/return `GEOMETRY`); this is the WASM equivalent for
+     * GeoJSON-shaped inputs.
+     *
+     * The input is **deep-cloned** — the source object is not mutated.
+     * Geometries with `null` or unsupported types are returned unchanged.
+     *
+     * @param input - Any GeoJSON geometry, feature, or feature collection.
+     * @param direction - `'geoToAuthalic'` (default) or `'authalicToGeo'`.
+     * @returns A new GeoJSON object of the same shape with transformed lats.
+     */
+    igeo7TransformGeoJson<T extends GeoJSON>(
+        input: T,
+        direction: 'geoToAuthalic' | 'authalicToGeo' = 'geoToAuthalic',
+    ): T {
+        const fn = direction === 'authalicToGeo'
+            ? (lat: number) => this._module.igeo7_authalic_to_geo(lat)
+            : (lat: number) => this._module.igeo7_geo_to_authalic(lat);
+        return transformGeoJsonLatitudes(input, fn);
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GeoJSON latitude transform helper (used by igeo7TransformGeoJson)
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Pos = number[];
+
+function transformPos(pos: Pos, fn: (lat: number) => number): Pos {
+    // GeoJSON positions are [lng, lat, ...]; only lat (index 1) is touched,
+    // any z/m values trail through untouched.
+    const out = pos.slice();
+    if (out.length >= 2) out[1] = fn(out[1]);
+    return out;
+}
+
+function transformCoords(coords: any, depth: number, fn: (lat: number) => number): any {
+    if (depth === 0) return transformPos(coords as Pos, fn);
+    return (coords as any[]).map(c => transformCoords(c, depth - 1, fn));
+}
+
+const COORD_DEPTH: Record<string, number> = {
+    Point: 0,
+    LineString: 1,
+    MultiPoint: 1,
+    Polygon: 2,
+    MultiLineString: 2,
+    MultiPolygon: 3,
+};
+
+function transformGeometry(geom: any, fn: (lat: number) => number): any {
+    if (!geom || typeof geom.type !== 'string') return geom;
+    if (geom.type === 'GeometryCollection') {
+        return {
+            ...geom,
+            geometries: (geom.geometries || []).map((g: any) => transformGeometry(g, fn)),
+        };
+    }
+    const depth = COORD_DEPTH[geom.type];
+    if (depth === undefined || !geom.coordinates) return geom;
+    return { ...geom, coordinates: transformCoords(geom.coordinates, depth, fn) };
+}
+
+function transformGeoJsonLatitudes<T>(input: T, fn: (lat: number) => number): T {
+    const node = input as any;
+    if (!node || typeof node.type !== 'string') return input;
+    switch (node.type) {
+        case 'FeatureCollection':
+            return {
+                ...node,
+                features: (node.features || []).map((f: any) => transformGeoJsonLatitudes(f, fn)),
+            } as T;
+        case 'Feature':
+            return { ...node, geometry: transformGeometry(node.geometry, fn) } as T;
+        default:
+            return transformGeometry(node, fn) as T;
     }
 }
