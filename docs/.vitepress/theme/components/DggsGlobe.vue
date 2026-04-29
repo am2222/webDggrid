@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
-import { ylOrBrRgba, processFcForGlobe } from '../utils/globeUtils.js'
+import { ylOrBrRgba } from '../utils/globeUtils.js'
 import { loadWebdggrid } from '../utils/loadWebdggrid.js'
 
 const props = defineProps({
@@ -21,6 +21,7 @@ const props = defineProps({
   initialPoleLng: { type: Number, default: 0 },
   initialPoleLat: { type: Number, default: 0 },
   initialCenter: { type: Array, default: () => [0, 20] },
+  /** Equivalent MapLibre globe zoom level — mapped to a Cesium camera altitude. */
   initialZoom: { type: Number, default: 1.8 },
   /** Cell fill color [r,g,b,a] */
   fillColor: { type: Array, default: () => [51, 136, 255, 71] },
@@ -75,14 +76,20 @@ const availableIndexTypes = computed(() => {
   return types
 })
 
-// --- non-reactive map state (reactivity on MapLibre objects causes issues) ---
-let map           = null
-let deckOverlay   = null
-let webdggrid     = null
-let poleMarker    = null
-let lastFineFc    = null
-let lastBaseFc    = null
-let multiResTimer = null
+// --- non-reactive Cesium state ---
+let viewer            = null
+let webdggrid         = null
+let gridDataSource    = null
+let baseDataSource    = null
+let parentDataSource  = null
+let childrenDataSource = null
+let selectedDataSource = null
+let poleEntity        = null
+let pickHandler       = null
+let cameraMoveEndCb   = null
+let lastFineFc        = null
+let lastBaseFc        = null
+let multiResTimer     = null
 
 // ---------------------------------------------------------------------------
 // CDN helpers
@@ -108,61 +115,107 @@ function loadLink(href) {
 }
 
 // ---------------------------------------------------------------------------
-// deck.gl layer helpers
+// Coordinate / camera helpers
 // ---------------------------------------------------------------------------
 
-function makeCellLayer(id, fc, colored, isBase) {
-  if (!fc) return null
-  const { GeoJsonLayer } = window.deck
-  return new GeoJsonLayer({
-    id,
-    data: fc,
-    filled: true,
-    stroked: true,
-    wrapLongitude: true,
-    getFillColor: f => {
-      if (isBase) return [0, 0, 0, 0]
-      if (colored) return ylOrBrRgba(f.properties.colorValue ?? 0, 179)
-      return props.fillColor
-    },
-    getLineColor: isBase ? [245, 158, 11, 220] : props.lineColor,
-    getLineWidth: isBase ? 2 : 1,
-    lineWidthUnits: 'pixels',
-    pickable: !isBase && props.showControls,
-    onHover: isBase || !props.showControls ? undefined : (info) => {
-      if (!tooltipEl.value) return
-      if (info.object) {
-        tooltipEl.value.style.display = 'block'
-        tooltipEl.value.style.left = `${info.x + 12}px`
-        tooltipEl.value.style.top  = `${info.y + 12}px`
-        tooltipEl.value.innerHTML  = `<b>Cell ID:</b> ${info.object.properties.id}`
-        map.getCanvas().style.cursor = 'pointer'
-      } else {
-        tooltipEl.value.style.display = 'none'
-        map.getCanvas().style.cursor = ''
-      }
-    },
-    onClick: isBase || !props.showControls ? undefined : (info) => {
-      if (info.object) {
-        const cellId = info.object.properties?.id ?? info.object.id
-        if (cellId != null) {
-          const resolution = ctrlMultiRes.value
-            ? zoomToResolution(map.getZoom(), ctrlResolution.value)
-            : ctrlResolution.value
-          selectCell(cellId, resolution)
-        }
-      }
-    },
-    updateTriggers: { getFillColor: [colored] },
+// webDggrid pre-applies unwrapAntimeridianRing for MapLibre's globe projection,
+// which produces longitudes outside [-180, 180]. Cesium expects standard
+// coordinates and does its own geodesic interpolation, so we reverse the unwrap
+// before handing the FeatureCollection to GeoJsonDataSource.
+function rewrapRing(ring) {
+  return ring.map(([lon, lat]) => {
+    let l = lon
+    while (l > 180) l -= 360
+    while (l < -180) l += 360
+    return [l, lat]
   })
 }
 
-function updateDeckLayers(fineFc, baseFc) {
+function preprocessFc(fc) {
+  for (const f of fc.features) {
+    if (f.geometry?.type === 'Polygon') {
+      f.geometry.coordinates = f.geometry.coordinates.map(rewrapRing)
+    } else if (f.geometry?.type === 'MultiPolygon') {
+      f.geometry.coordinates = f.geometry.coordinates.map(p => p.map(rewrapRing))
+    }
+  }
+  return fc
+}
+
+function rgbaArrayToCesium([r, g, b, a]) {
+  return Cesium.Color.fromBytes(r, g, b, a ?? 255)
+}
+
+// Map MapLibre-style globe zoom levels to a sensible Cesium camera altitude
+// so the existing `initialZoom` prop and the multi-res zoom-offset slider keep
+// working without changing their meaning.
+function altitudeFromZoom(zoom) {
+  return 40_000_000 * Math.pow(2, -zoom)
+}
+
+function zoomFromAltitude() {
+  if (!viewer) return 0
+  const h = viewer.camera.positionCartographic.height
+  return Math.log2(40_000_000 / Math.max(h, 1))
+}
+
+// ---------------------------------------------------------------------------
+// Cesium layer helpers
+// ---------------------------------------------------------------------------
+
+async function buildCellDataSource(fc, { fill, stroke, isBase, colored }) {
+  const ds = await Cesium.GeoJsonDataSource.load(fc, {
+    fill: rgbaArrayToCesium(fill),
+    stroke: rgbaArrayToCesium(stroke),
+    strokeWidth: isBase ? 2 : 1,
+    clampToGround: false,
+  })
+
+  const baseFill = rgbaArrayToCesium(fill)
+
+  ds.entities.values.forEach((e) => {
+    if (!e.polygon) return
+    e.polygon.arcType = Cesium.ArcType.GEODESIC
+    e.polygon.height  = 0
+    e.polygon.outline = true
+    if (isBase) {
+      e.polygon.fill = false
+    } else if (colored) {
+      const t = Number(e.properties?.colorValue?.getValue?.() ?? 0)
+      e.polygon.material = rgbaArrayToCesium(ylOrBrRgba(t, 179))
+    } else {
+      e.polygon.material = baseFill
+    }
+  })
+
+  return ds
+}
+
+async function updateLayers(fineFc, baseFc) {
+  if (!viewer) return
   const colored = ctrlColorCells.value
-  const layers  = []
-  if (baseFc) layers.push(makeCellLayer('dggrid-base',  baseFc, false, true))
-  if (fineFc) layers.push(makeCellLayer('dggrid-cells', fineFc, colored, false))
-  deckOverlay.setProps({ layers })
+
+  if (gridDataSource) { viewer.dataSources.remove(gridDataSource, true); gridDataSource = null }
+  if (baseDataSource) { viewer.dataSources.remove(baseDataSource, true); baseDataSource = null }
+
+  if (baseFc) {
+    baseDataSource = await buildCellDataSource(baseFc, {
+      fill:    [0, 0, 0, 0],
+      stroke:  [245, 158, 11, 220],
+      isBase:  true,
+      colored: false,
+    })
+    await viewer.dataSources.add(baseDataSource)
+  }
+  if (fineFc) {
+    gridDataSource = await buildCellDataSource(fineFc, {
+      fill:    props.fillColor,
+      stroke:  props.lineColor,
+      isBase:  false,
+      colored,
+    })
+    await viewer.dataSources.add(gridDataSource)
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -175,19 +228,35 @@ function zoomToResolution(zoom, maxRes) {
 }
 
 function viewportSeqNums(resolution) {
-  const bounds  = map.getBounds()
-  const minLat  = Math.max(bounds.getSouth(), -89)
-  const maxLat  = Math.min(bounds.getNorth(),  89)
-  const minLng  = bounds.getWest()
-  const maxLng  = bounds.getEast()
+  const rect = viewer.camera.computeViewRectangle()
+  let minLng, maxLng, minLat, maxLat
+  if (rect) {
+    minLng = Cesium.Math.toDegrees(rect.west)
+    maxLng = Cesium.Math.toDegrees(rect.east)
+    minLat = Math.max(Cesium.Math.toDegrees(rect.south), -89)
+    maxLat = Math.min(Cesium.Math.toDegrees(rect.north),  89)
+    if (maxLng < minLng) maxLng += 360 // antimeridian-crossing rectangle
+  } else {
+    // Camera is looking past the globe edge (whole-world view). Sample the
+    // entire world instead of trying to enumerate every cell at this
+    // resolution — at res 15 that's billions of cells and traps the WASM
+    // module ("RuntimeError: null function").
+    minLng = -180; maxLng = 180; minLat = -89; maxLat = 89
+  }
+
   const steps   = 80
   const latStep = (maxLat - minLat) / steps
   const lngStep = (maxLng - minLng) / steps
 
   const coords = []
-  for (let i = 0; i <= steps; i++)
-    for (let j = 0; j <= steps; j++)
-      coords.push([minLng + j * lngStep, minLat + i * latStep])
+  for (let i = 0; i <= steps; i++) {
+    for (let j = 0; j <= steps; j++) {
+      let lng = minLng + j * lngStep
+      while (lng >  180) lng -= 360
+      while (lng < -180) lng += 360
+      coords.push([lng, minLat + i * latStep])
+    }
+  }
 
   const raw  = webdggrid.geoToSequenceNum(coords, resolution)
   const seen = new Set()
@@ -213,13 +282,13 @@ function generateGrid() {
   hierarchyInfo.allParents = []
   hierarchyInfo.children = []
   hierarchyInfo.neighbors = []
-  removeHierarchyMapLayers()
+  removeHierarchyLayers()
 
   const maxRes     = ctrlResolution.value
   const multiRes   = ctrlMultiRes.value
   const isMixed    = ctrlMixedAperture.value && ctrlTopology.value === 'HEXAGON'
   const resolution = multiRes
-    ? zoomToResolution(map.getZoom(), isMixed ? ctrlApertureSeq.value.length : maxRes)
+    ? zoomToResolution(zoomFromAltitude(), isMixed ? ctrlApertureSeq.value.length : maxRes)
     : isMixed ? Math.min(maxRes, ctrlApertureSeq.value.length) : maxRes
   const topology   = ctrlTopology.value
   const projection = ctrlProjection.value
@@ -240,7 +309,7 @@ function generateGrid() {
   status.value = 'Generating grid…'
   if (!multiRes) isGenerating.value = true
 
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
       function buildFc(seqNums, res) {
         const total = webdggrid.nCells(res)
@@ -256,7 +325,7 @@ function generateGrid() {
               : 0
           }
         })
-        return processFcForGlobe(fc)
+        return preprocessFc(fc)
       }
 
       let seqNums
@@ -279,7 +348,7 @@ function generateGrid() {
       const fineFc = buildFc(seqNums, resolution)
       lastFineFc = fineFc
       lastBaseFc = baseFc
-      updateDeckLayers(fineFc, baseFc)
+      await updateLayers(fineFc, baseFc)
 
       const modeLabel = multiRes ? `res ${resolution} · viewport` : `res ${resolution} · globe`
       const apLabel = isMixed ? `mixed [${dggsConfig.apertureSequence}]` : topology
@@ -307,7 +376,7 @@ watch(ctrlTopology, (val) => {
 })
 
 watch(ctrlColorCells, () => {
-  if (isReady.value) updateDeckLayers(lastFineFc, lastBaseFc)
+  if (isReady.value) updateLayers(lastFineFc, lastBaseFc)
 })
 
 watch(ctrlZoomOffset, () => {
@@ -315,7 +384,9 @@ watch(ctrlZoomOffset, () => {
 })
 
 watch([ctrlPoleLng, ctrlPoleLat], () => {
-  if (poleMarker) poleMarker.setLngLat([ctrlPoleLng.value, ctrlPoleLat.value])
+  if (poleEntity) {
+    poleEntity.position = Cesium.Cartesian3.fromDegrees(ctrlPoleLng.value, ctrlPoleLat.value)
+  }
 })
 
 watch(ctrlMultiRes, (on) => {
@@ -325,9 +396,15 @@ watch(ctrlMultiRes, (on) => {
   } else {
     if (ctrlResolution.value > 5) ctrlResolution.value = 5
   }
-  if (map) {
-    map.off('moveend', onMoveEnd)
-    if (on) map.on('moveend', onMoveEnd)
+  if (viewer) {
+    if (cameraMoveEndCb) {
+      viewer.camera.moveEnd.removeEventListener(cameraMoveEndCb)
+      cameraMoveEndCb = null
+    }
+    if (on) {
+      cameraMoveEndCb = onMoveEnd
+      viewer.camera.moveEnd.addEventListener(cameraMoveEndCb)
+    }
   }
   if (on && isReady.value && webdggrid) generateGrid()
 })
@@ -367,7 +444,6 @@ function selectCell(cellId, resolution) {
   selectedCellId.value = seqnum
   selectedCellRes.value = resolution
 
-  // Get hierarchical relationships
   try {
     hierarchyInfo.neighbors = webdggrid.sequenceNumNeighbors([seqnum], resolution)[0]
   } catch { hierarchyInfo.neighbors = [] }
@@ -394,20 +470,15 @@ function clearSelection() {
   hierarchyInfo.allParents = []
   hierarchyInfo.children = []
   hierarchyInfo.neighbors = []
-  removeHierarchyMapLayers()
+  removeHierarchyLayers()
 }
 
-// MapLibre source/layer IDs for hierarchy
-const HIER_SOURCES = ['hier-parent', 'hier-children', 'hier-selected', 'hier-labels-selected', 'hier-labels-parent', 'hier-labels-children']
-
-function removeHierarchyMapLayers() {
-  if (!map) return
-  for (const id of HIER_SOURCES) {
-    for (const suffix of ['-fill', '-line', '-text']) {
-      if (map.getLayer(id + suffix)) map.removeLayer(id + suffix)
-    }
-    if (map.getSource(id)) map.removeSource(id)
+function removeHierarchyLayers() {
+  if (!viewer) return
+  for (const ds of [parentDataSource, childrenDataSource, selectedDataSource]) {
+    if (ds) viewer.dataSources.remove(ds, true)
   }
+  parentDataSource = childrenDataSource = selectedDataSource = null
 }
 
 function sanitizeFc(fc) {
@@ -422,137 +493,125 @@ function sanitizeFc(fc) {
   return fc
 }
 
-function updateHierarchyLayers(seqnum, resolution) {
-  if (!map) return
+async function updateHierarchyLayers(seqnum, resolution) {
+  if (!viewer) return
 
-  // Restore base deck.gl grid layers
-  if (deckOverlay && lastFineFc) {
-    updateDeckLayers(lastFineFc, lastBaseFc)
-  }
-
-  // Remove previous MapLibre hierarchy layers
-  removeHierarchyMapLayers()
+  removeHierarchyLayers()
 
   // --- Parent polygons (all touching parents) ---
   if (hierarchyInfo.allParents.length > 0 && resolution > 0) {
     try {
-      const parentFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.allParents, resolution - 1))
-      // Tag primary vs secondary parents
-      parentFc.features.forEach((f, i) => {
-        f.properties._primary = i === 0
-      })
-      map.addSource('hier-parent', { type: 'geojson', data: parentFc })
-      map.addLayer({ id: 'hier-parent-fill', type: 'fill', source: 'hier-parent', paint: {
-        'fill-color': ['case', ['get', '_primary'], '#22cc55', '#66dd88'],
-        'fill-opacity': ['case', ['get', '_primary'], 0.35, 0.25],
-      } })
-      map.addLayer({ id: 'hier-parent-line', type: 'line', source: 'hier-parent', paint: {
-        'line-color': ['case', ['get', '_primary'], '#11aa33', '#44bb66'],
-        'line-width': ['case', ['get', '_primary'], 3.5, 2.5],
-        'line-dasharray': [3, 2],
-      } })
+      const parentFc = preprocessFc(sanitizeFc(
+        webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.allParents, resolution - 1)
+      ))
+      parentFc.features.forEach((f, i) => { f.properties._primary = i === 0 })
 
-      // Parent labels
-      const parentLabelFeatures = hierarchyInfo.allParents.map((p, i) => {
-        const geo = webdggrid.sequenceNumToGeo([p], resolution - 1)[0]
-        return {
-          type: 'Feature',
-          geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
-          properties: {
-            label: getCellIndexLabel(p, resolution - 1),
-            primary: i === 0,
-          },
-        }
+      parentDataSource = await Cesium.GeoJsonDataSource.load(parentFc, { clampToGround: false })
+      parentDataSource.entities.values.forEach((e) => {
+        if (!e.polygon) return
+        const isPrimary = !!e.properties?._primary?.getValue?.()
+        e.polygon.arcType  = Cesium.ArcType.GEODESIC
+        e.polygon.height   = 0
+        e.polygon.material = Cesium.Color.fromCssColorString(isPrimary ? 'rgba(34,204,85,0.35)' : 'rgba(102,221,136,0.25)')
+        e.polygon.outline  = true
+        e.polygon.outlineColor = Cesium.Color.fromCssColorString(isPrimary ? '#11aa33' : '#44bb66')
+        e.polygon.outlineWidth = isPrimary ? 3.5 : 2.5
       })
-      map.addSource('hier-labels-parent', { type: 'geojson', data: { type: 'FeatureCollection', features: parentLabelFeatures } })
-      map.addLayer({
-        id: 'hier-labels-parent-text',
-        type: 'symbol',
-        source: 'hier-labels-parent',
-        layout: {
-          'text-field': ['get', 'label'],
-          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-          'text-size': ['case', ['get', 'primary'], 13, 11],
-          'text-offset': [0, -2],
-          'text-allow-overlap': false,
-        },
-        paint: {
-          'text-color': ['case', ['get', 'primary'], '#1a8a1a', '#5a9a5a'],
-          'text-halo-color': 'rgba(255,255,255,0.95)',
-          'text-halo-width': 2,
-        },
+
+      // Parent labels at cell centers
+      hierarchyInfo.allParents.forEach((p, i) => {
+        try {
+          const geo = webdggrid.sequenceNumToGeo([p], resolution - 1)[0]
+          parentDataSource.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(geo[0], geo[1]),
+            label: {
+              text: getCellIndexLabel(p, resolution - 1),
+              font: i === 0 ? 'bold 13px sans-serif' : 'bold 11px sans-serif',
+              fillColor: Cesium.Color.fromCssColorString(i === 0 ? '#1a8a1a' : '#5a9a5a'),
+              outlineColor: Cesium.Color.fromCssColorString('rgba(255,255,255,0.95)'),
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              pixelOffset: new Cesium.Cartesian2(0, -2),
+              disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            },
+          })
+        } catch { /* skip */ }
       })
+
+      await viewer.dataSources.add(parentDataSource)
     } catch (err) { console.error('Parent geometry error:', err) }
   }
 
   // --- Children polygons ---
   if (hierarchyInfo.children.length > 0) {
     try {
-      const childFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1))
-      map.addSource('hier-children', { type: 'geojson', data: childFc })
-      map.addLayer({ id: 'hier-children-fill', type: 'fill', source: 'hier-children', paint: { 'fill-color': '#ffcc00', 'fill-opacity': 0.3 } })
-      map.addLayer({ id: 'hier-children-line', type: 'line', source: 'hier-children', paint: { 'line-color': '#cc9900', 'line-width': 2 } })
+      const childFc = preprocessFc(sanitizeFc(
+        webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1)
+      ))
+      childrenDataSource = await Cesium.GeoJsonDataSource.load(childFc, { clampToGround: false })
+      childrenDataSource.entities.values.forEach((e) => {
+        if (!e.polygon) return
+        e.polygon.arcType  = Cesium.ArcType.GEODESIC
+        e.polygon.height   = 0
+        e.polygon.material = Cesium.Color.fromCssColorString('rgba(255,204,0,0.3)')
+        e.polygon.outline  = true
+        e.polygon.outlineColor = Cesium.Color.fromCssColorString('#cc9900')
+        e.polygon.outlineWidth = 2
+      })
 
-      // Children labels — collision detection auto-hides overlapping ones
-      const childLabelFeatures = []
-      for (const child of hierarchyInfo.children) {
+      hierarchyInfo.children.forEach((c) => {
         try {
-          const geo = webdggrid.sequenceNumToGeo([child], resolution + 1)[0]
-          childLabelFeatures.push({
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
-            properties: { label: getCellIndexLabel(child, resolution + 1) },
+          const geo = webdggrid.sequenceNumToGeo([c], resolution + 1)[0]
+          childrenDataSource.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(geo[0], geo[1]),
+            label: {
+              text: getCellIndexLabel(c, resolution + 1),
+              font: 'bold 10px sans-serif',
+              fillColor: Cesium.Color.fromCssColorString('#886600'),
+              outlineColor: Cesium.Color.fromCssColorString('rgba(255,255,255,0.95)'),
+              outlineWidth: 1.5,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            },
           })
         } catch { /* skip */ }
-      }
-      if (childLabelFeatures.length > 0) {
-        const childLabelFc = { type: 'FeatureCollection', features: childLabelFeatures }
-        map.addSource('hier-labels-children', { type: 'geojson', data: childLabelFc })
-        map.addLayer({
-          id: 'hier-labels-children-text',
-          type: 'symbol',
-          source: 'hier-labels-children',
-          layout: {
-            'text-field': ['get', 'label'],
-            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-            'text-size': 10,
-            'text-allow-overlap': false,
-            'text-optional': true,
-          },
-          paint: { 'text-color': '#886600', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.5 },
-        })
-      }
+      })
+
+      await viewer.dataSources.add(childrenDataSource)
     } catch { /* skip */ }
   }
 
   // --- Selected cell highlight (always on top) ---
   try {
-    const centerFc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution))
-    map.addSource('hier-selected', { type: 'geojson', data: centerFc })
-    map.addLayer({ id: 'hier-selected-fill', type: 'fill', source: 'hier-selected', paint: { 'fill-color': '#ff3333', 'fill-opacity': 0.25 } })
-    map.addLayer({ id: 'hier-selected-line', type: 'line', source: 'hier-selected', paint: { 'line-color': '#ff3333', 'line-width': 4 } })
-
-    // Selected label — always visible, ignores collisions
-    const geo = webdggrid.sequenceNumToGeo([seqnum], resolution)[0]
-    const selLabelFc = { type: 'FeatureCollection', features: [{
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [geo[0], geo[1]] },
-      properties: { label: getCellIndexLabel(seqnum, resolution) },
-    }] }
-    map.addSource('hier-labels-selected', { type: 'geojson', data: selLabelFc })
-    map.addLayer({
-      id: 'hier-labels-selected-text',
-      type: 'symbol',
-      source: 'hier-labels-selected',
-      layout: {
-        'text-field': ['get', 'label'],
-        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-        'text-size': 14,
-        'text-allow-overlap': true,
-        'text-ignore-placement': true,
-      },
-      paint: { 'text-color': '#ff3333', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 2.5 },
+    const centerFc = preprocessFc(sanitizeFc(
+      webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution)
+    ))
+    selectedDataSource = await Cesium.GeoJsonDataSource.load(centerFc, { clampToGround: false })
+    selectedDataSource.entities.values.forEach((e) => {
+      if (!e.polygon) return
+      e.polygon.arcType  = Cesium.ArcType.GEODESIC
+      e.polygon.height   = 0
+      e.polygon.material = Cesium.Color.fromCssColorString('rgba(255,51,51,0.25)')
+      e.polygon.outline  = true
+      e.polygon.outlineColor = Cesium.Color.fromCssColorString('#ff3333')
+      e.polygon.outlineWidth = 4
     })
+
+    const geo = webdggrid.sequenceNumToGeo([seqnum], resolution)[0]
+    selectedDataSource.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(geo[0], geo[1]),
+      label: {
+        text: getCellIndexLabel(seqnum, resolution),
+        font: 'bold 14px sans-serif',
+        fillColor: Cesium.Color.fromCssColorString('#ff3333'),
+        outlineColor: Cesium.Color.fromCssColorString('rgba(255,255,255,0.95)'),
+        outlineWidth: 2.5,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+    })
+
+    await viewer.dataSources.add(selectedDataSource)
   } catch { /* skip */ }
 }
 
@@ -568,89 +627,123 @@ onMounted(async () => {
     BigInt.prototype.toJSON = function () { return this.toString() }
   }
 
-  loadLink('https://unpkg.com/maplibre-gl@5.21.1/dist/maplibre-gl.css')
+  // CESIUM_BASE_URL must be set BEFORE Cesium.js is loaded
+  window.CESIUM_BASE_URL = 'https://cdn.jsdelivr.net/npm/cesium@1.122/Build/Cesium/'
+  loadLink('https://cdn.jsdelivr.net/npm/cesium@1.122/Build/Cesium/Widgets/widgets.css')
 
   try {
-    await Promise.all([
-      loadScript('https://unpkg.com/maplibre-gl@5.21.1/dist/maplibre-gl.js'),
-      loadScript('https://unpkg.com/deck.gl@9/dist.min.js'),
-    ])
-
+    await loadScript('https://cdn.jsdelivr.net/npm/cesium@1.122/Build/Cesium/Cesium.js')
     const Webdggrid = await loadWebdggrid()
 
     const isDark = document.documentElement.classList.contains('dark')
-
-    // Read the page background colour so the sky matches the theme
     const bgColor = getComputedStyle(document.documentElement)
       .getPropertyValue('--vp-c-bg').trim() || (isDark ? '#1b1b1f' : '#ffffff')
 
-    const noBasemapStyle = {
-      version: 8,
-      projection: { type: 'globe' },
-      sources: {},
-      layers: [],
-      sky: {
-        'sky-color':         isDark ? '#0b1d3a' : bgColor,
-        'sky-horizon-blend':  0.5,
-        'horizon-color':     isDark ? '#1a3a6e' : bgColor,
-        'horizon-fog-blend':  0.3,
-        'fog-color':         isDark ? '#071224' : bgColor,
-        'fog-ground-blend':   0.5,
-        'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 7, 0],
-      },
+    viewer = new Cesium.Viewer(mapContainer.value, {
+      baseLayer: false,
+      baseLayerPicker: false,
+      geocoder: false,
+      homeButton: false,
+      sceneModePicker: false,
+      navigationHelpButton: false,
+      timeline: false,
+      animation: false,
+      fullscreenButton: false,
+      infoBox: false,
+      selectionIndicator: false,
+      terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+    })
+
+    if (props.showBasemap) {
+      viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
+        url: 'https://tile.openstreetmap.org/',
+        credit: '© OpenStreetMap contributors',
+      }))
+    } else {
+      // No basemap — paint the globe & background to match the page theme.
+      const themed = Cesium.Color.fromCssColorString(bgColor)
+      viewer.scene.globe.baseColor   = themed
+      viewer.scene.backgroundColor   = themed
+      viewer.scene.skyAtmosphere.show = false
+      if (viewer.scene.skyBox) viewer.scene.skyBox.show = false
+    }
+    viewer.scene.globe.enableLighting = false
+
+    if (!props.interactive) {
+      const c = viewer.scene.screenSpaceCameraController
+      c.enableRotate = c.enableTranslate = c.enableZoom = c.enableTilt = c.enableLook = false
     }
 
-    const basemapStyle = {
-      version: 8,
-      projection: { type: 'globe' },
-      sources: {
-        osm: {
-          type: 'raster',
-          tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-          tileSize: 256,
-          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        },
-      },
-      layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
-      sky: isDark ? {
-        'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0],
-      } : {
-        'sky-color':        bgColor,
-        'horizon-color':    bgColor,
-        'fog-color':        bgColor,
-        'atmosphere-blend': 0,
-      },
-    }
-
-    const { Map, Marker } = window.maplibregl
-
-    map = new Map({
-      container: mapContainer.value,
-      style: props.showBasemap ? basemapStyle : noBasemapStyle,
-      center: props.initialCenter,
-      zoom: props.initialZoom,
-      interactive: props.interactive,
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(
+        props.initialCenter[0],
+        props.initialCenter[1],
+        altitudeFromZoom(props.initialZoom),
+      ),
     })
 
     if (props.showControls) {
-      const poleEl = document.createElement('div')
-      poleEl.className = 'dggs-pole-marker'
-      poleEl.innerHTML = '<div class="dggs-pole-dot"></div><div class="dggs-pole-label">Pole</div>'
-      poleMarker = new Marker({ element: poleEl, anchor: 'left' })
-        .setLngLat([ctrlPoleLng.value, ctrlPoleLat.value])
-        .addTo(map)
+      poleEntity = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(ctrlPoleLng.value, ctrlPoleLat.value),
+        point: {
+          color: Cesium.Color.fromCssColorString('#e53935'),
+          pixelSize: 11,
+          outlineColor: Cesium.Color.WHITE,
+          outlineWidth: 2,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        label: {
+          text: 'Pole',
+          font: 'bold 11px sans-serif',
+          fillColor: Cesium.Color.fromCssColorString('#333'),
+          showBackground: true,
+          backgroundColor: Cesium.Color.fromCssColorString('rgba(255,255,255,0.92)'),
+          backgroundPadding: new Cesium.Cartesian2(6, 4),
+          pixelOffset: new Cesium.Cartesian2(14, 0),
+          horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+          style: Cesium.LabelStyle.FILL,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+      })
     }
 
-    deckOverlay = new window.deck.MapboxOverlay({ layers: [] })
+    if (props.showControls) {
+      pickHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
 
-    const [,] = await Promise.all([
-      Webdggrid.load().then(w => { webdggrid = w }),
-      new Promise(resolve => map.on('load', () => {
-        try { map.setProjection({ type: 'globe' }) } catch (_) {}
-        map.addControl(deckOverlay)
-        resolve()
-      })),
-    ])
+      pickHandler.setInputAction((event) => {
+        const picked = viewer.scene.pick(event.endPosition)
+        const isCell = picked && picked.id && picked.id.entityCollection?.owner === gridDataSource && picked.id.polygon
+        if (isCell) {
+          if (tooltipEl.value) {
+            tooltipEl.value.style.display = 'block'
+            tooltipEl.value.style.left = `${event.endPosition.x + 12}px`
+            tooltipEl.value.style.top  = `${event.endPosition.y + 12}px`
+            const id = picked.id.properties?.id?.getValue?.() ?? picked.id.id
+            tooltipEl.value.innerHTML = `<b>Cell ID:</b> ${id}`
+          }
+          viewer.scene.canvas.style.cursor = 'pointer'
+        } else {
+          if (tooltipEl.value) tooltipEl.value.style.display = 'none'
+          viewer.scene.canvas.style.cursor = ''
+        }
+      }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+
+      pickHandler.setInputAction((event) => {
+        const picked = viewer.scene.pick(event.position)
+        const isCell = picked && picked.id && picked.id.entityCollection?.owner === gridDataSource && picked.id.polygon
+        if (isCell) {
+          const cellId = picked.id.properties?.id?.getValue?.() ?? picked.id.id
+          if (cellId != null) {
+            const resolution = ctrlMultiRes.value
+              ? zoomToResolution(zoomFromAltitude(), ctrlResolution.value)
+              : ctrlResolution.value
+            selectCell(cellId, resolution)
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    }
+
+    webdggrid = await Webdggrid.load()
 
     isReady.value = true
     status.value = props.showControls && !props.autoGenerate
@@ -658,7 +751,6 @@ onMounted(async () => {
       : ''
 
     if (props.showControls) {
-      // Re-enable max-res limit after initial load
       ctrlResolution.value = props.initialResolution
     }
 
@@ -673,11 +765,17 @@ onMounted(async () => {
 
 onUnmounted(() => {
   clearTimeout(multiResTimer)
-  if (map) { map.remove(); map = null }
+  if (viewer && cameraMoveEndCb) {
+    viewer.camera.moveEnd.removeEventListener(cameraMoveEndCb)
+    cameraMoveEndCb = null
+  }
+  if (pickHandler) { pickHandler.destroy(); pickHandler = null }
+  if (viewer) { viewer.destroy(); viewer = null }
 })
 
-// Allow parent components (e.g. DggsHeroBackground) to access the map instance.
-defineExpose({ getMap: () => map })
+// Allow parent components (e.g. DggsHeroBackground) to access the Cesium
+// viewer via the same getMap() handle the previous MapLibre version exposed.
+defineExpose({ getMap: () => viewer })
 </script>
 
 <template>
@@ -1182,34 +1280,5 @@ defineExpose({ getMap: () => map })
   color: var(--vp-c-text-3);
   font-style: italic;
   margin-top: 2px;
-}
-
-/* ---- pole marker (injected into MapLibre DOM) ---- */
-:global(.dggs-pole-marker) {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: default;
-}
-
-:global(.dggs-pole-dot) {
-  width: 11px;
-  height: 11px;
-  background: #e53935;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-  flex-shrink: 0;
-}
-
-:global(.dggs-pole-label) {
-  background: rgba(255, 255, 255, 0.92);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #333;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  white-space: nowrap;
 }
 </style>

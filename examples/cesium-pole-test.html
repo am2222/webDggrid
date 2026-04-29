@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CesiumJS + webDggrid — Pole Rendering Test</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; color: #eee; font-family: system-ui, sans-serif; overflow: hidden; }
+  #cesiumContainer { position: absolute; inset: 0; }
+  .cesium-viewer-bottom { display: none !important; }
+  .panel {
+    position: absolute; top: 12px; left: 12px; z-index: 10;
+    background: rgba(20, 20, 28, 0.88);
+    padding: 12px 14px; border-radius: 8px;
+    width: 270px; box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  .panel h2 { margin: 0 0 8px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #9ec5fe; }
+  .panel .row { margin-top: 8px; }
+  .panel button {
+    margin: 2px 4px 2px 0; padding: 4px 10px;
+    background: #2b6cb0; color: white; border: none; border-radius: 4px;
+    font-size: 12px; cursor: pointer;
+  }
+  .panel button:hover { background: #3182ce; }
+  .panel button:disabled { background: #4a5568; cursor: default; }
+  .panel label { font-size: 12px; color: #cbd5e0; display: inline-flex; align-items: center; gap: 6px; }
+  .panel select {
+    background: #1a202c; color: #eee; border: 1px solid #2d3748; border-radius: 3px;
+    padding: 2px 4px; font-size: 12px;
+  }
+  .status {
+    margin-top: 10px; padding-top: 8px; border-top: 1px solid #2d3748;
+    font-size: 11px; color: #9ec5fe; line-height: 1.4; white-space: pre-wrap;
+  }
+  .legend { font-size: 11px; color: #a0aec0; margin-top: 6px; }
+  .legend .swatch {
+    display: inline-block; width: 10px; height: 10px; vertical-align: middle;
+    border: 1px solid #fff; margin-right: 4px;
+  }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.122/Build/Cesium/Widgets/widgets.css" />
+</head>
+<body>
+<div id="cesiumContainer"></div>
+
+<div class="panel">
+  <h2>DGGRID on CesiumJS — Pole Test</h2>
+
+  <div class="row">
+    <label>Resolution
+      <select id="res">
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </label>
+    <button id="regen">Regenerate</button>
+  </div>
+
+  <div class="row">
+    <label><input type="checkbox" id="extrude" /> Extrude cells (3D)</label>
+  </div>
+
+  <div class="row">
+    <strong style="font-size:11px; color:#cbd5e0;">FLY TO</strong><br/>
+    <button data-lng="0"   data-lat="90"  data-alt="16000000">North Pole</button>
+    <button data-lng="0"   data-lat="-90" data-alt="16000000">South Pole</button>
+    <button data-lng="180" data-lat="0"   data-alt="16000000">Antimeridian</button>
+    <button data-lng="0"   data-lat="0"   data-alt="16000000">Globe</button>
+  </div>
+
+  <div class="row">
+    <strong style="font-size:11px; color:#cbd5e0;">ZOOM</strong>
+    <button data-lng="0" data-lat="90" data-alt="3000000">Pole close-up</button>
+  </div>
+
+  <div class="legend">
+    <span class="swatch" style="background:#3388ff"></span>DGGS cells (vector polygons on globe)
+  </div>
+
+  <div class="status" id="status">Loading…</div>
+</div>
+
+<script>
+  window.CESIUM_BASE_URL = 'https://cdn.jsdelivr.net/npm/cesium@1.122/Build/Cesium/';
+</script>
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.122/Build/Cesium/Cesium.js"></script>
+<script type="module">
+  const statusEl = document.getElementById('status');
+  const setStatus = (m) => { statusEl.textContent = m; };
+
+  setStatus('Loading webDggrid WASM…');
+  const wmod = await import('https://cdn.jsdelivr.net/npm/webdggrid/dist/webdggrid.js');
+  const webdggrid = await wmod.Webdggrid.load();
+
+  setStatus('Initializing CesiumJS…');
+  const viewer = new Cesium.Viewer('cesiumContainer', {
+    baseLayer: false,
+    baseLayerPicker: false,
+    geocoder: false,
+    homeButton: false,
+    sceneModePicker: false,
+    navigationHelpButton: false,
+    timeline: false,
+    animation: false,
+    fullscreenButton: false,
+    infoBox: false,
+    selectionIndicator: false,
+    terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+  });
+  viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
+    url: 'https://tile.openstreetmap.org/',
+    credit: '© OpenStreetMap contributors',
+  }));
+  viewer.scene.globe.enableLighting = false;
+
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(0, 90, 16000000),
+    duration: 0,
+  });
+
+  let currentDataSource = null;
+
+  function buildFeatureCollection(resolution) {
+    webdggrid.setDggs({
+      topology: 'HEXAGON',
+      projection: 'ISEA',
+      aperture: 4,
+      azimuth: 0,
+      poleCoordinates: { lat: 0, lng: 0 },
+    }, resolution);
+    const total = webdggrid.nCells(resolution);
+    const seqNums = Array.from({ length: total }, (_, i) => BigInt(i + 1));
+    const fc = webdggrid.sequenceNumToGridFeatureCollection(seqNums, resolution);
+
+    fc.features.forEach((f) => {
+      if (typeof f.id === 'bigint') f.id = f.id.toString();
+      const p = f.properties;
+      if (p) {
+        for (const k of Object.keys(p)) {
+          if (typeof p[k] === 'bigint') p[k] = p[k].toString();
+        }
+      }
+    });
+
+    // webDggrid runs every ring through unwrapAntimeridianRing() for MapLibre's
+    // globe projection. Cesium expects standard [-180, 180] longitudes and does
+    // its own geodesic interpolation, so we reverse the unwrap here.
+    fc.features.forEach((f) => {
+      if (f.geometry?.type === 'Polygon') {
+        f.geometry.coordinates = f.geometry.coordinates.map(rewrapRing);
+      } else if (f.geometry?.type === 'MultiPolygon') {
+        f.geometry.coordinates = f.geometry.coordinates.map((poly) => poly.map(rewrapRing));
+      }
+    });
+
+    return { fc, count: total };
+  }
+
+  function rewrapRing(ring) {
+    return ring.map(([lon, lat]) => {
+      let l = lon;
+      while (l > 180) l -= 360;
+      while (l < -180) l += 360;
+      return [l, lat];
+    });
+  }
+
+  async function renderFeatures(fc, extrude) {
+    if (currentDataSource) {
+      viewer.dataSources.remove(currentDataSource, true);
+      currentDataSource = null;
+    }
+
+    const ds = await Cesium.GeoJsonDataSource.load(fc, {
+      stroke: Cesium.Color.fromCssColorString('rgba(0, 85, 204, 0.95)'),
+      fill: Cesium.Color.fromCssColorString('rgba(51, 136, 255, 0.45)'),
+      strokeWidth: extrude ? 2 : 1,
+      clampToGround: false,
+    });
+
+    // Force geodesic arcs on every polygon. clampToGround: true would use
+    // rhumb-line subdivision under the hood, which is degenerate at the poles
+    // ("Too many properties to enumerate" inside computeRhumbLineSubdivision).
+    ds.entities.values.forEach((e) => {
+      if (e.polygon) {
+        e.polygon.arcType = Cesium.ArcType.GEODESIC;
+        e.polygon.height = 0;
+        if (extrude) {
+          e.polygon.extrudedHeight = 80000;
+          e.polygon.outline = true;
+        }
+      }
+      if (e.polyline) {
+        e.polyline.arcType = Cesium.ArcType.GEODESIC;
+      }
+    });
+
+    await viewer.dataSources.add(ds);
+    currentDataSource = ds;
+  }
+
+  async function regenerate() {
+    const res = parseInt(document.getElementById('res').value, 10);
+    const extrude = document.getElementById('extrude').checked;
+
+    setStatus(`Generating HEXAGON res ${res}…`);
+
+    const t0 = performance.now();
+    const { fc, count } = buildFeatureCollection(res);
+    const tBuild = performance.now() - t0;
+
+    const t1 = performance.now();
+    await renderFeatures(fc, extrude);
+    const tDraw = performance.now() - t1;
+
+    setStatus(`Loaded ${count} cells at res ${res}.
+Built in ${tBuild.toFixed(0)} ms, drew in ${tDraw.toFixed(0)} ms.
+Use FLY TO buttons to inspect the poles.`);
+  }
+
+  function flyTo(lng, lat, altitude) {
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(lng, lat, altitude),
+      duration: 1.5,
+    });
+  }
+
+  document.getElementById('regen').addEventListener('click', regenerate);
+  document.getElementById('extrude').addEventListener('change', regenerate);
+  document.querySelectorAll('button[data-lng]').forEach((b) => {
+    b.addEventListener('click', () => {
+      flyTo(parseFloat(b.dataset.lng), parseFloat(b.dataset.lat), parseFloat(b.dataset.alt));
+    });
+  });
+
+  regenerate();
+</script>
+</body>
+</html>
