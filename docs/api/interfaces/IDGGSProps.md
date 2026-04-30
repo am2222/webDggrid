@@ -2,7 +2,7 @@
 
 # Interface: IDGGSProps
 
-Defined in: [webdggrid.ts:136](https://github.com/am2222/webDggrid/blob/46d3220e4b260396a281ac7fc8c31a562326bb54/src-ts/webdggrid.ts#L136)
+Defined in: [webdggrid.ts:136](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L136)
 
 Full configuration of a Discrete Global Grid System.
 
@@ -32,7 +32,7 @@ dggs.setDggs(myDggs, 5);
 
 > `optional` **aperture?**: `7` \| `3` \| `4` \| `5`
 
-Defined in: [webdggrid.ts:162](https://github.com/am2222/webDggrid/blob/46d3220e4b260396a281ac7fc8c31a562326bb54/src-ts/webdggrid.ts#L162)
+Defined in: [webdggrid.ts:162](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L162)
 
 Subdivision aperture — the number of child cells each parent cell is
 divided into when moving to the next finer resolution.
@@ -52,7 +52,7 @@ Ignored if `apertureSequence` is specified.
 
 > `optional` **apertureSequence?**: `string`
 
-Defined in: [webdggrid.ts:181](https://github.com/am2222/webDggrid/blob/46d3220e4b260396a281ac7fc8c31a562326bb54/src-ts/webdggrid.ts#L181)
+Defined in: [webdggrid.ts:181](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L181)
 
 Mixed aperture sequence (e.g., `"434747"`).
 
@@ -78,7 +78,7 @@ apertureSequence: "434747"
 
 > **azimuth**: `number`
 
-Defined in: [webdggrid.ts:148](https://github.com/am2222/webDggrid/blob/46d3220e4b260396a281ac7fc8c31a562326bb54/src-ts/webdggrid.ts#L148)
+Defined in: [webdggrid.ts:148](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L148)
 
 Azimuth of the icosahedron pole in decimal degrees.
 Rotates the grid around the pole axis. Defaults to `0`.
@@ -89,7 +89,7 @@ Rotates the grid around the pole axis. Defaults to `0`.
 
 > **poleCoordinates**: [`Coordinate`](Coordinate.md)
 
-Defined in: [webdggrid.ts:143](https://github.com/am2222/webDggrid/blob/46d3220e4b260396a281ac7fc8c31a562326bb54/src-ts/webdggrid.ts#L143)
+Defined in: [webdggrid.ts:143](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L143)
 
 Geographic location of the icosahedron pole used to orient the grid.
 Changing this rotates the entire grid on the globe, which can be used
@@ -102,7 +102,7 @@ Defaults to `{ lat: 0, lng: 0 }`.
 
 > **projection**: [`Projection`](../enumerations/Projection.md)
 
-Defined in: [webdggrid.ts:185](https://github.com/am2222/webDggrid/blob/46d3220e4b260396a281ac7fc8c31a562326bb54/src-ts/webdggrid.ts#L185)
+Defined in: [webdggrid.ts:185](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L185)
 
 Projection used to map the polyhedron faces onto the sphere. See [Projection](../enumerations/Projection.md).
 
@@ -112,6 +112,6 @@ Projection used to map the polyhedron faces onto the sphere. See [Projection](..
 
 > **topology**: [`Topology`](../enumerations/Topology.md)
 
-Defined in: [webdggrid.ts:183](https://github.com/am2222/webDggrid/blob/46d3220e4b260396a281ac7fc8c31a562326bb54/src-ts/webdggrid.ts#L183)
+Defined in: [webdggrid.ts:183](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L183)
 
 Shape of each cell. See [Topology](../enumerations/Topology.md).

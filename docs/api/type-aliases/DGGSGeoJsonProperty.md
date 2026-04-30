@@ -4,7 +4,7 @@
 
 > **DGGSGeoJsonProperty** = `GeoJsonProperties` & `object`
 
-Defined in: [webdggrid.ts:102](https://github.com/am2222/webDggrid/blob/46d3220e4b260396a281ac7fc8c31a562326bb54/src-ts/webdggrid.ts#L102)
+Defined in: [webdggrid.ts:102](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L102)
 
 GeoJSON `properties` object attached to every cell feature returned by
 [Webdggrid.sequenceNumToGridFeatureCollection](../classes/Webdggrid.md#sequencenumtogridfeaturecollection).

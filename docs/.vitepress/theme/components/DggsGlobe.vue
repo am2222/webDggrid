@@ -142,22 +142,21 @@ function readThemeBg() {
   return cssBg || (isDark ? '#1b1b1f' : '#ffffff')
 }
 
-// Sync the Cesium scene chrome (background canvas, globe base color, sky)
-// with the current VitePress theme. Called once at mount and again whenever
-// the theme observer fires.
+// Sync the Cesium scene chrome (background canvas, globe base color) with
+// the current VitePress theme. We always hide sky/atmosphere/sun/moon so
+// the canvas behind the globe is just the themed flat color — that's what
+// makes the globe look like a first-class part of the page rather than
+// a window into Cesium space.
 function applyTheme(v, hasBasemap) {
   if (!v) return
   const themed = Cesium.Color.fromCssColorString(readThemeBg())
   v.scene.backgroundColor = themed
-  if (!hasBasemap) {
-    v.scene.globe.baseColor = themed
-    v.scene.skyAtmosphere.show = false
-    if (v.scene.skyBox) v.scene.skyBox.show = false
-  } else {
-    // With basemap: keep the sky/atmosphere but match canvas behind the globe.
-    v.scene.skyAtmosphere.show = true
-    if (v.scene.skyBox) v.scene.skyBox.show = true
-  }
+  v.scene.globe.baseColor = themed
+  v.scene.skyAtmosphere.show = false
+  if (v.scene.skyBox) v.scene.skyBox.show = false
+  if (v.scene.sun)    v.scene.sun.show    = false
+  if (v.scene.moon)   v.scene.moon.show   = false
+  v.scene.requestRender()
 }
 
 // Map MapLibre-style globe zoom levels to a sensible Cesium camera altitude
@@ -319,7 +318,12 @@ function generateGrid() {
 
   webdggrid.setDggs(dggsConfig, resolution)
 
-  ctrlResolution.value = resolution
+  // In multi-res mode, ctrlResolution is the user's "Max Resolution" cap —
+  // don't write the engine's computed resolution back to it (that clobbers
+  // the cap and makes the Zoom→Res offset slider appear broken because the
+  // ceiling drops every call). In single-res mode, ctrlResolution IS the
+  // rendered resolution, so keep them in sync.
+  if (!multiRes) ctrlResolution.value = resolution
   status.value = 'Generating grid…'
   if (!multiRes) isGenerating.value = true
 
@@ -402,6 +406,20 @@ watch([ctrlPoleLng, ctrlPoleLat], () => {
     poleEntity.position = Cesium.Cartesian3.fromDegrees(ctrlPoleLng.value, ctrlPoleLat.value)
   }
 })
+
+// In multi-res mode the "Generate Grid" button is hidden, so any setting
+// that affects the grid must auto-regenerate. Debounced so dragging the
+// resolution slider doesn't fire one regeneration per integer step.
+let multiResSettingsTimer = null
+function scheduleMultiResRegen() {
+  if (!ctrlMultiRes.value || !isReady.value || !webdggrid) return
+  clearTimeout(multiResSettingsTimer)
+  multiResSettingsTimer = setTimeout(generateGrid, 150)
+}
+watch(
+  [ctrlResolution, ctrlTopology, ctrlProjection, ctrlAperture, ctrlAzimuth, ctrlPoleLng, ctrlPoleLat, ctrlMixedAperture, ctrlApertureSeq],
+  scheduleMultiResRegen,
+)
 
 watch(ctrlMultiRes, (on) => {
   ctrlMaxResLabel.value = on ? 'Max Resolution' : 'Resolution'
@@ -696,9 +714,14 @@ onMounted(async () => {
     if (!props.interactive) {
       const c = viewer.scene.screenSpaceCameraController
       c.enableRotate = c.enableTranslate = c.enableZoom = c.enableTilt = c.enableLook = false
+    } else {
+      // Default Cesium controls, just clamp the zoom-out so the user can't
+      // back the camera out into space (where the sun/sky would otherwise
+      // be visible if the theme paint hadn't already hidden them).
+      // ~7× Earth radius — comfortably outside any plausible "view the
+      // whole grid at once" use case but well short of solar-system scale.
+      viewer.scene.screenSpaceCameraController.maximumZoomDistance = 50_000_000
     }
-    // Otherwise: leave Cesium's default screenSpaceCameraController settings
-    // alone (cursor-anchored zoom, default tilt/look/inertia).
 
     viewer.camera.setView({
       destination: Cesium.Cartesian3.fromDegrees(
