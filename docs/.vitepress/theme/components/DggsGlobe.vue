@@ -90,6 +90,7 @@ let cameraMoveEndCb   = null
 let lastFineFc        = null
 let lastBaseFc        = null
 let multiResTimer     = null
+let themeObserver     = null
 
 // ---------------------------------------------------------------------------
 // CDN helpers
@@ -129,6 +130,34 @@ function prepareFc(fc) {
 
 function rgbaArrayToCesium([r, g, b, a]) {
   return Cesium.Color.fromBytes(r, g, b, a ?? 255)
+}
+
+// Pull the current theme background from the live VitePress CSS variable.
+// Falls back to the standard VitePress dark/light bg when the variable hasn't
+// been computed yet (very early in mount).
+function readThemeBg() {
+  const isDark = document.documentElement.classList.contains('dark')
+  const cssBg = getComputedStyle(document.documentElement)
+    .getPropertyValue('--vp-c-bg').trim()
+  return cssBg || (isDark ? '#1b1b1f' : '#ffffff')
+}
+
+// Sync the Cesium scene chrome (background canvas, globe base color, sky)
+// with the current VitePress theme. Called once at mount and again whenever
+// the theme observer fires.
+function applyTheme(v, hasBasemap) {
+  if (!v) return
+  const themed = Cesium.Color.fromCssColorString(readThemeBg())
+  v.scene.backgroundColor = themed
+  if (!hasBasemap) {
+    v.scene.globe.baseColor = themed
+    v.scene.skyAtmosphere.show = false
+    if (v.scene.skyBox) v.scene.skyBox.show = false
+  } else {
+    // With basemap: keep the sky/atmosphere but match canvas behind the globe.
+    v.scene.skyAtmosphere.show = true
+    if (v.scene.skyBox) v.scene.skyBox.show = true
+  }
 }
 
 // Map MapLibre-style globe zoom levels to a sensible Cesium camera altitude
@@ -298,7 +327,7 @@ function generateGrid() {
     try {
       function buildFc(seqNums, res) {
         const total = webdggrid.nCells(res)
-        const fc    = webdggrid.sequenceNumToGridFeatureCollection(seqNums, res)
+        const fc    = webdggrid.sequenceNumToGridFeatureCollection(seqNums, res, false)
         fc.features.forEach(f => {
           if (typeof f.id === 'bigint') f.id = f.id.toString()
           const p = f.properties
@@ -430,7 +459,7 @@ function selectCell(cellId, resolution) {
   selectedCellRes.value = resolution
 
   try {
-    const fc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution))
+    const fc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution, false))
     const geom = fc.features[0]?.geometry
     console.log('[DggsGlobe] selected cell', {
       seqnum: seqnum.toString(),
@@ -501,7 +530,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
   if (hierarchyInfo.allParents.length > 0 && resolution > 0) {
     try {
       const parentFc = prepareFc(sanitizeFc(
-        webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.allParents, resolution - 1)
+        webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.allParents, resolution - 1, false)
       ))
       parentFc.features.forEach((f, i) => { f.properties._primary = i === 0 })
 
@@ -545,7 +574,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
   if (hierarchyInfo.children.length > 0) {
     try {
       const childFc = prepareFc(sanitizeFc(
-        webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1)
+        webdggrid.sequenceNumToGridFeatureCollection(hierarchyInfo.children, resolution + 1, false)
       ))
       childrenDataSource = await Cesium.GeoJsonDataSource.load(childFc, { clampToGround: false })
       childrenDataSource.entities.values.forEach((e) => {
@@ -583,7 +612,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
   // --- Selected cell highlight (always on top) ---
   try {
     const centerFc = prepareFc(sanitizeFc(
-      webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution)
+      webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution, false)
     ))
     selectedDataSource = await Cesium.GeoJsonDataSource.load(centerFc, { clampToGround: false })
     selectedDataSource.entities.values.forEach((e) => {
@@ -634,10 +663,6 @@ onMounted(async () => {
     await loadScript('https://cdn.jsdelivr.net/npm/cesium@1.122/Build/Cesium/Cesium.js')
     const Webdggrid = await loadWebdggrid()
 
-    const isDark = document.documentElement.classList.contains('dark')
-    const bgColor = getComputedStyle(document.documentElement)
-      .getPropertyValue('--vp-c-bg').trim() || (isDark ? '#1b1b1f' : '#ffffff')
-
     viewer = new Cesium.Viewer(mapContainer.value, {
       baseLayer: false,
       baseLayerPicker: false,
@@ -658,35 +683,22 @@ onMounted(async () => {
         url: 'https://tile.openstreetmap.org/',
         credit: '© OpenStreetMap contributors',
       }))
-    } else {
-      // No basemap — paint the globe & background to match the page theme.
-      const themed = Cesium.Color.fromCssColorString(bgColor)
-      viewer.scene.globe.baseColor   = themed
-      viewer.scene.backgroundColor   = themed
-      viewer.scene.skyAtmosphere.show = false
-      if (viewer.scene.skyBox) viewer.scene.skyBox.show = false
     }
     viewer.scene.globe.enableLighting = false
+
+    // Re-paint scene chrome (background, globe base, sky) whenever VitePress
+    // toggles the `.dark` class on <html>. Stays in sync with the user's
+    // OS / docs theme switcher without remounting the Cesium viewer.
+    applyTheme(viewer, props.showBasemap)
+    themeObserver = new MutationObserver(() => applyTheme(viewer, props.showBasemap))
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 
     if (!props.interactive) {
       const c = viewer.scene.screenSpaceCameraController
       c.enableRotate = c.enableTranslate = c.enableZoom = c.enableTilt = c.enableLook = false
-    } else {
-      // Cesium's default scroll-wheel zoom keeps the cursor's globe point
-      // anchored, which causes the camera to roll/tilt as it approaches the
-      // surface — feels like unintentional rotation. Kill inertia, take
-      // middle-click off the look/tilt path so a brushed wheel never
-      // injects roll, and clamp the minimum zoom distance so the cursor
-      // anchor doesn't go ill-conditioned at very close range.
-      const c = viewer.scene.screenSpaceCameraController
-      c.enableLook = false
-      c.inertiaSpin = 0
-      c.inertiaTranslate = 0
-      c.inertiaZoom = 0
-      c.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH]
-      c.tiltEventTypes = [Cesium.CameraEventType.MIDDLE_DRAG]
-      c.minimumZoomDistance = 1000
     }
+    // Otherwise: leave Cesium's default screenSpaceCameraController settings
+    // alone (cursor-anchored zoom, default tilt/look/inertia).
 
     viewer.camera.setView({
       destination: Cesium.Cartesian3.fromDegrees(
@@ -779,6 +791,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   clearTimeout(multiResTimer)
+  if (themeObserver) { themeObserver.disconnect(); themeObserver = null }
   if (viewer && cameraMoveEndCb) {
     viewer.camera.moveEnd.removeEventListener(cameraMoveEndCb)
     cameraMoveEndCb = null

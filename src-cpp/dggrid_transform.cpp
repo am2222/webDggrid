@@ -521,29 +521,12 @@ static unsigned int computeCellVertices(
                             static_cast<double>(c->latDegs()) });
     }
 
-    // Antimeridian: if lon span > 180° shift negatives by +360° for sort
-    bool antimeridian = false;
-    {
-        double lo = scratch[0].first, hi = scratch[0].first;
-        for (auto &p : scratch) { lo = std::min(lo, p.first); hi = std::max(hi, p.first); }
-        if (hi - lo > 180.0) {
-            antimeridian = true;
-            for (auto &p : scratch) if (p.first < 0.0) p.first += 360.0;
-        }
-    }
-
-    double cx = 0.0, cy = 0.0;
-    for (auto &p : scratch) { cx += p.first; cy += p.second; }
-    cx /= n; cy /= n;
-
-    std::sort(scratch.begin(), scratch.end(),
-        [cx, cy](const std::pair<double,double> &a, const std::pair<double,double> &b) {
-            return std::atan2(a.second - cy, a.first - cx) <
-                   std::atan2(b.second - cy, b.first - cx);
-        });
-
-    if (antimeridian)
-        for (auto &p : scratch) if (p.first > 180.0) p.first -= 360.0;
+    // DGGRID emits boundary vertices in correct traversal order around the
+    // spherical polygon. We previously re-sorted by atan2 around the
+    // arithmetic (lon, lat) centroid as a "safety net," but that centroid is
+    // meaningless for any cell whose vertices straddle a pole — it produced
+    // the wrong order for polar caps (e.g. cell 47 @ res 2). Trust DGGRID's
+    // ordering as-is.
 
     for (int i = 0; i < n; i++) { out_x.push_back(scratch[i].first); out_y.push_back(scratch[i].second); }
     out_x.push_back(scratch[0].first); out_y.push_back(scratch[0].second);

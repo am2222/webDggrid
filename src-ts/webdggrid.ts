@@ -187,21 +187,31 @@ export interface IDGGSProps {
 
 /**
  * Rewraps a polygon ring that crosses the antimeridian so that all longitudes
- * are in a contiguous range (some may exceed 180°).  This is the format
- * expected by MapLibre GL / Mapbox GL globe projection for antimeridian cells.
- * For renderers that require standard [-180, 180] coordinates, use the raw
- * output from {@link Webdggrid.sequenceNumToGrid} directly.
+ * are in a contiguous range. The output longitudes may fall outside
+ * [-180, 180] — that's intentional, and is the format expected by MapLibre
+ * GL / Mapbox GL globe projection for antimeridian cells. For renderers that
+ * require standard [-180, 180] coordinates, run a final modulo step
+ * downstream.
+ *
+ * Walks consecutive vertices and accumulates a ±360 offset whenever the
+ * longitude delta between neighbours exceeds 180° (the only meaningful sign
+ * of an antimeridian crossing). This keeps the traversal direction faithful
+ * even for polar caps, which span a full 360° in lon and were broken by the
+ * previous "negative-to-positive" rewrite.
  */
 export function unwrapAntimeridianRing(ring: Position[]): Position[] {
-    let minLon = ring[0][0];
-    let maxLon = ring[0][0];
+    if (ring.length === 0) return ring;
+    const out: Position[] = [[ring[0][0], ring[0][1]]];
+    let offset = 0;
     for (let i = 1; i < ring.length; i++) {
-        const lon = ring[i][0];
-        if (lon < minLon) minLon = lon;
-        else if (lon > maxLon) maxLon = lon;
+        const prev = ring[i - 1][0];
+        const curr = ring[i][0];
+        const delta = curr - prev;
+        if (delta >  180) offset -= 360;
+        else if (delta < -180) offset += 360;
+        out.push([curr + offset, ring[i][1]]);
     }
-    if (maxLon - minLon <= 180) return ring;
-    return ring.map(([lon, lat]) => [lon < 0 ? lon + 360 : lon, lat]);
+    return out;
 }
 
 const DEFAULT_RESOLUTION = 1;
@@ -778,13 +788,22 @@ export class Webdggrid {
      *   retrieve.
      * @param resolution - Resolution at which the IDs were generated. Defaults
      *   to the instance's current {@link resolution}.
+     * @param unwrap - When `true` (default), antimeridian-crossing rings are
+     *   passed through {@link unwrapAntimeridianRing} so longitudes stay
+     *   contiguous (lons may exceed 180°). Required by MapLibre GL / Mapbox
+     *   GL globe projection. Set to `false` to receive the raw DGGRID output
+     *   in `[-180, 180]` — required by Cesium's `GeoJsonDataSource` (which
+     *   internally normalises lons and breaks polar caps under unwrap), and
+     *   by any sphere-aware renderer that interpolates edges as great-circle
+     *   arcs.
      * @returns A 2-D array: `result[i]` is the vertex ring of `sequenceNum[i]`.
      *   Each vertex is a `[lng, lat]` position.
      * @throws If the WASM module encounters an invalid cell ID.
      */
     sequenceNumToGrid(
         sequenceNum: bigint[],
-        resolution: number = DEFAULT_RESOLUTION
+        resolution: number = DEFAULT_RESOLUTION,
+        unwrap: boolean = true
     ): Position[][] {
         const {
             poleCoordinates: { lat, lng },
@@ -836,7 +855,7 @@ export class Webdggrid {
             for (let j = 0; j < numVertexes; j += 1) {
                 coordinates.push([resultArray[xOffset + j], resultArray[yOffset + j]]);
             }
-            featureSet.push(unwrapAntimeridianRing(coordinates));
+            featureSet.push(unwrap ? unwrapAntimeridianRing(coordinates) : coordinates);
             xOffset += numVertexes;
             yOffset += numVertexes;
         }
@@ -874,15 +893,19 @@ export class Webdggrid {
      * @param sequenceNum - Array of `BigInt` cell IDs to convert.
      * @param resolution - Resolution at which the IDs were generated. Defaults
      *   to the instance's current {@link resolution}.
+     * @param unwrap - Forwarded to {@link sequenceNumToGrid}. Defaults to
+     *   `true` (MapLibre-style unwrap). Pass `false` for Cesium and other
+     *   great-circle-arc renderers.
      * @returns A GeoJSON `FeatureCollection` of `Polygon` features, one per
      *   input cell ID.
      */
     sequenceNumToGridFeatureCollection(
         sequenceNum: bigint[],
-        resolution: number = DEFAULT_RESOLUTION
+        resolution: number = DEFAULT_RESOLUTION,
+        unwrap: boolean = true
     ): FeatureCollection<Polygon, DGGSGeoJsonProperty> {
 
-        const coordinatesArray = this.sequenceNumToGrid(sequenceNum, resolution);
+        const coordinatesArray = this.sequenceNumToGrid(sequenceNum, resolution, unwrap);
 
         const features = coordinatesArray.map((coordinates, index) => {
             const seqNum = sequenceNum[index];

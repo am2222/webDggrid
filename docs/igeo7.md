@@ -56,6 +56,19 @@ Click `→ inspect` on any related cell to drill into it.
 | `igeo7Neighbour` | `(index: bigint, direction: number) → bigint` | Single neighbour by direction (1-6) |
 | `igeo7FirstNonZero` | `(index: bigint) → number` | Position of first non-zero digit slot |
 | `igeo7IsValid` | `(index: bigint) → boolean` | `false` when index equals the invalid sentinel |
+| `igeo7GeoToAuthalic` | `(latDeg: number) → number` | Geodetic → authalic latitude on the WGS84 ellipsoid (Karney 2022) |
+| `igeo7AuthalicToGeo` | `(latDeg: number) → number` | Authalic → geodetic latitude (inverse of above) |
+| `igeo7TransformGeoJson` | `(geo, direction?) → geo` | Apply the latitude conversion to every coordinate of a GeoJSON geometry / feature / FC. Mirrors the `(GEOMETRY) → GEOMETRY` DuckDB scalar functions for use in JS. Accepts `'geoToAuthalic'` (default) or `'authalicToGeo'`. Source object is not mutated. |
+
+::: tip DuckDB extension parity
+The two scalar functions correspond to the upstream extension's
+`igeo7_geo_to_authalic` / `igeo7_authalic_to_geo` `(GEOMETRY) → GEOMETRY`
+SQL functions. `igeo7TransformGeoJson` is the JS-side equivalent — DuckDB's
+`GEOMETRY` type isn't available in WASM, so the wrapper walks GeoJSON
+coordinates instead. See the
+[upstream igeo7_duckdb README](https://github.com/allixender/igeo7_duckdb#authalic-latitude-conversion)
+for the SQL signatures.
+:::
 
 ## Examples
 
@@ -146,6 +159,35 @@ direction, returned as the invalid sentinel:
 const pent = dggs.igeo7FromString('0800'); // a pentagon at res 2
 const ns = dggs.igeo7Neighbours(pent);
 ns.filter(n => !dggs.igeo7IsValid(n)).length; // exactly 1
+```
+
+### Authalic latitude conversion
+
+WGS84 is an oblate ellipsoid; many DGGS calculations and equal-area
+projections want the *authalic* sphere instead — a sphere with the same
+surface area as the ellipsoid. `igeo7GeoToAuthalic` and `igeo7AuthalicToGeo`
+implement the round-trip via Karney (2022)'s polynomial expansion (the same
+math the DuckDB extension applies to `GEOMETRY` columns).
+
+```typescript
+// Scalar use — single latitude in degrees.
+dggs.igeo7GeoToAuthalic(45);                 // ~44.8717
+dggs.igeo7AuthalicToGeo(dggs.igeo7GeoToAuthalic(45)); // 45 within 1e-9°
+```
+
+For GeoJSON inputs, `igeo7TransformGeoJson` walks the geometry and applies
+the conversion to every position's latitude (longitude is untouched). The
+input is deep-cloned, so the original is left intact:
+
+```typescript
+const fc = dggs.sequenceNumToGridFeatureCollection([1n, 2n, 3n], 5);
+const equalArea = dggs.igeo7TransformGeoJson(fc);
+// equalArea is a new FeatureCollection with each cell's vertices
+// projected onto the WGS84 authalic sphere — useful when feeding cells
+// into an equal-area visual or computing on-sphere areas.
+
+// Round-trip back to geodetic for display:
+const back = dggs.igeo7TransformGeoJson(equalArea, 'authalicToGeo');
 ```
 
 ## Relationship to DGGRID's built-in Z7
