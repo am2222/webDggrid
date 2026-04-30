@@ -24,9 +24,9 @@ const props = defineProps({
   /** Equivalent MapLibre globe zoom level — mapped to a Cesium camera altitude. */
   initialZoom: { type: Number, default: 1.8 },
   /** Cell fill color [r,g,b,a] */
-  fillColor: { type: Array, default: () => [51, 136, 255, 71] },
+  fillColor: { type: Array, default: () => [56, 132, 255, 110] },
   /** Cell line color [r,g,b,a] */
-  lineColor: { type: Array, default: () => [0, 85, 204, 220] },
+  lineColor: { type: Array, default: () => [10, 70, 200, 245] },
   /** Allow map pan/zoom interaction */
   interactive: { type: Boolean, default: true },
 })
@@ -180,7 +180,7 @@ async function buildCellDataSource(fc, { fill, stroke, isBase, colored }) {
   const ds = await Cesium.GeoJsonDataSource.load(fc, {
     fill: rgbaArrayToCesium(fill),
     stroke: rgbaArrayToCesium(stroke),
-    strokeWidth: isBase ? 2 : 1,
+    strokeWidth: isBase ? 3 : 1.5,
     clampToGround: false,
   })
 
@@ -191,11 +191,13 @@ async function buildCellDataSource(fc, { fill, stroke, isBase, colored }) {
     e.polygon.arcType = Cesium.ArcType.GEODESIC
     e.polygon.height  = 0
     e.polygon.outline = true
+    e.polygon.outlineWidth = isBase ? 3 : 1.5
     if (isBase) {
       e.polygon.fill = false
     } else if (colored) {
       const t = Number(e.properties?.colorValue?.getValue?.() ?? 0)
-      e.polygon.material = rgbaArrayToCesium(ylOrBrRgba(t, 179))
+      // Bumped alpha 179 → 220 for stronger fill in YlOrBr mode.
+      e.polygon.material = rgbaArrayToCesium(ylOrBrRgba(t, 220))
     } else {
       e.polygon.material = baseFill
     }
@@ -703,6 +705,19 @@ onMounted(async () => {
       }))
     }
     viewer.scene.globe.enableLighting = false
+
+    // Sharpen the rendering pipeline: Cesium's defaults run an HDR tonemap
+    // and an FXAA pass that together wash colors out and soften every cell
+    // outline. We want crisp, saturated cell colors over the basemap.
+    viewer.scene.highDynamicRange = false
+    if (viewer.scene.postProcessStages.fxaa) {
+      viewer.scene.postProcessStages.fxaa.enabled = false
+    }
+    // 4× MSAA gives clean polygon edges without the FXAA blur.
+    if ('msaaSamples' in viewer.scene) viewer.scene.msaaSamples = 4
+    // Atmosphere haze tints the basemap blue at low altitudes; off.
+    viewer.scene.globe.showGroundAtmosphere = false
+    viewer.scene.fog.enabled = false
 
     // Re-paint scene chrome (background, globe base, sky) whenever VitePress
     // toggles the `.dark` class on <html>. Stays in sync with the user's
