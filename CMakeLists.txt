@@ -26,7 +26,10 @@ set(SHAPE_LIB  "${DGGRID_DIR}/src/lib/shapelib/lib")
 # (src/igeo7_extension.cpp) is intentionally excluded.
 set(IGEO7_DIR "${CMAKE_SOURCE_DIR}/submodules/igeo7_duckdb")
 set(IGEO7_Z7_INC "${IGEO7_DIR}/src")
-set(IGEO7_Z7_SOURCES "${IGEO7_DIR}/src/z7/library.cpp")
+set(IGEO7_Z7_SOURCES
+    "${IGEO7_DIR}/src/z7/library.cpp"
+    "${IGEO7_DIR}/src/auth/authalic.cpp"
+)
 
 # ── Source files ──────────────────────────────────────────────────────────
 file(GLOB DGLIB_SOURCES  "${DGLIB_LIB}/*.cpp")

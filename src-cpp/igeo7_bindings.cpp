@@ -17,6 +17,7 @@
 #include <emscripten/bind.h>
 
 #include "z7/library.h"
+#include "auth/authalic.hpp"
 
 #include <array>
 #include <cstdint>
@@ -177,6 +178,20 @@ static uint64_t igeo7_encode(
 }
 
 // ---------------------------------------------------------------------------
+// igeo7_geo_to_authalic(double) → double  — geodetic latitude → authalic
+// igeo7_authalic_to_geo(double) → double  — authalic latitude → geodetic
+// (DuckDB extension exposes a GEOMETRY-walking variant; in WASM we bind the
+//  scalar core and let JS callers walk GeoJSON.)
+// ---------------------------------------------------------------------------
+static double igeo7_geo_to_authalic(double phi_deg) {
+    return auth::geodetic_to_authalic(phi_deg);
+}
+
+static double igeo7_authalic_to_geo(double xi_deg) {
+    return auth::authalic_to_geodetic(xi_deg);
+}
+
+// ---------------------------------------------------------------------------
 // Bindings
 // ---------------------------------------------------------------------------
 EMSCRIPTEN_BINDINGS(igeo7_module) {
@@ -192,4 +207,6 @@ EMSCRIPTEN_BINDINGS(igeo7_module) {
     emscripten::function("igeo7_first_non_zero", &igeo7_first_non_zero);
     emscripten::function("igeo7_is_valid",       &igeo7_is_valid);
     emscripten::function("igeo7_encode",         &igeo7_encode);
+    emscripten::function("igeo7_geo_to_authalic", &igeo7_geo_to_authalic);
+    emscripten::function("igeo7_authalic_to_geo", &igeo7_authalic_to_geo);
 }

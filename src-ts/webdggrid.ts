@@ -1,6 +1,6 @@
 // @ts-ignore
 import { loadWasm, unloadWasm } from './libdggrid.wasm.js';
-import { Feature, FeatureCollection, GeoJsonProperties, Polygon, Position } from 'geojson';
+import { Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Polygon, Position } from 'geojson';
 
 /**
  * The shape of each cell in the Discrete Global Grid System.
@@ -187,21 +187,31 @@ export interface IDGGSProps {
 
 /**
  * Rewraps a polygon ring that crosses the antimeridian so that all longitudes
- * are in a contiguous range (some may exceed 180°).  This is the format
- * expected by MapLibre GL / Mapbox GL globe projection for antimeridian cells.
- * For renderers that require standard [-180, 180] coordinates, use the raw
- * output from {@link Webdggrid.sequenceNumToGrid} directly.
+ * are in a contiguous range. The output longitudes may fall outside
+ * [-180, 180] — that's intentional, and is the format expected by MapLibre
+ * GL / Mapbox GL globe projection for antimeridian cells. For renderers that
+ * require standard [-180, 180] coordinates, run a final modulo step
+ * downstream.
+ *
+ * Walks consecutive vertices and accumulates a ±360 offset whenever the
+ * longitude delta between neighbours exceeds 180° (the only meaningful sign
+ * of an antimeridian crossing). This keeps the traversal direction faithful
+ * even for polar caps, which span a full 360° in lon and were broken by the
+ * previous "negative-to-positive" rewrite.
  */
 export function unwrapAntimeridianRing(ring: Position[]): Position[] {
-    let minLon = ring[0][0];
-    let maxLon = ring[0][0];
+    if (ring.length === 0) return ring;
+    const out: Position[] = [[ring[0][0], ring[0][1]]];
+    let offset = 0;
     for (let i = 1; i < ring.length; i++) {
-        const lon = ring[i][0];
-        if (lon < minLon) minLon = lon;
-        else if (lon > maxLon) maxLon = lon;
+        const prev = ring[i - 1][0];
+        const curr = ring[i][0];
+        const delta = curr - prev;
+        if (delta >  180) offset -= 360;
+        else if (delta < -180) offset += 360;
+        out.push([curr + offset, ring[i][1]]);
     }
-    if (maxLon - minLon <= 180) return ring;
-    return ring.map(([lon, lat]) => [lon < 0 ? lon + 360 : lon, lat]);
+    return out;
 }
 
 const DEFAULT_RESOLUTION = 1;
@@ -778,13 +788,22 @@ export class Webdggrid {
      *   retrieve.
      * @param resolution - Resolution at which the IDs were generated. Defaults
      *   to the instance's current {@link resolution}.
+     * @param unwrap - When `true` (default), antimeridian-crossing rings are
+     *   passed through {@link unwrapAntimeridianRing} so longitudes stay
+     *   contiguous (lons may exceed 180°). Required by MapLibre GL / Mapbox
+     *   GL globe projection. Set to `false` to receive the raw DGGRID output
+     *   in `[-180, 180]` — required by Cesium's `GeoJsonDataSource` (which
+     *   internally normalises lons and breaks polar caps under unwrap), and
+     *   by any sphere-aware renderer that interpolates edges as great-circle
+     *   arcs.
      * @returns A 2-D array: `result[i]` is the vertex ring of `sequenceNum[i]`.
      *   Each vertex is a `[lng, lat]` position.
      * @throws If the WASM module encounters an invalid cell ID.
      */
     sequenceNumToGrid(
         sequenceNum: bigint[],
-        resolution: number = DEFAULT_RESOLUTION
+        resolution: number = DEFAULT_RESOLUTION,
+        unwrap: boolean = true
     ): Position[][] {
         const {
             poleCoordinates: { lat, lng },
@@ -836,7 +855,7 @@ export class Webdggrid {
             for (let j = 0; j < numVertexes; j += 1) {
                 coordinates.push([resultArray[xOffset + j], resultArray[yOffset + j]]);
             }
-            featureSet.push(unwrapAntimeridianRing(coordinates));
+            featureSet.push(unwrap ? unwrapAntimeridianRing(coordinates) : coordinates);
             xOffset += numVertexes;
             yOffset += numVertexes;
         }
@@ -874,15 +893,19 @@ export class Webdggrid {
      * @param sequenceNum - Array of `BigInt` cell IDs to convert.
      * @param resolution - Resolution at which the IDs were generated. Defaults
      *   to the instance's current {@link resolution}.
+     * @param unwrap - Forwarded to {@link sequenceNumToGrid}. Defaults to
+     *   `true` (MapLibre-style unwrap). Pass `false` for Cesium and other
+     *   great-circle-arc renderers.
      * @returns A GeoJSON `FeatureCollection` of `Polygon` features, one per
      *   input cell ID.
      */
     sequenceNumToGridFeatureCollection(
         sequenceNum: bigint[],
-        resolution: number = DEFAULT_RESOLUTION
+        resolution: number = DEFAULT_RESOLUTION,
+        unwrap: boolean = true
     ): FeatureCollection<Polygon, DGGSGeoJsonProperty> {
 
-        const coordinatesArray = this.sequenceNumToGrid(sequenceNum, resolution);
+        const coordinatesArray = this.sequenceNumToGrid(sequenceNum, resolution, unwrap);
 
         const features = coordinatesArray.map((coordinates, index) => {
             const seqNum = sequenceNum[index];
@@ -2592,5 +2615,111 @@ export class Webdggrid {
      */
     igeo7IsValid(index: bigint): boolean {
         return this._module.igeo7_is_valid(index);
+    }
+
+    /**
+     * Convert a geodetic latitude (WGS84 ellipsoid) to its authalic latitude
+     * on the equal-area sphere. Implementation follows Karney (2022) — same
+     * polynomial used by the `igeo7_geo_to_authalic` DuckDB scalar function.
+     *
+     * Longitude is unaffected; only latitude is transformed.
+     *
+     * @param latDeg - Geodetic latitude in degrees, range `[-90, 90]`.
+     * @returns Authalic latitude in degrees.
+     */
+    igeo7GeoToAuthalic(latDeg: number): number {
+        return this._module.igeo7_geo_to_authalic(latDeg);
+    }
+
+    /**
+     * Inverse of {@link igeo7GeoToAuthalic} — convert an authalic latitude
+     * back to geodetic.
+     *
+     * @param latDeg - Authalic latitude in degrees.
+     * @returns Geodetic latitude (WGS84) in degrees.
+     */
+    igeo7AuthalicToGeo(latDeg: number): number {
+        return this._module.igeo7_authalic_to_geo(latDeg);
+    }
+
+    /**
+     * Apply {@link igeo7GeoToAuthalic} (or its inverse) to every coordinate of
+     * a GeoJSON geometry, feature, or feature collection. Mirrors the
+     * `igeo7_geo_to_authalic` / `igeo7_authalic_to_geo` DuckDB functions
+     * (which take/return `GEOMETRY`); this is the WASM equivalent for
+     * GeoJSON-shaped inputs.
+     *
+     * The input is **deep-cloned** — the source object is not mutated.
+     * Geometries with `null` or unsupported types are returned unchanged.
+     *
+     * @param input - Any GeoJSON geometry, feature, or feature collection.
+     * @param direction - `'geoToAuthalic'` (default) or `'authalicToGeo'`.
+     * @returns A new GeoJSON object of the same shape with transformed lats.
+     */
+    igeo7TransformGeoJson<T extends GeoJSON>(
+        input: T,
+        direction: 'geoToAuthalic' | 'authalicToGeo' = 'geoToAuthalic',
+    ): T {
+        const fn = direction === 'authalicToGeo'
+            ? (lat: number) => this._module.igeo7_authalic_to_geo(lat)
+            : (lat: number) => this._module.igeo7_geo_to_authalic(lat);
+        return transformGeoJsonLatitudes(input, fn);
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GeoJSON latitude transform helper (used by igeo7TransformGeoJson)
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Pos = number[];
+
+function transformPos(pos: Pos, fn: (lat: number) => number): Pos {
+    // GeoJSON positions are [lng, lat, ...]; only lat (index 1) is touched,
+    // any z/m values trail through untouched.
+    const out = pos.slice();
+    if (out.length >= 2) out[1] = fn(out[1]);
+    return out;
+}
+
+function transformCoords(coords: any, depth: number, fn: (lat: number) => number): any {
+    if (depth === 0) return transformPos(coords as Pos, fn);
+    return (coords as any[]).map(c => transformCoords(c, depth - 1, fn));
+}
+
+const COORD_DEPTH: Record<string, number> = {
+    Point: 0,
+    LineString: 1,
+    MultiPoint: 1,
+    Polygon: 2,
+    MultiLineString: 2,
+    MultiPolygon: 3,
+};
+
+function transformGeometry(geom: any, fn: (lat: number) => number): any {
+    if (!geom || typeof geom.type !== 'string') return geom;
+    if (geom.type === 'GeometryCollection') {
+        return {
+            ...geom,
+            geometries: (geom.geometries || []).map((g: any) => transformGeometry(g, fn)),
+        };
+    }
+    const depth = COORD_DEPTH[geom.type];
+    if (depth === undefined || !geom.coordinates) return geom;
+    return { ...geom, coordinates: transformCoords(geom.coordinates, depth, fn) };
+}
+
+function transformGeoJsonLatitudes<T>(input: T, fn: (lat: number) => number): T {
+    const node = input as any;
+    if (!node || typeof node.type !== 'string') return input;
+    switch (node.type) {
+        case 'FeatureCollection':
+            return {
+                ...node,
+                features: (node.features || []).map((f: any) => transformGeoJsonLatitudes(f, fn)),
+            } as T;
+        case 'Feature':
+            return { ...node, geometry: transformGeometry(node.geometry, fn) } as T;
+        default:
+            return transformGeometry(node, fn) as T;
     }
 }
