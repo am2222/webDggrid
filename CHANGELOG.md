@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.9.0](https://github.com/am2222/webDggrid/compare/v1.8.0...v1.9.0) (2026-05-02)
+
+
+### Features
+
+* Added cesium as demo ([46d3220](https://github.com/am2222/webDggrid/commit/46d3220e4b260396a281ac7fc8c31a562326bb54))
+* Enhance DGGS functionality with authalic latitude conversion and GeoJSON support ([9331596](https://github.com/am2222/webDggrid/commit/93315961490bf7f17751490c6e9666d0f128a580))
+* improved demo ([5df111c](https://github.com/am2222/webDggrid/commit/5df111c3c6208028d868e6f203c8249d154b0342))
+
+
+### Bug Fixes
+
+* changed globe colors ([0a5f9d5](https://github.com/am2222/webDggrid/commit/0a5f9d50289ce6f618f3e042b437d7feb1bac77f))
+* fix the over pole cell bug ([62544b2](https://github.com/am2222/webDggrid/commit/62544b244ecf036037149f81bc90e0fa7718511e))
+
 ## [1.8.0](https://github.com/am2222/webDggrid/compare/v1.7.0...v1.8.0) (2026-04-25)
 
 
