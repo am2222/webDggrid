@@ -82,6 +82,10 @@ if(EMSCRIPTEN)
         "-sWASM_BIGINT=1"
         "-sBINARYEN_ASYNC_COMPILATION=1"
         "-sDYNAMIC_EXECUTION=0"
+        # The JS build embeds the WASM and passes it as Module.wasmBinary.
+        # Emscripten 6.0.2+ no longer reads wasmBinary unless it is listed here,
+        # and would instead fetch libdggrid.wasm, which the package does not ship.
+        "-sINCOMING_MODULE_JS_API=wasmBinary"
     )
 
     if(STANDALONE_WASM)
