@@ -26,7 +26,8 @@
     "dist/*.*",
     "types/*",
     "src-ts/*",
-    "lib-wasm/*",
+    "lib-wasm/libdggrid.js",
+    "lib-wasm/libdggrid.wasm",
     "lib-esm/*"
   ],
   "scripts": {
