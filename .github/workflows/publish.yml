@@ -37,9 +37,9 @@ jobs:
       - name: Build
         run: yarn build
 
-      # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 20 ships 10.x.
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 20 ships 10.x and npm 12 no longer supports Node 20.
       - name: Upgrade npm for trusted publishing
-        run: npm install -g npm@latest && npm --version
+        run: npm install -g npm@11 && npm --version
 
       - name: Publish to npm
         run: npm publish
