@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.9.1](https://github.com/am2222/webDggrid/compare/v1.9.0...v1.9.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* **build:** drop the unresolvable libdggrid.wasm URL from the embedded glue ([0676e15](https://github.com/am2222/webDggrid/commit/0676e1514ce00f43f7a8a3119e7e8291cd69f4e7))
+* **build:** keep locateFile, print, printErr, onAbort and onRuntimeInitialized as Module options ([b48fa2a](https://github.com/am2222/webDggrid/commit/b48fa2a0ff9c779252171deb97e1b6c1a6f3ff10))
+* **build:** load the embedded WASM with Emscripten 6 and drop the unresolvable WASM URL ([1e2acd2](https://github.com/am2222/webDggrid/commit/1e2acd210af60f00e45133525a2fc1c7d2f30d59))
+* **build:** pass the embedded wasmBinary through with Emscripten 6.0.2+ ([389c76a](https://github.com/am2222/webDggrid/commit/389c76a13fe4d65df35698da500a715b8f05e699))
+
 ## [1.9.0](https://github.com/am2222/webDggrid/compare/v1.8.0...v1.9.0) (2026-05-02)
 
 
