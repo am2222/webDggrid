@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.2](https://github.com/am2222/webDggrid/compare/v1.9.1...v1.9.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* **publish:** simplify npm publishing workflow and update package files ([68b6ae6](https://github.com/am2222/webDggrid/commit/68b6ae645d16a67d599257cc319f89beed930d4a))
+
 ## [1.9.1](https://github.com/am2222/webDggrid/compare/v1.9.0...v1.9.1) (2026-10-01)
 
 
