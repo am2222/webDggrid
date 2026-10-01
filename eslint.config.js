@@ -49,11 +49,6 @@ export default defineConfig([
             'prefer-rest-params': 'off',
             'prefer-spread': 'off',
 
-            // New in the ESLint 10 recommended set. Reported as warnings so the
-            // upgrade does not change the lint verdict; fix them and promote to 'error'.
-            'preserve-caught-error': 'warn',
-            'no-useless-assignment': 'warn',
-
             // Formatting rules moved out of ESLint core in v9/v10 and now live in @stylistic.
             '@stylistic/no-multiple-empty-lines': ['error', { max: 1 }],
             '@stylistic/function-call-spacing': ['error', 'never'],
