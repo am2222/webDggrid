@@ -104,12 +104,12 @@ export type DGGSGeoJsonProperty = GeoJsonProperties & {
      * The DGGS sequence number (cell ID) of this feature.
      * Unique within a given DGGS configuration and resolution.
      */
-    id?: BigInt;
+    id?: bigint;
     /** Column index in an (i, j) address scheme, if available. */
-    i?: BigInt;
+    i?: bigint;
     /** Row index in an (i, j) address scheme, if available. */
-    j?: BigInt;
-}
+    j?: bigint;
+};
 
 /**
  * Full configuration of a Discrete Global Grid System.
@@ -432,7 +432,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         const cellCount = this._module.nCells(
             lng,
@@ -475,7 +475,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         const cellCount = this._module.cellAreaKM(
             lng,
@@ -518,7 +518,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         const cellCount = this._module.cellDistKM(
             lng,
@@ -562,7 +562,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         const cellCount = this._module.gridStatCLS(
             lng,
@@ -622,7 +622,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         const xCoords = coordinates.map((coord) => coord[0]);
         const yCoords = coordinates.map((coord) => coord[1]);
@@ -676,7 +676,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         const resultArray = this._module.SEQNUM_to_GEO(
             lng,
@@ -741,7 +741,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         const xCoords = coordinates.map((coord) => coord[0]);
         const yCoords = coordinates.map((coord) => coord[1]);
@@ -815,11 +815,11 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         const inputSize = sequenceNum.length;
 
-        let resultArray = [];
+        let resultArray;
         try {
             resultArray = this._module.SeqNumGrid(
                 lng,
@@ -973,7 +973,7 @@ export class Webdggrid {
         }
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         try {
             const resultArray = this._module.SEQNUMS_neighbors(
@@ -1052,7 +1052,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         try {
             const resultArray = this._module.SEQNUMS_parents(
@@ -1176,7 +1176,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         try {
             const resultArray = this._module.SEQNUMS_children(
@@ -1334,7 +1334,8 @@ export class Webdggrid {
             const errMsg = this._module.getExceptionMessage(e).toString();
             if (errMsg.includes('aperture')) {
                 throw new Error(
-                    `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`
+                    `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`,
+                    { cause: e }
                 );
             }
             console.error(errMsg);
@@ -1378,7 +1379,8 @@ export class Webdggrid {
             const errMsg = this._module.getExceptionMessage(e).toString();
             if (errMsg.includes('aperture')) {
                 throw new Error(
-                    `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`
+                    `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`,
+                    { cause: e }
                 );
             }
             console.error(errMsg);
@@ -1428,7 +1430,8 @@ export class Webdggrid {
             const errMsg = this._module.getExceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
                 throw new Error(
-                    `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`
+                    `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`,
+                    { cause: e }
                 );
             }
             console.error(errMsg);
@@ -1472,7 +1475,8 @@ export class Webdggrid {
             const errMsg = this._module.getExceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
                 throw new Error(
-                    `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`
+                    `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`,
+                    { cause: e }
                 );
             }
             console.error(errMsg);
@@ -1523,7 +1527,8 @@ export class Webdggrid {
             const errMsg = this._module.getExceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
                 throw new Error(
-                    `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`
+                    `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`,
+                    { cause: e }
                 );
             }
             console.error(errMsg);
@@ -1567,7 +1572,8 @@ export class Webdggrid {
             const errMsg = this._module.getExceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
                 throw new Error(
-                    `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`
+                    `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`,
+                    { cause: e }
                 );
             }
             console.error(errMsg);
@@ -1839,7 +1845,7 @@ export class Webdggrid {
         } = this.dggs;
 
         const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || "";
+        const apSeq = apertureSequence || '';
 
         return [
             lng,

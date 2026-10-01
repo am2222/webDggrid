@@ -37,7 +37,7 @@
     "build:types": "tsc",
     "build:sfx": "node ./utils/sfx-wasm",
     "bundle": "rollup -c",
-    "lint": "eslint src-ts/**/*.ts",
+    "lint": "eslint src-ts",
     "prettier": "prettier --config .prettierrc --write .",
     "test": "vitest",
     "docs:dev": "yarn publish-typedoc && vitepress dev docs",
@@ -48,8 +48,7 @@
     "publish:major": "npm version major",
     "preversion": "yarn install && yarn test",
     "version": "yarn build && yarn docs:build",
-    "postversion": "echo postversion",
-    "serve": "npx http-server -o ./lib-wasm "
+    "postversion": "echo postversion"
   },
   "repository": {
     "type": "git",
@@ -81,16 +80,16 @@
     "fzstd": "^0.1.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10",
     "@hpcc-js/wasm": "^2.33.2",
     "@rollup/plugin-commonjs": "^29.0.2",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
+    "@stylistic/eslint-plugin": "^5",
     "@types/geojson": "^7946.0.16",
     "@types/node": "~22",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "~7.18",
-    "eslint": "^8.57.1",
-    "http-server": "^14.1.1",
+    "eslint": "^10",
+    "globals": "^17",
     "prettier": "~3.8",
     "rollup": "^4.60.1",
     "rollup-plugin-sourcemaps2": "0.5.6",
@@ -98,6 +97,7 @@
     "typedoc-plugin-markdown": "^4.11.0",
     "typedoc-vitepress-theme": "^1.1.2",
     "typescript": "~5.7",
+    "typescript-eslint": "^8",
     "vitepress": "^1.6.4",
     "vitest": "^4.1.11",
     "vue": "^3.5.31"
