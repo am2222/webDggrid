@@ -74,15 +74,18 @@ jobs:
         run: |
           VERSION="${{ github.event.release.tag_name }}"
           VERSION="${VERSION#v}"
+          # npm processes new versions asynchronously after publish; allow up to 10 minutes.
           echo "Waiting for webdggrid@${VERSION} on npm…"
-          for i in $(seq 1 12); do
+          for i in $(seq 1 30); do
             if npm view "webdggrid@${VERSION}" version &>/dev/null; then
               echo "Package available."
-              break
+              exit 0
             fi
-            echo "  not yet (attempt ${i}/12), retrying in 10s…"
-            sleep 10
+            echo "  not yet (attempt ${i}/30), retrying in 20s…"
+            sleep 20
           done
+          echo "webdggrid@${VERSION} did not appear on npm within 10 minutes."
+          exit 1
 
       - name: Install published package
         run: |
