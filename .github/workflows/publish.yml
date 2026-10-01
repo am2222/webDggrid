@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,10 +37,12 @@ jobs:
       - name: Build
         run: yarn build
 
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 20 ships 10.x.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest && npm --version
+
       - name: Publish to npm
         run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Rename WASM assets to avoid name collisions
         run: |
