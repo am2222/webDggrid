@@ -99,7 +99,7 @@
     "typedoc-vitepress-theme": "^1.1.2",
     "typescript": "~5.7",
     "vitepress": "^1.6.4",
-    "vitest": "^4.1.2",
+    "vitest": "^4.1.11",
     "vue": "^3.5.31"
   }
 }

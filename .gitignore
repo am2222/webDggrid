@@ -18,3 +18,5 @@ cmake_install.cmake
 *.o
 *.o.d
 *.bin
+# Yarn 4 project; npm lockfile is never used
+package-lock.json
