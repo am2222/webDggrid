@@ -79,7 +79,6 @@ if(EMSCRIPTEN)
         "-sMODULARIZE=1"
         "-sEXPORT_ES6=1"
         "-sIGNORE_CLOSURE_COMPILER_ERRORS=0"
-        "-sWASM_BIGINT=1"
         "-sBINARYEN_ASYNC_COMPILATION=1"
         "-sDYNAMIC_EXECUTION=0"
         # Module options the glue reads. The JS build embeds the WASM and passes
