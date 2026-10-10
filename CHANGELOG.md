@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.3](https://github.com/am2222/webDggrid/compare/v1.9.2...v1.9.3) (2026-10-10)
+
+
+### Miscellaneous Chores
+
+* release 1.9.3 ([#38](https://github.com/am2222/webDggrid/issues/38)) ([9b51348](https://github.com/am2222/webDggrid/commit/9b5134884f10bb26b0038280f4da5b0b48362d81))
+
 ## [1.9.2](https://github.com/am2222/webDggrid/compare/v1.9.1...v1.9.2) (2026-10-01)
 
 
