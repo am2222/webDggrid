@@ -54,6 +54,22 @@ export enum Projection {
 }
 
 /**
+ * Hierarchical indexing system used by the indexing parent/children methods
+ * ({@link Webdggrid.sequenceNumIndexParent},
+ * {@link Webdggrid.sequenceNumIndexChildren}; children support Z7 only).
+ *
+ * @enum {string}
+ */
+export enum IndexingSystem {
+    /** Z3 — pure aperture 3 hexagon grids. */
+    'Z3' = 'Z3',
+    /** Z7 — pure aperture 7 hexagon grids (e.g. IGEO7). */
+    'Z7' = 'Z7',
+    /** ZORDER — pure aperture 3 or 4 hexagon grids. */
+    'ZORDER' = 'ZORDER',
+}
+
+/**
  * A simple geographic coordinate expressed as latitude and longitude in
  * decimal degrees (WGS-84).
  *
@@ -283,7 +299,38 @@ export class Webdggrid {
     resolution: number = DEFAULT_RESOLUTION;
 
     private constructor(protected _module: any) {
-        this._module = _module;
+        this._module = Webdggrid._withErrorMessages(_module);
+    }
+
+    /**
+     * Wrap the WASM module so a C++ exception thrown by any of its functions
+     * reaches the caller as an `Error` carrying the C++ message (the original
+     * exception is kept as `cause`). Without this, callers get a bare object
+     * holding an exception pointer.
+     * @internal
+     */
+    private static _withErrorMessages(module: any): any {
+        const wrapped = new Map<PropertyKey, unknown>();
+        return new Proxy(module, {
+            get(target, prop, receiver) {
+                const value = Reflect.get(target, prop, receiver);
+                if (typeof value !== 'function' || prop === 'getExceptionMessage') {
+                    return value;
+                }
+                if (!wrapped.has(prop)) {
+                    wrapped.set(prop, (...args: unknown[]) => {
+                        try {
+                            return value.apply(target, args);
+                        } catch (e) {
+                            const ptr = typeof e === 'number' ? e : (e as { excPtr?: number } | null)?.excPtr;
+                            if (typeof ptr !== 'number') throw e;
+                            throw new Error(target.getExceptionMessage(ptr), { cause: e });
+                        }
+                    });
+                }
+                return wrapped.get(prop);
+            },
+        });
     }
 
     /**
@@ -834,8 +881,9 @@ export class Webdggrid {
                 sequenceNum
             );
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw (e);
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
 
         const allShapeVertexes = resultArray.slice(0, inputSize);
@@ -1004,8 +1052,9 @@ export class Webdggrid {
 
             return neighbors;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1070,8 +1119,9 @@ export class Webdggrid {
 
             return resultArray;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1127,8 +1177,9 @@ export class Webdggrid {
             }
             return result;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1207,8 +1258,118 @@ export class Webdggrid {
 
             return children;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
+        }
+    }
+
+    /**
+     * Returns the **indexing parent** of each input cell at resolution - 1,
+     * as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
+     *
+     * The indexing parent is the cell whose index is the input's index with
+     * the last digit removed. It is defined by the index's digit structure,
+     * not geometry, so it need not match the spatial parent returned by
+     * {@link sequenceNumParent} (the coarser cell containing the input's
+     * center).
+     *
+     * ```ts
+     * dggs.setDggs({ ...dggs.dggs, aperture: 7 }, 5);
+     * const parents = dggs.sequenceNumIndexParent([1000n], 5);
+     * ```
+     *
+     * ::: info
+     * Requires DGGRID v9 indexing systems: only pure-aperture hexagon grids
+     * are supported (Z7 for aperture 7, Z3 for aperture 3, ZORDER for
+     * aperture 3 or 4). Aperture sequences are not supported.
+     * :::
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose indexing parents
+     *   to find.
+     * @param resolution - Resolution of the input IDs (must be > 0).
+     *   Defaults to the instance's current {@link resolution}.
+     * @param system - Indexing system to use. Defaults to the one matching
+     *   the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4.
+     * @returns Array of `BigInt` parent cell IDs at resolution - 1, one per
+     *   input cell, in the same order.
+     * @throws If resolution is 0, or the system is not available for the grid.
+     */
+    sequenceNumIndexParent(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION,
+        system?: IndexingSystem
+    ): bigint[] {
+        if (resolution <= 0) {
+            throw new Error('Cannot get indexing parent at resolution 0 or below');
+        }
+
+        try {
+            return this._module.SEQNUMS_index_parents(
+                ...this._getParams(resolution),
+                sequenceNum,
+                system ?? ''
+            );
+        } catch (e) {
+            throw new Error(this._exceptionMessage(e).toString(), { cause: e });
+        }
+    }
+
+    /**
+     * Returns the **indexing children** of each input cell at resolution + 1,
+     * as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
+     *
+     * The indexing children are the cells whose Z7 indexes extend the
+     * input's index by one digit: 7 per cell, 6 below a pentagon. Unlike
+     * {@link sequenceNumChildren}, which returns every finer cell overlapping
+     * the parent, these follow the index structure.
+     *
+     * ::: warning
+     * Only Z7 (pure aperture 7 hexagon grids) is supported. DGGRID v9.03b
+     * generates incorrect Z3 and ZORDER indexing children, so those systems
+     * throw.
+     * :::
+     *
+     * ```ts
+     * dggs.setDggs({ ...dggs.dggs, aperture: 7 }, 4);
+     * const children = dggs.sequenceNumIndexChildren([100n], 4);
+     * // children[0] — the Z7 children of cell 100 at resolution 5
+     * ```
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose indexing
+     *   children to find.
+     * @param resolution - Resolution of the input IDs. Defaults to the
+     *   instance's current {@link resolution}.
+     * @param system - Indexing system to use. Defaults to the one matching
+     *   the grid; only {@link IndexingSystem.Z7} is currently supported.
+     * @returns A 2-D array: `result[i]` holds the child IDs of
+     *   `sequenceNum[i]` at resolution + 1.
+     * @throws If the grid is not a pure aperture 7 hexagon grid or a system
+     *   other than Z7 is requested.
+     */
+    sequenceNumIndexChildren(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION,
+        system?: IndexingSystem
+    ): bigint[][] {
+        try {
+            const resultArray = this._module.SEQNUMS_index_children(
+                ...this._getParams(resolution),
+                sequenceNum,
+                system ?? ''
+            );
+
+            const result: bigint[][] = [];
+            for (let i = 0; i < resultArray.length; i++) {
+                const inner: bigint[] = [];
+                for (let j = 0; j < resultArray[i].length; j++) {
+                    inner.push(resultArray[i][j]);
+                }
+                result.push(inner);
+            }
+            return result;
+        } catch (e) {
+            throw new Error(this._exceptionMessage(e).toString(), { cause: e });
         }
     }
 
@@ -1245,8 +1406,9 @@ export class Webdggrid {
             );
             return result;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1285,8 +1447,9 @@ export class Webdggrid {
                 y
             );
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1297,7 +1460,8 @@ export class Webdggrid {
      * curve index. This provides good spatial locality for range queries.
      *
      * **Compatibility:** ZORDER is only available for **aperture 3 and 4**
-     * hexagon grids. It is **NOT supported** for aperture 7.
+     * hexagon grids. It is **NOT supported** for aperture 7 or for aperture
+     * sequences (DGGRID v9 restricts ZORDER to pure-aperture grids).
      *
      * ```ts
      * // With aperture 4:
@@ -1326,12 +1490,12 @@ export class Webdggrid {
         }
 
         try {
-            return this._module.SEQNUM_to_ZORDER(
+            return this._u64(this._module.SEQNUM_to_ZORDER(
                 ...this._getParams(resolution),
                 sequenceNum
-            );
+            ));
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture')) {
                 throw new Error(
                     `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`,
@@ -1339,7 +1503,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1376,7 +1540,7 @@ export class Webdggrid {
                 zorderValue
             );
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture')) {
                 throw new Error(
                     `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`,
@@ -1384,7 +1548,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1422,12 +1586,12 @@ export class Webdggrid {
         }
 
         try {
-            return this._module.SEQNUM_to_Z3(
+            return this._u64(this._module.SEQNUM_to_Z3(
                 ...this._getParams(resolution),
                 sequenceNum
-            );
+            ));
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
                 throw new Error(
                     `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`,
@@ -1435,7 +1599,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1472,7 +1636,7 @@ export class Webdggrid {
                 z3Value
             );
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
                 throw new Error(
                     `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`,
@@ -1480,7 +1644,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1519,12 +1683,12 @@ export class Webdggrid {
         }
 
         try {
-            return this._module.SEQNUM_to_Z7(
+            return this._u64(this._module.SEQNUM_to_Z7(
                 ...this._getParams(resolution),
                 sequenceNum
-            );
+            ));
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
                 throw new Error(
                     `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`,
@@ -1532,7 +1696,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1569,7 +1733,7 @@ export class Webdggrid {
                 z7Value
             );
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
                 throw new Error(
                     `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`,
@@ -1577,7 +1741,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -2431,6 +2595,20 @@ export class Webdggrid {
      */
     private _u64(x: bigint): bigint {
         return BigInt.asUintN(64, x);
+    }
+
+    /**
+     * Message of an error thrown by the WASM module. C++ exceptions reach JS
+     * as an object holding the exception pointer (`excPtr`, with
+     * `-fexceptions`) or, in older builds, as the bare pointer.
+     * @internal
+     */
+    private _exceptionMessage(e: unknown): string {
+        const ptr = typeof e === 'number' ? e : (e as { excPtr?: number } | null)?.excPtr;
+        if (typeof ptr === 'number') {
+            return this._module.getExceptionMessage(ptr);
+        }
+        return e instanceof Error ? e.message : String(e);
     }
 
     /**

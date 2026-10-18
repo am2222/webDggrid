@@ -546,7 +546,7 @@ console.log('Children Z7:', childrenZ7.map(z => z.toString(16)));
 
 ### DGGRID Reference Frames
 
-WebDGGRID's coordinate systems are implemented using DGGRID v8.44's reference frame system (`DgRFBase`):
+WebDGGRID's coordinate systems are implemented using DGGRID v9.03b's reference frame system (`DgRFBase`):
 
 | Address Type | DGGRID Reference Frame |
 |--------------|------------------------|

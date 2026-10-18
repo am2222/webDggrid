@@ -1,7 +1,8 @@
 // dggrid_transform.cpp
 //
 // All coordinate transforms and grid utilities implemented against the
-// DGGRID v8 dglib API, verified against the actual v8 header files:
+// DGGRID v9 dglib API (ported from v8.44; see the Z-index notes in
+// buildTransformer), verified against the actual header files:
 //
 //   DgIDGGBase.h   — the Q2DI frame + all RF accessors
 //   DgBoundedIDGG.h — SEQNUM linearisation
@@ -41,7 +42,7 @@
 
 #include "dggrid_transform.hpp"
 
-// ── dglib v8 headers ──────────────────────────────────────────────────────
+// ── dglib v9 headers ──────────────────────────────────────────────────────
 #include <dglib/DgRFNetwork.h>
 #include <dglib/DgGeoSphRF.h>       // DgGeoSphRF, DgGeoSphDegRF
 #include <dglib/DgEllipsoidRF.h>    // DgGeoCoord (.latDegs / .lonDegs)
@@ -60,9 +61,9 @@
 #include <dglib/DgIVec2D.h>         // DgIVec2D (.i(), .j())
 #include <dglib/DgDVec2D.h>         // DgDVec2D (.x(), .y())
 #include <dglib/DgConstants.h>      // M_PIl, M_ZERO
-#include <dglib/DgZOrderRF.h>       // DgZOrderRF, DgZOrderCoord
-#include <dglib/DgZ3RF.h>           // DgZ3RF, DgZ3Coord
-#include <dglib/DgZ7RF.h>           // DgZ7RF, DgZ7Coord
+#include <dglib/DgHierNdxSystemRFSBase.h> // DgHierNdxSystemRFSBase::makeSystem (Z3/Z7/ZORDER)
+#include <dglib/DgHierNdxSystemRFBase.h>  // per-resolution system RF (DgHierNdx)
+#include <dglib/DgHierNdx.h>              // DgHierNdx, DgHierNdxIntCoord
 
 #include <algorithm>
 #include <cmath>
@@ -109,9 +110,19 @@ struct Transformer {
     
     // Hierarchical address frames (may be null depending on aperture/topology)
     const DgVertex2DDRF *vertexRF  = nullptr;  // dgg.vertexRF() - always available
-    const DgZOrderRF    *zorderRF  = nullptr;  // dgg.zorderRF() - aperture 3/4 only
-    const DgZ3RF        *z3RF      = nullptr;  // dgg.z3RF() - aperture 3 only
-    const DgZ7RF        *z7RF      = nullptr;  // dgg.z7RF() - aperture 7 only
+    // DGGRID v9 moved Z-indexes out of DgIDGGBase into standalone indexing
+    // systems built over the whole IDGGS. The *RF members are the system's
+    // per-resolution frame (addresses are DgHierNdx carrying both the INT64
+    // and digit-string forms). Its intRF() is deliberately not used: in
+    // v9.03b DgZ3RF/DgZ7RF/DgZOrderRF::quantify go through the *parent*
+    // resolution's string RF (system().pStrRF()) and abort on a digit-count
+    // mismatch; DgHierNdxSystemRFBase::quantify uses the correct strRF().
+    const DgHierNdxSystemRFSBase *zorderSys = nullptr; // pure aperture 3/4 only
+    const DgHierNdxSystemRFSBase *z3Sys     = nullptr; // pure aperture 3 only
+    const DgHierNdxSystemRFSBase *z7Sys     = nullptr; // pure aperture 7 only
+    const DgHierNdxSystemRFBase *zorderRF = nullptr;
+    const DgHierNdxSystemRFBase *z3RF     = nullptr;
+    const DgHierNdxSystemRFBase *z7RF     = nullptr;
 
     // ── inX: create a DgLocation in the named source frame ──────────────
 
@@ -219,26 +230,26 @@ struct Transformer {
     
     void outZORDER(LocPtr &loc, uint64_t &out_value) const {
         if (!zorderRF)
-            throw std::runtime_error("ZORDER not available for this aperture (use aperture 3 or 4, not 7)");
+            throw std::runtime_error("ZORDER not available (requires pure aperture 3 or 4 hexagon grid, not aperture 7 or sequences)");
         zorderRF->convert(loc.get());
-        const DgZOrderCoord *c = zorderRF->getAddress(*loc);
-        out_value = c->value();
+        const DgHierNdx *c = zorderRF->getAddress(*loc);
+        out_value = c->intNdx().value();
     }
     
     void outZ3(LocPtr &loc, uint64_t &out_value) const {
         if (!z3RF)
             throw std::runtime_error("Z3 not available (requires aperture 3 hexagon grid)");
         z3RF->convert(loc.get());
-        const DgZ3Coord *c = z3RF->getAddress(*loc);
-        out_value = c->value();
+        const DgHierNdx *c = z3RF->getAddress(*loc);
+        out_value = c->intNdx().value();
     }
     
     void outZ7(LocPtr &loc, uint64_t &out_value) const {
         if (!z7RF)
             throw std::runtime_error("Z7 not available (requires aperture 7 hexagon grid)");
         z7RF->convert(loc.get());
-        const DgZ7Coord *c = z7RF->getAddress(*loc);
-        out_value = c->value();
+        const DgHierNdx *c = z7RF->getAddress(*loc);
+        out_value = c->intNdx().value();
     }
     
     // ── inX for hierarchical types ───────────────────────────────────────
@@ -254,23 +265,29 @@ struct Transformer {
     
     LocPtr inZORDER(uint64_t value) const {
         if (!zorderRF)
-            throw std::runtime_error("ZORDER not available for this aperture (use aperture 3 or 4, not 7)");
-        DgZOrderCoord coord(value);
-        return LocPtr(zorderRF->makeLocation(coord));
+            throw std::runtime_error("ZORDER not available (requires pure aperture 3 or 4 hexagon grid, not aperture 7 or sequences)");
+        DgHierNdx ndx;
+        ndx.setIntNdx(DgHierNdxIntCoord(value));
+        zorderRF->setStringFromIntCoord(ndx);
+        return LocPtr(zorderRF->makeLocation(ndx));
     }
     
     LocPtr inZ3(uint64_t value) const {
         if (!z3RF)
             throw std::runtime_error("Z3 not available (requires aperture 3 hexagon grid)");
-        DgZ3Coord coord(value);
-        return LocPtr(z3RF->makeLocation(coord));
+        DgHierNdx ndx;
+        ndx.setIntNdx(DgHierNdxIntCoord(value));
+        z3RF->setStringFromIntCoord(ndx);
+        return LocPtr(z3RF->makeLocation(ndx));
     }
     
     LocPtr inZ7(uint64_t value) const {
         if (!z7RF)
             throw std::runtime_error("Z7 not available (requires aperture 7 hexagon grid)");
-        DgZ7Coord coord(value);
-        return LocPtr(z7RF->makeLocation(coord));
+        DgHierNdx ndx;
+        ndx.setIntNdx(DgHierNdxIntCoord(value));
+        z7RF->setStringFromIntCoord(ndx);
+        return LocPtr(z7RF->makeLocation(ndx));
     }
 };
 
@@ -403,8 +420,8 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
             nRes,
             "HexIDGGS",
             p.projection,
-            apSeq,           // the aperture sequence
             true,            // isApSeq = true
+            apSeq,           // the aperture sequence
             false,           // isMixed43
             0,               // numAp4
             false            // isSuperfund
@@ -456,15 +473,28 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
     t->bndRF    = &dgg.bndRF();
     
     // ── Resolve hierarchical address frames (may be null) ─────────────────
-    // These are available from DgIDGGBase accessors:
     //   const DgVertex2DDRF& vertexRF (void) const { return *vertexRF_; }
-    //   const DgZOrderRF* zorderRF() const { return zorderRF_; }
-    //   const DgZ3RF* z3RF() const { return z3RF_; }
-    //   const DgZ7RF* z7RF() const { return z7RF_; }
     t->vertexRF = &dgg.vertexRF();  // Always available
-    t->zorderRF = dgg.zorderRF();   // Null if aperture 7
-    t->z3RF     = dgg.z3RF();       // Null if not aperture 3
-    t->z7RF     = dgg.z7RF();       // Null if not aperture 7
+
+    // Z-index systems (v9: DgHierNdxSystemRFSBase::makeSystem). makeSystem
+    // calls exit() on an unsupported grid, which would kill the WASM module,
+    // so only build the systems DGGRID accepts: pure hexagon apertures.
+    // The systems are RFs registered with net, which deletes them.
+    if (topo == Hexagon && !p.is_aperture_sequence) {
+        if (p.aperture == 7) {
+            t->z7Sys = DgHierNdxSystemRFSBase::makeSystem(
+                *idggs, dgg::addtype::Z7, dgg::addtype::Int64, "Z7");
+        } else if (p.aperture == 3 || p.aperture == 4) {
+            t->zorderSys = DgHierNdxSystemRFSBase::makeSystem(
+                *idggs, dgg::addtype::ZOrder, dgg::addtype::Int64, "ZOrder");
+            if (p.aperture == 3)
+                t->z3Sys = DgHierNdxSystemRFSBase::makeSystem(
+                    *idggs, dgg::addtype::Z3, dgg::addtype::Int64, "Z3");
+        }
+    }
+    if (t->zorderSys) t->zorderRF = &t->zorderSys->sysRF(p.res);
+    if (t->z3Sys)     t->z3RF     = &t->z3Sys->sysRF(p.res);
+    if (t->z7Sys)     t->z7RF     = &t->z7Sys->sysRF(p.res);
 
     return t;
 }
@@ -1133,6 +1163,108 @@ std::vector<std::vector<SeqNum>> seqNumsChildren(const DggsParams &p,
         result.push_back(seqNumChildren(p, seqnum));
     }
     
+    return result;
+}
+
+// ===========================================================================
+// INDEXING PARENT/CHILDREN (DGGRID v9 hierarchical indexing systems)
+// ===========================================================================
+// Unlike the spatial parent/children above, these follow the digit
+// structure of a Z3, Z7 or ZORDER index: the indexing parent drops the last
+// digit and the indexing children append one. They need not coincide with
+// the containing cell or the cells covering the parent's area.
+
+// Select the indexing system for a transformer. An empty name picks the one
+// matching the grid (Z7 for aperture 7, Z3 for aperture 3, ZORDER for 4).
+static const DgHierNdxSystemRFSBase *indexSystem(const Transformer &t,
+                                                 const std::string &system) {
+    const DgHierNdxSystemRFSBase *sys = nullptr;
+    if (system.empty())          sys = t.z7Sys ? t.z7Sys : (t.z3Sys ? t.z3Sys : t.zorderSys);
+    else if (system == "Z7")     sys = t.z7Sys;
+    else if (system == "Z3")     sys = t.z3Sys;
+    else if (system == "ZORDER") sys = t.zorderSys;
+    else throw std::invalid_argument(
+        "Unknown indexing system '" + system + "'. Use Z3, Z7, or ZORDER.");
+
+    if (!sys)
+        throw std::runtime_error(
+            "Indexing system " + (system.empty() ? std::string("") : system + " ") +
+            "not available (Z7 requires pure aperture 7, Z3 pure aperture 3, "
+            "ZORDER pure aperture 3 or 4 hexagon grids; not aperture sequences)");
+    return sys;
+}
+
+// Map a DgResAdd<DgHierNdx> location produced by an indexing system back to
+// a SEQNUM at the resolution it carries.
+static SeqNum indexLocToSeqNum(const Transformer &t,
+                               const DgHierNdxSystemRFSBase &sys,
+                               const DgLocation &loc) {
+    const DgResAdd<DgHierNdx> *add = sys.getAddress(loc);
+    const int res = add->res();
+    DgQ2DICoord q2di = sys.sysRF(res).invQuantify(add->address());
+    return static_cast<SeqNum>(
+        t.idggs->idggBase(res).bndRF().seqNumAddress(q2di));
+}
+
+SeqNum seqNumIndexParent(const DggsParams &p, SeqNum seqnum,
+                         const std::string &system) {
+    if (p.res <= 0)
+        throw std::runtime_error("Cannot get indexing parent: already at resolution 0");
+
+    auto t = getTransformer(p);
+    const DgHierNdxSystemRFSBase *sys = indexSystem(*t, system);
+
+    DgQ2DICoord q2di = t->bndRF->addFromSeqNum(
+                           static_cast<unsigned long long int>(seqnum));
+    DgLocation parent(*sys);
+    sys->setNdxParent(DgResAdd<DgQ2DICoord>(q2di, p.res), parent);
+    return indexLocToSeqNum(*t, *sys, parent);
+}
+
+std::vector<SeqNum> seqNumsIndexParents(const DggsParams &p,
+                                        const std::vector<SeqNum>& seqnums,
+                                        const std::string &system) {
+    std::vector<SeqNum> result;
+    result.reserve(seqnums.size());
+    for (const auto& seqnum : seqnums)
+        result.push_back(seqNumIndexParent(p, seqnum, system));
+    return result;
+}
+
+std::vector<SeqNum> seqNumIndexChildren(const DggsParams &p, SeqNum seqnum,
+                                        const std::string &system) {
+    // The indexing system needs res+1 to exist, as in seqNumChildren
+    DggsParams p_with_children = p;
+    p_with_children.res = p.res + 1;
+    auto t = getTransformer(p_with_children);
+    const DgHierNdxSystemRFSBase *sys = indexSystem(*t, system);
+    // In v9.03b DgZ3System/DgZOrderSystem::setAddNdxChildren are copies of
+    // the Z7 version (digits 0-6, Z7 pentagon rule) and return cells that
+    // are not children; only Z7 is correct.
+    if (sys != t->z7Sys)
+        throw std::runtime_error(
+            "Indexing children are only supported for Z7 (DGGRID v9.03b "
+            "generates incorrect Z3/ZORDER indexing children)");
+
+    DgQ2DICoord q2di = t->idggs->idggBase(p.res).bndRF().addFromSeqNum(
+                           static_cast<unsigned long long int>(seqnum));
+    DgLocVector children(*sys);
+    sys->setNdxChildren(DgResAdd<DgQ2DICoord>(q2di, p.res), children);
+
+    std::vector<SeqNum> result;
+    result.reserve(children.size());
+    for (int i = 0; i < children.size(); i++)
+        result.push_back(indexLocToSeqNum(*t, *sys, children[i]));
+    return result;
+}
+
+std::vector<std::vector<SeqNum>> seqNumsIndexChildren(const DggsParams &p,
+                                                      const std::vector<SeqNum>& seqnums,
+                                                      const std::string &system) {
+    std::vector<std::vector<SeqNum>> result;
+    result.reserve(seqnums.size());
+    for (const auto& seqnum : seqnums)
+        result.push_back(seqNumIndexChildren(p, seqnum, system));
     return result;
 }
 

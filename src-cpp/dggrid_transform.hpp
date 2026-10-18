@@ -195,4 +195,22 @@ std::vector<SeqNum> seqNumChildren (const DggsParams& p, SeqNum seqnum);
 std::vector<std::vector<SeqNum>> seqNumsChildren (const DggsParams& p,
                                                     const std::vector<SeqNum>& seqnums);
 
+// ===========================================================================
+// INDEXING PARENT/CHILDREN (DGGRID v9)
+// ===========================================================================
+// Parent/children by the digit structure of a hierarchical index system
+// ("Z3", "Z7", "ZORDER"; empty = the system matching the grid's aperture).
+// Pure-aperture hexagon grids only.
+
+SeqNum              seqNumIndexParent (const DggsParams& p, SeqNum seqnum,
+                                       const std::string& system);
+std::vector<SeqNum> seqNumsIndexParents (const DggsParams& p,
+                                         const std::vector<SeqNum>& seqnums,
+                                         const std::string& system);
+std::vector<SeqNum> seqNumIndexChildren (const DggsParams& p, SeqNum seqnum,
+                                         const std::string& system);
+std::vector<std::vector<SeqNum>> seqNumsIndexChildren (const DggsParams& p,
+                                                       const std::vector<SeqNum>& seqnums,
+                                                       const std::string& system);
+
 } // namespace dggrid

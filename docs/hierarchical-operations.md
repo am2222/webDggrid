@@ -380,6 +380,26 @@ const allParents = dggs.sequenceNumAllParents([cellId], 5)[0];
 
 Interior cells typically have 1 parent. Boundary cells may have 2–3 parents depending on the aperture and topology.
 
+## Indexing Parents and Children
+
+DGGRID v9 adds parent/children defined by a hierarchical **index** (Z3, Z7 or ZORDER) instead of by geometry. The indexing parent is the cell whose index is the input's index with its last digit removed; the indexing children are the cells whose index extends the input's by one digit.
+
+```ts
+dggs.setDggs({ ...dggs.dggs, aperture: 7 }, 5);
+
+// Z7 parent of each cell (resolution 4)
+const parents = dggs.sequenceNumIndexParent([cellId], 5);
+
+// Z7 children (resolution 6): 7 per cell, 6 below a pentagon
+const children = dggs.sequenceNumIndexChildren([cellId], 5)[0];
+```
+
+The system defaults to the one matching the grid (Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4); pass `IndexingSystem.ZORDER` to use ZORDER on an aperture 3 grid. Only pure-aperture hexagon grids are supported.
+
+::: warning
+`sequenceNumIndexChildren()` supports **Z7 only**. DGGRID v9.03b generates incorrect Z3 and ZORDER indexing children (it applies the Z7 digit rules), so those throw. `sequenceNumIndexParent()` works for all three systems.
+:::
+
 ## API Reference
 
 | Method | Description |
@@ -388,3 +408,5 @@ Interior cells typically have 1 parent. Boundary cells may have 2–3 parents de
 | [`sequenceNumParent()`](api/classes/Webdggrid.md#sequencenumparent) | Get the primary (containing) parent at `resolution - 1` |
 | [`sequenceNumAllParents()`](api/classes/Webdggrid.md#sequencenumallparents) | Get all touching parent cells at `resolution - 1` (primary first) |
 | [`sequenceNumChildren()`](api/classes/Webdggrid.md#sequencenumchildren) | Get child cells at `resolution + 1` |
+| [`sequenceNumIndexParent()`](api/classes/Webdggrid.md#sequencenumindexparent) | Get the Z3/Z7/ZORDER indexing parent at `resolution - 1` |
+| [`sequenceNumIndexChildren()`](api/classes/Webdggrid.md#sequencenumindexchildren) | Get the Z7 indexing children at `resolution + 1` |

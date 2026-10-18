@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ── Build options ─────────────────────────────────────────────────────────
 option(STANDALONE_WASM "Build as standalone WASM (no JS glue, for Python)" OFF)
 
-# ── DGGRID v8 paths ───────────────────────────────────────────────────────
+# ── DGGRID v9 paths ───────────────────────────────────────────────────────
 set(DGGRID_DIR "${CMAKE_SOURCE_DIR}/submodules/DGGRID")
 
 set(DGLIB_INC  "${DGGRID_DIR}/src/lib/dglib/include")
@@ -90,6 +90,13 @@ if(EMSCRIPTEN)
 
     if(STANDALONE_WASM)
         list(APPEND EM_LINK_FLAGS "-sSTANDALONE_WASM=1")
+    else()
+        # C++ exceptions carry the wrapper's error messages to JS (read with
+        # getExceptionMessage). Without -fexceptions, Emscripten 6 turns every
+        # throw into "Aborted(undefined)". JS-based exceptions need the JS glue,
+        # so the standalone build keeps them off.
+        target_compile_options(libdggrid PRIVATE "-fexceptions")
+        list(APPEND EM_LINK_FLAGS "-fexceptions")
     endif()
 
     target_link_options(libdggrid PRIVATE ${EM_LINK_FLAGS})

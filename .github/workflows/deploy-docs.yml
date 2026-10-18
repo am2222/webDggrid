@@ -30,7 +30,8 @@ jobs:
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v14
         with:
-          version: 4.0.7
+          # pinned: a new Emscripten changed uint64 and exception behavior
+          version: 6.0.12
 
       - run: corepack enable
 

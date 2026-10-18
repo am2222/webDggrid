@@ -62,12 +62,10 @@ describe('Multi-Aperture Configuration Validation', () => {
         }).not.toThrow();
     });
 
-    // Note: The following validation tests are skipped because C++ exceptions from 
-    // Emscripten-compiled code aren't reliably propagated to JavaScript.
-    // The validation logic exists in C++ (dggrid_transform.cpp) but errors may be silently handled.
-    // In practice, invalid configurations will either fail silently or produce incorrect results.
+    // Validation runs in C++ (dggrid_transform.cpp); its messages reach JS
+    // because the build uses -fexceptions and Webdggrid wraps module calls.
 
-    test.skip('rejects aperture sequence with TRIANGLE topology', () => {
+    test('rejects aperture sequence with TRIANGLE topology', () => {
         expect(() => {
             dggs.setDggs({
                 poleCoordinates: { lat: 0, lng: 0 },
@@ -81,7 +79,7 @@ describe('Multi-Aperture Configuration Validation', () => {
         }).toThrow(/only supported for HEXAGON topology/i);
     });
 
-    test.skip('rejects aperture sequence with DIAMOND topology', () => {
+    test('rejects aperture sequence with DIAMOND topology', () => {
         expect(() => {
             dggs.setDggs({
                 poleCoordinates: { lat: 0, lng: 0 },
@@ -95,7 +93,7 @@ describe('Multi-Aperture Configuration Validation', () => {
         }).toThrow(/only supported for HEXAGON topology/i);
     });
 
-    test.skip('rejects aperture sequence with invalid character (2)', () => {
+    test('rejects aperture sequence with invalid character (2)', () => {
         expect(() => {
             dggs.setDggs({
                 poleCoordinates: { lat: 0, lng: 0 },
@@ -109,7 +107,7 @@ describe('Multi-Aperture Configuration Validation', () => {
         }).toThrow(/invalid character.*'2'/i);
     });
 
-    test.skip('rejects aperture sequence with invalid character (5)', () => {
+    test('rejects aperture sequence with invalid character (5)', () => {
         expect(() => {
             dggs.setDggs({
                 poleCoordinates: { lat: 0, lng: 0 },
@@ -123,7 +121,7 @@ describe('Multi-Aperture Configuration Validation', () => {
         }).toThrow(/invalid character.*'5'/i);
     });
 
-    test.skip('rejects resolution exceeding sequence length', () => {
+    test('rejects resolution exceeding sequence length', () => {
         expect(() => {
             dggs.setDggs({
                 poleCoordinates: { lat: 0, lng: 0 },
@@ -137,7 +135,7 @@ describe('Multi-Aperture Configuration Validation', () => {
         }).toThrow(/exceeds aperture sequence length/i);
     });
 
-    test.skip('rejects empty aperture sequence when flag is true', () => {
+    test('rejects empty aperture sequence when flag is true', () => {
         // This is tested at C++ level through direct module call
         const P = [0, 0, 0, 4, 1, 'HEXAGON', 'ISEA', true, ''] as const;
         expect(() => {
