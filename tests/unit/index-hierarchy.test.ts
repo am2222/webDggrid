@@ -181,6 +181,8 @@ describe('Indexing parent/children (DGGRID v9)', () => {
         test('C++ error messages reach JS (needs -fexceptions on Emscripten 6)', () => {
             dggs.setDggs(grid(4), 3);
             expect(() => dggs.sequenceNumParent([1n], 31)).toThrow(/res must be 0/);
+            // a method with no catch of its own: the module wrapper supplies the message
+            expect(() => dggs.geoToSequenceNum([[0, 0]], 31)).toThrow(/res must be 0/);
         });
 
         test('module stays usable after an unsupported request', () => {

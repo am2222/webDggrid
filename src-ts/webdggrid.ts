@@ -299,7 +299,38 @@ export class Webdggrid {
     resolution: number = DEFAULT_RESOLUTION;
 
     private constructor(protected _module: any) {
-        this._module = _module;
+        this._module = Webdggrid._withErrorMessages(_module);
+    }
+
+    /**
+     * Wrap the WASM module so a C++ exception thrown by any of its functions
+     * reaches the caller as an `Error` carrying the C++ message (the original
+     * exception is kept as `cause`). Without this, callers get a bare object
+     * holding an exception pointer.
+     * @internal
+     */
+    private static _withErrorMessages(module: any): any {
+        const wrapped = new Map<PropertyKey, unknown>();
+        return new Proxy(module, {
+            get(target, prop, receiver) {
+                const value = Reflect.get(target, prop, receiver);
+                if (typeof value !== 'function' || prop === 'getExceptionMessage') {
+                    return value;
+                }
+                if (!wrapped.has(prop)) {
+                    wrapped.set(prop, (...args: unknown[]) => {
+                        try {
+                            return value.apply(target, args);
+                        } catch (e) {
+                            const ptr = typeof e === 'number' ? e : (e as { excPtr?: number } | null)?.excPtr;
+                            if (typeof ptr !== 'number') throw e;
+                            throw new Error(target.getExceptionMessage(ptr), { cause: e });
+                        }
+                    });
+                }
+                return wrapped.get(prop);
+            },
+        });
     }
 
     /**
