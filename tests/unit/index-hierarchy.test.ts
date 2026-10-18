@@ -16,6 +16,7 @@ const grid = (aperture: number, projection = Projection.ISEA, topology = Topolog
 describe('Hierarchical index values (pinned to DGGRID v8.44 output)', () => {
     // Golden values captured from the v8.44 build before the DGGRID v9
     // upgrade. Any drift here means the index encoding changed upstream.
+    // Values are unsigned 64-bit, as the API returns them.
     let dggs: Webdggrid;
 
     beforeAll(async () => {
@@ -31,31 +32,31 @@ describe('Hierarchical index values (pinned to DGGRID v8.44 output)', () => {
             name: 'ISEA4H ZORDER', aperture: 4, res: 9, method: 'sequenceNumToZOrder',
             seq: ['609961', '552383', '153274', '2465923', '2425555', '259'],
             values: ['3688725171746635776', '3836473146240663552', '1816964955132395520',
-                '-6663071250648137728', '-6682202752971440128', '1441156278805069824'],
+                '11783672823061413888', '11764541320738111488', '1441156278805069824'],
         },
         {
             name: 'ISEA3H Z3', aperture: 3, res: 11, method: 'sequenceNumToZ3',
             seq: ['412209', '373218', '103607', '1666557', '1638893', '124'],
             values: ['3482780871428145151', '4153799348842397695', '1324147625766682623',
-                '-6803080587427971073', '-6167291287201382401', '1921534283369938943'],
+                '11643663486281580543', '12279452786508169215', '1921534283369938943'],
         },
         {
             name: 'ISEA3H ZORDER', aperture: 3, res: 11, method: 'sequenceNumToZOrder',
             seq: ['412209', '373218', '103607', '1666557', '1638893', '124'],
             values: ['3506796954157842432', '3610362428279226368', '1549418591722405888',
-                '-6618003368537227264', '-6808734551095902208', '1229783964458156032'],
+                '11828740705172324352', '11638009522613649408', '1229783964458156032'],
         },
         {
             name: 'ISEA7H Z7', aperture: 7, res: 8, method: 'sequenceNumToZ7',
             seq: ['13412772', '12141547', '3367065', '54229592', '53334392', '3608'],
             values: ['4428445877308227583', '886322439183663103', '2480689684724842495',
-                '-6301025779840974849', '-6044750785005223937', '750311613877190655'],
+                '12145718293868576767', '12401993288704327679', '750311613877190655'],
         },
         {
             name: 'FULLER7H Z7', aperture: 7, projection: Projection.FULLER, res: 6, method: 'sequenceNumToZ7',
             seq: ['273484', '248973', '69069', '1107637', '1089170', '174'],
             values: ['4428454604681773055', '894896911893397503', '2480687348262633471',
-                '-6300874528272678913', '-6051949493790703617', '750315530887364607'],
+                '12145869545436872703', '12394794579918847999', '750315530887364607'],
         },
     ];
 
@@ -175,6 +176,11 @@ describe('Indexing parent/children (DGGRID v9)', () => {
         test('aperture sequences', () => {
             dggs.setDggs({ ...grid(4), apertureSequence: '434747' }, 3);
             expect(() => dggs.sequenceNumIndexParent([1n], 3)).toThrow(/not available/);
+        });
+
+        test('C++ error messages reach JS (needs -fexceptions on Emscripten 6)', () => {
+            dggs.setDggs(grid(4), 3);
+            expect(() => dggs.sequenceNumParent([1n], 31)).toThrow(/res must be 0/);
         });
 
         test('module stays usable after an unsupported request', () => {

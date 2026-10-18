@@ -27,6 +27,9 @@ jobs:
       - run: corepack enable
 
       - uses: mymindstorm/setup-emsdk@v14
+        with:
+          # pinned: a new Emscripten changed uint64 and exception behavior
+          version: 6.0.12
 
       - name: Verify emcc
         run: emcc -v

@@ -850,8 +850,9 @@ export class Webdggrid {
                 sequenceNum
             );
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw (e);
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
 
         const allShapeVertexes = resultArray.slice(0, inputSize);
@@ -1020,8 +1021,9 @@ export class Webdggrid {
 
             return neighbors;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1086,8 +1088,9 @@ export class Webdggrid {
 
             return resultArray;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1143,8 +1146,9 @@ export class Webdggrid {
             }
             return result;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1223,8 +1227,9 @@ export class Webdggrid {
 
             return children;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1275,7 +1280,7 @@ export class Webdggrid {
                 system ?? ''
             );
         } catch (e) {
-            throw new Error(this._module.getExceptionMessage(e).toString(), { cause: e });
+            throw new Error(this._exceptionMessage(e).toString(), { cause: e });
         }
     }
 
@@ -1333,7 +1338,7 @@ export class Webdggrid {
             }
             return result;
         } catch (e) {
-            throw new Error(this._module.getExceptionMessage(e).toString(), { cause: e });
+            throw new Error(this._exceptionMessage(e).toString(), { cause: e });
         }
     }
 
@@ -1370,8 +1375,9 @@ export class Webdggrid {
             );
             return result;
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1410,8 +1416,9 @@ export class Webdggrid {
                 y
             );
         } catch (e) {
-            console.error(this._module.getExceptionMessage(e).toString());
-            throw e;
+            const message = this._exceptionMessage(e);
+            console.error(message);
+            throw new Error(message, { cause: e });
         }
     }
 
@@ -1452,12 +1459,12 @@ export class Webdggrid {
         }
 
         try {
-            return this._module.SEQNUM_to_ZORDER(
+            return this._u64(this._module.SEQNUM_to_ZORDER(
                 ...this._getParams(resolution),
                 sequenceNum
-            );
+            ));
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture')) {
                 throw new Error(
                     `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`,
@@ -1465,7 +1472,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1502,7 +1509,7 @@ export class Webdggrid {
                 zorderValue
             );
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture')) {
                 throw new Error(
                     `ZORDER error: ${errMsg}. ZORDER requires aperture 3 or 4 (not 7).`,
@@ -1510,7 +1517,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1548,12 +1555,12 @@ export class Webdggrid {
         }
 
         try {
-            return this._module.SEQNUM_to_Z3(
+            return this._u64(this._module.SEQNUM_to_Z3(
                 ...this._getParams(resolution),
                 sequenceNum
-            );
+            ));
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
                 throw new Error(
                     `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`,
@@ -1561,7 +1568,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1598,7 +1605,7 @@ export class Webdggrid {
                 z3Value
             );
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z3')) {
                 throw new Error(
                     `Z3 error: ${errMsg}. Z3 requires aperture 3 hexagon grids.`,
@@ -1606,7 +1613,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1645,12 +1652,12 @@ export class Webdggrid {
         }
 
         try {
-            return this._module.SEQNUM_to_Z7(
+            return this._u64(this._module.SEQNUM_to_Z7(
                 ...this._getParams(resolution),
                 sequenceNum
-            );
+            ));
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
                 throw new Error(
                     `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`,
@@ -1658,7 +1665,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -1695,7 +1702,7 @@ export class Webdggrid {
                 z7Value
             );
         } catch (e) {
-            const errMsg = this._module.getExceptionMessage(e).toString();
+            const errMsg = this._exceptionMessage(e).toString();
             if (errMsg.includes('aperture') || errMsg.includes('Z7')) {
                 throw new Error(
                     `Z7 error: ${errMsg}. Z7 requires aperture 7 hexagon grids.`,
@@ -1703,7 +1710,7 @@ export class Webdggrid {
                 );
             }
             console.error(errMsg);
-            throw e;
+            throw new Error(errMsg, { cause: e });
         }
     }
 
@@ -2557,6 +2564,20 @@ export class Webdggrid {
      */
     private _u64(x: bigint): bigint {
         return BigInt.asUintN(64, x);
+    }
+
+    /**
+     * Message of an error thrown by the WASM module. C++ exceptions reach JS
+     * as an object holding the exception pointer (`excPtr`, with
+     * `-fexceptions`) or, in older builds, as the bare pointer.
+     * @internal
+     */
+    private _exceptionMessage(e: unknown): string {
+        const ptr = typeof e === 'number' ? e : (e as { excPtr?: number } | null)?.excPtr;
+        if (typeof ptr === 'number') {
+            return this._module.getExceptionMessage(ptr);
+        }
+        return e instanceof Error ? e.message : String(e);
     }
 
     /**

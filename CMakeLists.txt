@@ -90,6 +90,13 @@ if(EMSCRIPTEN)
 
     if(STANDALONE_WASM)
         list(APPEND EM_LINK_FLAGS "-sSTANDALONE_WASM=1")
+    else()
+        # C++ exceptions carry the wrapper's error messages to JS (read with
+        # getExceptionMessage). Without -fexceptions, Emscripten 6 turns every
+        # throw into "Aborted(undefined)". JS-based exceptions need the JS glue,
+        # so the standalone build keeps them off.
+        target_compile_options(libdggrid PRIVATE "-fexceptions")
+        list(APPEND EM_LINK_FLAGS "-fexceptions")
     endif()
 
     target_link_options(libdggrid PRIVATE ${EM_LINK_FLAGS})
