@@ -54,6 +54,22 @@ export enum Projection {
 }
 
 /**
+ * Hierarchical indexing system used by the indexing parent/children methods
+ * ({@link Webdggrid.sequenceNumIndexParent},
+ * {@link Webdggrid.sequenceNumIndexChildren}; children support Z7 only).
+ *
+ * @enum {string}
+ */
+export enum IndexingSystem {
+    /** Z3 — pure aperture 3 hexagon grids. */
+    'Z3' = 'Z3',
+    /** Z7 — pure aperture 7 hexagon grids (e.g. IGEO7). */
+    'Z7' = 'Z7',
+    /** ZORDER — pure aperture 3 or 4 hexagon grids. */
+    'ZORDER' = 'ZORDER',
+}
+
+/**
  * A simple geographic coordinate expressed as latitude and longitude in
  * decimal degrees (WGS-84).
  *
@@ -1212,6 +1228,115 @@ export class Webdggrid {
         }
     }
 
+    /**
+     * Returns the **indexing parent** of each input cell at resolution - 1,
+     * as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
+     *
+     * The indexing parent is the cell whose index is the input's index with
+     * the last digit removed. It is defined by the index's digit structure,
+     * not geometry, so it need not match the spatial parent returned by
+     * {@link sequenceNumParent} (the coarser cell containing the input's
+     * center).
+     *
+     * ```ts
+     * dggs.setDggs({ ...dggs.dggs, aperture: 7 }, 5);
+     * const parents = dggs.sequenceNumIndexParent([1000n], 5);
+     * ```
+     *
+     * ::: info
+     * Requires DGGRID v9 indexing systems: only pure-aperture hexagon grids
+     * are supported (Z7 for aperture 7, Z3 for aperture 3, ZORDER for
+     * aperture 3 or 4). Aperture sequences are not supported.
+     * :::
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose indexing parents
+     *   to find.
+     * @param resolution - Resolution of the input IDs (must be > 0).
+     *   Defaults to the instance's current {@link resolution}.
+     * @param system - Indexing system to use. Defaults to the one matching
+     *   the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4.
+     * @returns Array of `BigInt` parent cell IDs at resolution - 1, one per
+     *   input cell, in the same order.
+     * @throws If resolution is 0, or the system is not available for the grid.
+     */
+    sequenceNumIndexParent(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION,
+        system?: IndexingSystem
+    ): bigint[] {
+        if (resolution <= 0) {
+            throw new Error('Cannot get indexing parent at resolution 0 or below');
+        }
+
+        try {
+            return this._module.SEQNUMS_index_parents(
+                ...this._getParams(resolution),
+                sequenceNum,
+                system ?? ''
+            );
+        } catch (e) {
+            throw new Error(this._module.getExceptionMessage(e).toString(), { cause: e });
+        }
+    }
+
+    /**
+     * Returns the **indexing children** of each input cell at resolution + 1,
+     * as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
+     *
+     * The indexing children are the cells whose Z7 indexes extend the
+     * input's index by one digit: 7 per cell, 6 below a pentagon. Unlike
+     * {@link sequenceNumChildren}, which returns every finer cell overlapping
+     * the parent, these follow the index structure.
+     *
+     * ::: warning
+     * Only Z7 (pure aperture 7 hexagon grids) is supported. DGGRID v9.03b
+     * generates incorrect Z3 and ZORDER indexing children, so those systems
+     * throw.
+     * :::
+     *
+     * ```ts
+     * dggs.setDggs({ ...dggs.dggs, aperture: 7 }, 4);
+     * const children = dggs.sequenceNumIndexChildren([100n], 4);
+     * // children[0] — the Z7 children of cell 100 at resolution 5
+     * ```
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs whose indexing
+     *   children to find.
+     * @param resolution - Resolution of the input IDs. Defaults to the
+     *   instance's current {@link resolution}.
+     * @param system - Indexing system to use. Defaults to the one matching
+     *   the grid; only {@link IndexingSystem.Z7} is currently supported.
+     * @returns A 2-D array: `result[i]` holds the child IDs of
+     *   `sequenceNum[i]` at resolution + 1.
+     * @throws If the grid is not a pure aperture 7 hexagon grid or a system
+     *   other than Z7 is requested.
+     */
+    sequenceNumIndexChildren(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION,
+        system?: IndexingSystem
+    ): bigint[][] {
+        try {
+            const resultArray = this._module.SEQNUMS_index_children(
+                ...this._getParams(resolution),
+                sequenceNum,
+                system ?? ''
+            );
+
+            const result: bigint[][] = [];
+            for (let i = 0; i < resultArray.length; i++) {
+                const inner: bigint[] = [];
+                for (let j = 0; j < resultArray[i].length; j++) {
+                    inner.push(resultArray[i][j]);
+                }
+                result.push(inner);
+            }
+            return result;
+        } catch (e) {
+            throw new Error(this._module.getExceptionMessage(e).toString(), { cause: e });
+        }
+    }
+
     // =========================================================================
     // Hierarchical Address Type Conversions
     // These methods convert between SEQNUM and hierarchical indexing systems
@@ -1297,7 +1422,8 @@ export class Webdggrid {
      * curve index. This provides good spatial locality for range queries.
      *
      * **Compatibility:** ZORDER is only available for **aperture 3 and 4**
-     * hexagon grids. It is **NOT supported** for aperture 7.
+     * hexagon grids. It is **NOT supported** for aperture 7 or for aperture
+     * sequences (DGGRID v9 restricts ZORDER to pure-aperture grids).
      *
      * ```ts
      * // With aperture 4:

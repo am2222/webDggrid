@@ -983,6 +983,51 @@ val SEQNUMS_children(
 }
 
 // ===========================================================================
+// INDEXING PARENT/CHILDREN — DGGRID v9 hierarchical indexing systems
+// ===========================================================================
+
+val SEQNUMS_index_parents(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnums, std::string system)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+
+    const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
+    return seqNumArray(dggrid::seqNumsIndexParents(p, sv, system));
+}
+
+val SEQNUMS_index_children(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    val seqnums, std::string system)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence);
+
+    const auto sv = convertJSArrayToNumberVector<uint64_t>(seqnums);
+    auto allChildren = dggrid::seqNumsIndexChildren(p, sv, system);
+
+    // Return as array of arrays
+    val result = val::array();
+    for (const auto& children : allChildren) {
+        val inner = val::array();
+        for (const auto& child : children) {
+            inner.call<void>("push", static_cast<uint64_t>(child));
+        }
+        result.call<void>("push", inner);
+    }
+    return result;
+}
+
+// ===========================================================================
 // Hierarchical Address Types - SEQNUM conversions
 // ===========================================================================
 
@@ -1210,6 +1255,8 @@ EMSCRIPTEN_BINDINGS(my_module)
     emscripten::function("SEQNUMS_all_parents",  &SEQNUMS_all_parents);
     emscripten::function("SEQNUM_children",       &SEQNUM_children);
     emscripten::function("SEQNUMS_children",  &SEQNUMS_children);
+    emscripten::function("SEQNUMS_index_parents",  &SEQNUMS_index_parents);
+    emscripten::function("SEQNUMS_index_children", &SEQNUMS_index_children);
     
     // HIERARCHICAL ADDRESS TYPES
     emscripten::function("SEQNUM_to_VERTEX2DD", &SEQNUM_to_VERTEX2DD);

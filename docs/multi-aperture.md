@@ -260,7 +260,7 @@ Multi-aperture grids are useful for:
 ## Technical Notes
 
 ### DGGRID Library Integration
-This feature leverages the `DgHexIDGGS::makeRF()` factory function from the DGGRID v8 library, which supports the `DgApSeq` (Aperture Sequence) class for defining mixed aperture grids.
+This feature leverages the `DgHexIDGGS::makeRF()` factory function from the DGGRID library, which supports the `DgApSeq` (Aperture Sequence) class for defining mixed aperture grids.
 
 ### Caching
 The transformer cache includes aperture sequence information in the cache key, ensuring separate cached transformers for different aperture sequences.

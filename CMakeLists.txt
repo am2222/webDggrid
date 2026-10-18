@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ── Build options ─────────────────────────────────────────────────────────
 option(STANDALONE_WASM "Build as standalone WASM (no JS glue, for Python)" OFF)
 
-# ── DGGRID v8 paths ───────────────────────────────────────────────────────
+# ── DGGRID v9 paths ───────────────────────────────────────────────────────
 set(DGGRID_DIR "${CMAKE_SOURCE_DIR}/submodules/DGGRID")
 
 set(DGLIB_INC  "${DGGRID_DIR}/src/lib/dglib/include")
