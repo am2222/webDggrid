@@ -100,6 +100,9 @@
     "typescript-eslint": "^8",
     "vitepress": "^1.6.4",
     "vitest": "^4.1.11",
-    "vue": "^3.5.31"
+    "vue": "^3.5.44"
+  },
+  "resolutions": {
+    "vitepress/vite": "^6.4.3"
   }
 }
