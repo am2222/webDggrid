@@ -16,7 +16,7 @@ A WebAssembly wrapper for [DGGRID](https://github.com/sahrk/DGGRID), the C++ lib
 
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/am2222/webDggrid/main/media/screenshot.png" alt="Webdggrid demo screenshot"/>
+  <img src="https://raw.githubusercontent.com/am2222/webDggrid/main/media/screenshot.png" alt="Webdggrid demo screenshot" width="450"/>
 </p>
 
 ------------
