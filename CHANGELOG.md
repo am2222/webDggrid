@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.10.0](https://github.com/am2222/webDggrid/compare/v1.9.3...v1.10.0) (2026-10-18)
+
+
+### Features
+
+* **hierarchy:** add sequenceNumIndexParent and sequenceNumIndexChildren for DGGRID v9 indexing parent/children, with IndexingSystem enum (children support Z7 only) ([e612334](https://github.com/am2222/webDggrid/commit/e612334c441fb6f58539fa8ce17957888ddf95ba))
+
+
+### Bug Fixes
+
+* **z-index:** convert Z3/Z7/ZORDER through the v9 indexing system RF to avoid a DGGRID v9.03b abort ([e612334](https://github.com/am2222/webDggrid/commit/e612334c441fb6f58539fa8ce17957888ddf95ba))
+* **zorder:** throw a clear error for ZORDER on aperture-sequence grids instead of crashing ([e612334](https://github.com/am2222/webDggrid/commit/e612334c441fb6f58539fa8ce17957888ddf95ba))
+
 ## [1.9.3](https://github.com/am2222/webDggrid/compare/v1.9.2...v1.9.3) (2026-10-10)
 
 
