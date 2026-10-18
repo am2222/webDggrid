@@ -6,14 +6,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ── Build options ─────────────────────────────────────────────────────────
 option(STANDALONE_WASM "Build as standalone WASM (no JS glue, for Python)" OFF)
+option(DGGRID_DOUBLE_PRECISION
+    "Compile DGGRID with double instead of long double (soft-float binary128 on wasm32; see cmake/DggridDoublePrecision.cmake)" ON)
 
 # ── DGGRID v9 paths ───────────────────────────────────────────────────────
 set(DGGRID_DIR "${CMAKE_SOURCE_DIR}/submodules/DGGRID")
 
-set(DGLIB_INC  "${DGGRID_DIR}/src/lib/dglib/include")
-set(DGLIB_LIB  "${DGGRID_DIR}/src/lib/dglib/lib")
-set(PROJ4_INC  "${DGGRID_DIR}/src/lib/proj4lib/include")
-set(PROJ4_LIB  "${DGGRID_DIR}/src/lib/proj4lib/lib")
+# dglib/proj4lib come from the submodule, or from a double-precision copy of it
+set(DGGRID_LIB_DIR "${DGGRID_DIR}/src/lib")
+if(DGGRID_DOUBLE_PRECISION)
+    include("${CMAKE_SOURCE_DIR}/cmake/DggridDoublePrecision.cmake")
+    set(DGGRID_LIB_DIR "${CMAKE_BINARY_DIR}/dggrid-double")
+    dggrid_double_precision_copy("${DGGRID_DIR}/src/lib" "${DGGRID_LIB_DIR}")
+endif()
+
+set(DGLIB_INC  "${DGGRID_LIB_DIR}/dglib/include")
+set(DGLIB_LIB  "${DGGRID_LIB_DIR}/dglib/lib")
+set(PROJ4_INC  "${DGGRID_LIB_DIR}/proj4lib/include")
+set(PROJ4_LIB  "${DGGRID_LIB_DIR}/proj4lib/lib")
 # shapefil.h lives at shapelib/include/shapelib/shapefil.h.
 # dglib headers use  #include <shapefil.h>       → needs .../include/shapelib
 # shapelib .c files use #include "shapelib/shapefil.h" → needs .../include

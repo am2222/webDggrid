@@ -38,8 +38,10 @@ describe('test sequenceNumToGeo function', async () => {
   const dggs = await Webdggrid.load();
   test('should return a set of cells for 1n coordinate', () => {
     const coords = dggs.sequenceNumToGeo([1n]);
-    expect(coords[0][0]).toBe(3.305785137194538e-10);
-    expect(coords[0][1]).toBe(1.9245964639629087e-9);
+    // Cell 1 is centred on (0, 0); the residue is floating-point noise whose
+    // exact value depends on DGGRID's float width (see DGGRID_DOUBLE_PRECISION).
+    expect(coords[0][0]).toBeCloseTo(0, 8);
+    expect(coords[0][1]).toBeCloseTo(0, 8);
   });
 });
 
@@ -50,14 +52,14 @@ describe('test sequenceNumToGrid function', async () => {
     expect(coords.length).toBe(4);
     expect(coords[0][1].length).toBe(2);
     // Vertex order is DGGRID's native CCW emission. Pinned for regression.
-    expect(coords[3][2][0]).toBe(-66.68514068908306);
+    expect(coords[3][2][0]).toBeCloseTo(-66.68514068908306, 10);
   });
 
   test('should return a set of cells for 4 dggids as geojson', () => {
     const featureCollection = dggs.sequenceNumToGridFeatureCollection([1n, 2n, 3n, 10n]);
     expect(featureCollection.features.length).toBe(4);
     expect(featureCollection.features[0].geometry.coordinates[0][1].length).toBe(2);
-    expect(featureCollection.features[3].geometry.coordinates[0][2][0]).toBe(-66.68514068908306);
+    expect(featureCollection.features[3].geometry.coordinates[0][2][0]).toBeCloseTo(-66.68514068908306, 10);
   });
 
   test('should return a set of cells for 9 dggids as geojson', () => {
