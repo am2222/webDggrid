@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/am2222/webDggrid/compare/v1.10.0...v1.11.0) (2026-10-18)
+
+
+### Features
+
+* **cmake:** add support for double precision in DGGRID compilation ([#43](https://github.com/am2222/webDggrid/issues/43)) ([f0f855d](https://github.com/am2222/webDggrid/commit/f0f855dd0670474b298ec149627d5547a1ba357d))
+
 ## [1.10.0](https://github.com/am2222/webDggrid/compare/v1.9.3...v1.10.0) (2026-10-18)
 
 
