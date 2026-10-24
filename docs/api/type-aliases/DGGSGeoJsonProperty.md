@@ -4,7 +4,7 @@
 
 > **DGGSGeoJsonProperty** = `GeoJsonProperties` & `object`
 
-Defined in: [webdggrid.ts:102](https://github.com/am2222/webDggrid/blob/62544b244ecf036037149f81bc90e0fa7718511e/src-ts/webdggrid.ts#L102)
+Defined in: [webdggrid.ts:147](https://github.com/am2222/webDggrid/blob/580262862c407d886c0c501445632ae6dc75bc82/src-ts/webdggrid.ts#L147)
 
 GeoJSON `properties` object attached to every cell feature returned by
 [Webdggrid.sequenceNumToGridFeatureCollection](../classes/Webdggrid.md#sequencenumtogridfeaturecollection).
@@ -20,19 +20,19 @@ can exceed the safe integer range of IEEE-754 doubles at high resolutions.
 
 ### i?
 
-> `optional` **i?**: `BigInt`
+> `optional` **i?**: `bigint`
 
 Column index in an (i, j) address scheme, if available.
 
 ### id?
 
-> `optional` **id?**: `BigInt`
+> `optional` **id?**: `bigint`
 
 The DGGS sequence number (cell ID) of this feature.
 Unique within a given DGGS configuration and resolution.
 
 ### j?
 
-> `optional` **j?**: `BigInt`
+> `optional` **j?**: `bigint`
 
 Row index in an (i, j) address scheme, if available.

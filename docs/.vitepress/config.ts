@@ -45,6 +45,7 @@ export default defineConfig({
           { text: 'IGEO7 / Z7 Index', link: '/igeo7' },
           { text: 'Authalic Conversion', link: '/authalic' },
           { text: 'Multi-Aperture', link: '/multi-aperture' },
+          { text: 'Projections, Datums & Presets', link: '/grid-options' },
         ],
       },
       {

@@ -33,8 +33,13 @@ export enum Topology {
  *
  * - **ISEA** (Icosahedral Snyder Equal Area) — preserves cell area at the cost
  *   of shape distortion. Recommended for most analytical use-cases.
+ * - **IVEA** (Icosahedral Vertex-oriented Equal Area) — equal-area, with
+ *   distortion arranged around the icosahedron vertices instead of the face
+ *   centres.
  * - **FULLER** (Fuller/Dymaxion) — minimises shape distortion but does not
  *   preserve equal area.
+ * - **GNOMONIC** (icosahedral gnomonic) — not equal-area; cell edges are
+ *   great-circle arcs. This is the projection H3 uses.
  *
  * @export
  * @enum {string}
@@ -49,14 +54,38 @@ export enum Topology {
 export enum Projection {
     /** Icosahedral Snyder Equal Area projection — equal-area cells. */
     'ISEA' = 'ISEA',
+    /** Icosahedral Vertex-oriented Equal Area projection — equal-area cells. */
+    'IVEA' = 'IVEA',
     /** Fuller/Dymaxion projection — shape-preserving cells. */
     'FULLER' = 'FULLER',
+    /** Icosahedral gnomonic projection — great-circle cell edges (as in H3). */
+    'GNOMONIC' = 'GNOMONIC',
+}
+
+/**
+ * How geographic (`[lng, lat]`) coordinates passed in and returned are
+ * interpreted.
+ *
+ * DGGRID always builds the grid on a sphere. With `AUTHALIC_SPHERE` (the
+ * default, and the only behaviour before 2.0) coordinates are taken as
+ * positions on that sphere unchanged. With `WGS84` they are WGS84 geodetic
+ * coordinates: latitudes are converted to the authalic sphere on input and
+ * back on output, so the grid stays exactly equal-area on the ellipsoid.
+ * This is what DGGRID's ellipsoidal (`…L`) presets and IGEO7v2 use.
+ *
+ * @enum {string}
+ */
+export enum Datum {
+    /** Coordinates are on the grid sphere (no conversion). */
+    'AUTHALIC_SPHERE' = 'AUTHALIC_SPHERE',
+    /** Coordinates are WGS84 geodetic; latitudes are converted to/from authalic. */
+    'WGS84' = 'WGS84',
 }
 
 /**
  * Hierarchical indexing system used by the indexing parent/children methods
  * ({@link Webdggrid.sequenceNumIndexParent},
- * {@link Webdggrid.sequenceNumIndexChildren}; children support Z7 only).
+ * {@link Webdggrid.sequenceNumIndexChildren}).
  *
  * @enum {string}
  */
@@ -199,6 +228,142 @@ export interface IDGGSProps {
     topology: Topology;
     /** Projection used to map the polyhedron faces onto the sphere. See {@link Projection}. */
     projection: Projection;
+    /**
+     * Datum of geographic input and output coordinates. See {@link Datum}.
+     * Defaults to `AUTHALIC_SPHERE`.
+     */
+    datum?: Datum;
+    /**
+     * Radius in km of the sphere the grid is built on. Only cell areas and
+     * distances depend on it. `0` or omitted means the WGS84 authalic radius
+     * (6371.0072 km); otherwise 1–10000. `datum: WGS84` requires the
+     * authalic radius.
+     */
+    sphereRadiusKm?: number;
+}
+
+/**
+ * A named icosahedron orientation (DGGRID `dggs_orient_preset`). Use with
+ * {@link orientationPreset} to fill `poleCoordinates` and `azimuth`.
+ *
+ * @enum {string}
+ */
+export enum OrientationPreset {
+    /** Snyder's ISEA orientation: vertex at 11.25° E, atan(φ)° N, azimuth 0. */
+    'ISEA' = 'ISEA',
+    /** The ISEA orientation shifted to 11.20° E, used by the ellipsoidal (`…L`) presets. */
+    'ISEAL' = 'ISEAL',
+    /**
+     * Fuller's Dymaxion placement (R. W. Gray's coordinates). Vertex and face
+     * numbering match H3's; used by the FULLER presets.
+     */
+    'DYMAXION' = 'DYMAXION',
+}
+
+// atan(φ) in degrees (DGGRID's M_ICOSA_VERT0_LAT_DEG): puts the north pole
+// on an icosahedron edge midpoint. Values are DGGRID's, rounded to double.
+const ICOSA_VERT0_LAT_DEG = 58.282525588538995;
+
+const ORIENTATIONS: Record<OrientationPreset, { poleCoordinates: Coordinate; azimuth: number }> = {
+    [OrientationPreset.ISEA]: { poleCoordinates: { lat: ICOSA_VERT0_LAT_DEG, lng: 11.25 }, azimuth: 0 },
+    [OrientationPreset.ISEAL]: { poleCoordinates: { lat: ICOSA_VERT0_LAT_DEG, lng: 11.20 }, azimuth: 0 },
+    [OrientationPreset.DYMAXION]: {
+        poleCoordinates: { lat: 64.70000012793489, lng: 10.536199075467637 },
+        azimuth: 125.68765089354628,
+    },
+};
+
+/**
+ * Returns the `poleCoordinates` and `azimuth` of a named orientation.
+ *
+ * @example
+ * ```ts
+ * dggs.setDggs({ ...orientationPreset(OrientationPreset.DYMAXION),
+ *                aperture: 7, topology: Topology.HEXAGON,
+ *                projection: Projection.GNOMONIC }, 5);
+ * ```
+ */
+export function orientationPreset(preset: OrientationPreset): { poleCoordinates: Coordinate; azimuth: number } {
+    const o = ORIENTATIONS[preset];
+    if (!o) throw new Error(`Unknown orientation preset '${preset}'`);
+    return { poleCoordinates: { ...o.poleCoordinates }, azimuth: o.azimuth };
+}
+
+/**
+ * DGGRID 9.1 preset grid names (`dggs_type`) that WebDggrid supports.
+ *
+ * Names are `<projection><aperture><topology>` plus suffixes:
+ * - `S` — spherical: authalic-sphere coordinates and the ISEA orientation.
+ *   The unsuffixed legacy names (e.g. `ISEA4H`) are the same grids.
+ * - `L` — ellipsoidal: WGS84 coordinates ({@link Datum.WGS84}) and the ISEAL
+ *   orientation.
+ * - `Z` — hierarchically indexed (Z3 / ZORDER / Z7 by aperture). The grid is
+ *   the same as without `Z`; WebDggrid exposes every index for every grid
+ *   that supports it.
+ *
+ * `IGEO7v1` is `ISEA7HSZ` and `IGEO7v2` is `ISEA7HLZ`. The mixed-aperture
+ * `…43H` grids, SUPERFUND, and H3 are not supported.
+ */
+export type DggsPresetName =
+    | `${'ISEA' | 'IVEA'}${'3H' | '4H' | '7H' | '4T' | '4D'}${'' | 'S' | 'L'}`
+    | `${'ISEA' | 'IVEA'}${'3H' | '4H' | '7H'}${'S' | 'L'}Z`
+    | `FULLER${'3H' | '4H' | '7H' | '4T' | '4D'}`
+    | 'IGEO7v1' | 'IGEO7v2' | 'PLANETRISK';
+
+/**
+ * Returns the {@link IDGGSProps} of a DGGRID preset grid (DGGRID's
+ * `dggs_type`), for {@link Webdggrid.setDggs}.
+ *
+ * Unlike DGGRID, `IVEA…` names without `S`/`L` are accepted as the spherical
+ * grids, and the bare name `IGEO7` is rejected: DGGRID 9.1 changed it from
+ * `IGEO7v1` to `IGEO7v2`, so say which one you mean.
+ *
+ * @example
+ * ```ts
+ * import { Webdggrid, dggsPreset } from 'webdggrid/Webdggrid';
+ *
+ * const dggs = await Webdggrid.load();
+ * dggs.setDggs(dggsPreset('IGEO7v2'), 9);   // ISEA7H on WGS84
+ * ```
+ *
+ * @throws If the name is not a supported preset.
+ */
+export function dggsPreset(name: DggsPresetName): IDGGSProps {
+    let grid = String(name).toUpperCase();
+    if (grid === 'IGEO7V1') grid = 'ISEA7HSZ';
+    else if (grid === 'IGEO7V2') grid = 'ISEA7HLZ';
+    else if (grid === 'IGEO7')
+        throw new Error("Preset 'IGEO7' is ambiguous since DGGRID 9.1: use 'IGEO7v1' (authalic sphere) or 'IGEO7v2' (WGS84)");
+
+    if (grid === 'PLANETRISK') {
+        return {
+            ...orientationPreset(OrientationPreset.ISEA),
+            aperture: 4,
+            apertureSequence: '43334777777777777777777',
+            topology: Topology.HEXAGON,
+            projection: Projection.ISEA,
+        };
+    }
+
+    const m = /^(ISEA|IVEA|FULLER)([347])([HTD])(S|L)?(Z)?$/.exec(grid);
+    const fuller = m?.[1] === 'FULLER';
+    const valid = m && (m[3] === 'H' || m[2] === '4')                  // T and D are aperture 4 only
+        && !(fuller && (m[4] || m[5]))                                  // FULLER has no S/L/Z forms
+        && !(m[5] && (m[3] !== 'H' || !m[4]));                          // Z needs a hexagon grid and S/L
+    if (!m || !valid) throw new Error(`Unknown or unsupported DGGS preset '${name}'`);
+
+    const ellipsoidal = m[4] === 'L';
+    const orientation = fuller ? OrientationPreset.DYMAXION
+        : ellipsoidal ? OrientationPreset.ISEAL : OrientationPreset.ISEA;
+    const topology = { H: Topology.HEXAGON, T: Topology.TRIANGLE, D: Topology.DIAMOND }[m[3] as 'H' | 'T' | 'D'];
+
+    return {
+        ...orientationPreset(orientation),
+        aperture: Number(m[2]) as 3 | 4 | 7,
+        topology,
+        projection: m[1] as Projection,
+        datum: ellipsoidal ? Datum.WGS84 : Datum.AUTHALIC_SPHERE,
+    };
 }
 
 /**
@@ -469,28 +634,8 @@ export class Webdggrid {
      * @returns Total number of cells at the given resolution.
      */
     nCells(resolution: number = DEFAULT_RESOLUTION): number {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         const cellCount = this._module.nCells(
-            lng,
-            lat,
-            azimuth,
-            aperture,
-            resolution,
-            topology,
-            projection,
-            isApertureSequence,
-            apSeq
+            ...this._getParams(resolution)
         );
 
         return cellCount as number;
@@ -512,28 +657,8 @@ export class Webdggrid {
      * @returns Average cell area in km².
      */
     cellAreaKM(resolution: number = DEFAULT_RESOLUTION): number {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         const cellCount = this._module.cellAreaKM(
-            lng,
-            lat,
-            azimuth,
-            aperture,
-            resolution,
-            topology,
-            projection,
-            isApertureSequence,
-            apSeq
+            ...this._getParams(resolution)
         );
 
         return cellCount as number;
@@ -555,28 +680,8 @@ export class Webdggrid {
      * @returns Average cell spacing in km.
      */
     cellDistKM(resolution: number = DEFAULT_RESOLUTION): number {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         const cellCount = this._module.cellDistKM(
-            lng,
-            lat,
-            azimuth,
-            aperture,
-            resolution,
-            topology,
-            projection,
-            isApertureSequence,
-            apSeq
+            ...this._getParams(resolution)
         );
 
         return cellCount as number;
@@ -599,28 +704,8 @@ export class Webdggrid {
      * @returns Grid CLS value.
      */
     gridStatCLS(resolution: number = DEFAULT_RESOLUTION): number {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         const cellCount = this._module.gridStatCLS(
-            lng,
-            lat,
-            azimuth,
-            aperture,
-            resolution,
-            topology,
-            projection,
-            isApertureSequence,
-            apSeq
+            ...this._getParams(resolution)
         );
 
         return cellCount as number;
@@ -659,31 +744,11 @@ export class Webdggrid {
         coordinates: number[][],
         resolution: number = DEFAULT_RESOLUTION
     ): bigint[] {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         const xCoords = coordinates.map((coord) => coord[0]);
         const yCoords = coordinates.map((coord) => coord[1]);
 
         const resultArray = this._module.DgGEO_to_SEQNUM(
-            lng,
-            lat,
-            azimuth,
-            aperture,
-            resolution,
-            topology,
-            projection,
-            isApertureSequence,
-            apSeq,
+            ...this._getParams(resolution),
             xCoords,
             yCoords
         );
@@ -713,28 +778,8 @@ export class Webdggrid {
         sequenceNum: bigint[],
         resolution: number = DEFAULT_RESOLUTION
     ): Position[] {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         const resultArray = this._module.SEQNUM_to_GEO(
-            lng,
-            lat,
-            azimuth,
-            aperture,
-            resolution,
-            topology,
-            projection,
-            isApertureSequence,
-            apSeq,
+            ...this._getParams(resolution),
             sequenceNum
         );
 
@@ -778,31 +823,11 @@ export class Webdggrid {
         coordinates: number[][],
         resolution: number = DEFAULT_RESOLUTION
     ): Position[] {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         const xCoords = coordinates.map((coord) => coord[0]);
         const yCoords = coordinates.map((coord) => coord[1]);
 
         const resultArray = this._module.GEO_to_GEO(
-            lng,
-            lat,
-            azimuth,
-            aperture,
-            resolution,
-            topology,
-            projection,
-            isApertureSequence,
-            apSeq,
+            ...this._getParams(resolution),
             xCoords,
             yCoords
         );
@@ -852,32 +877,12 @@ export class Webdggrid {
         resolution: number = DEFAULT_RESOLUTION,
         unwrap: boolean = true
     ): Position[][] {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         const inputSize = sequenceNum.length;
 
         let resultArray;
         try {
             resultArray = this._module.SeqNumGrid(
-                lng,
-                lat,
-                azimuth,
-                aperture,
-                resolution,
-                topology,
-                projection,
-                isApertureSequence,
-                apSeq,
+                ...this._getParams(resolution),
                 sequenceNum
             );
         } catch (e) {
@@ -1007,33 +1012,13 @@ export class Webdggrid {
         sequenceNum: bigint[],
         resolution: number = DEFAULT_RESOLUTION
     ): bigint[][] {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        if (topology === Topology.TRIANGLE) {
+        if (this.dggs.topology === Topology.TRIANGLE) {
             throw new Error('Neighbor detection is not supported for TRIANGLE topology');
         }
 
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         try {
             const resultArray = this._module.SEQNUMS_neighbors(
-                lng,
-                lat,
-                azimuth,
-                aperture,
-                resolution,
-                topology,
-                projection,
-                isApertureSequence,
-                apSeq,
+                ...this._getParams(resolution),
                 sequenceNum
             );
 
@@ -1091,29 +1076,9 @@ export class Webdggrid {
             throw new Error('Cannot get parent at resolution 0 or below');
         }
 
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         try {
             const resultArray = this._module.SEQNUMS_parents(
-                lng,
-                lat,
-                azimuth,
-                aperture,
-                resolution,
-                topology,
-                projection,
-                isApertureSequence,
-                apSeq,
+                ...this._getParams(resolution),
                 sequenceNum
             );
 
@@ -1217,29 +1182,9 @@ export class Webdggrid {
         sequenceNum: bigint[],
         resolution: number = DEFAULT_RESOLUTION
     ): bigint[][] {
-        const {
-            poleCoordinates: { lat, lng },
-            azimuth,
-            topology,
-            projection,
-            aperture,
-            apertureSequence,
-        } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
-
         try {
             const resultArray = this._module.SEQNUMS_children(
-                lng,
-                lat,
-                azimuth,
-                aperture,
-                resolution,
-                topology,
-                projection,
-                isApertureSequence,
-                apSeq,
+                ...this._getParams(resolution),
                 sequenceNum
             );
 
@@ -1319,16 +1264,11 @@ export class Webdggrid {
      * Returns the **indexing children** of each input cell at resolution + 1,
      * as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
      *
-     * The indexing children are the cells whose Z7 indexes extend the
-     * input's index by one digit: 7 per cell, 6 below a pentagon. Unlike
+     * The indexing children are the cells whose indexes extend the input's
+     * index by one digit: up to 7 per cell for Z7, 3 for Z3, 4 for ZORDER on
+     * aperture 4 (fewer below a pentagon). Unlike
      * {@link sequenceNumChildren}, which returns every finer cell overlapping
      * the parent, these follow the index structure.
-     *
-     * ::: warning
-     * Only Z7 (pure aperture 7 hexagon grids) is supported. DGGRID v9.03b
-     * generates incorrect Z3 and ZORDER indexing children, so those systems
-     * throw.
-     * :::
      *
      * ```ts
      * dggs.setDggs({ ...dggs.dggs, aperture: 7 }, 4);
@@ -1341,11 +1281,11 @@ export class Webdggrid {
      * @param resolution - Resolution of the input IDs. Defaults to the
      *   instance's current {@link resolution}.
      * @param system - Indexing system to use. Defaults to the one matching
-     *   the grid; only {@link IndexingSystem.Z7} is currently supported.
+     *   the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4.
      * @returns A 2-D array: `result[i]` holds the child IDs of
      *   `sequenceNum[i]` at resolution + 1.
-     * @throws If the grid is not a pure aperture 7 hexagon grid or a system
-     *   other than Z7 is requested.
+     * @throws If the system is not available for the grid (see
+     *   {@link IndexingSystem}).
      */
     sequenceNumIndexChildren(
         sequenceNum: bigint[],
@@ -2006,10 +1946,9 @@ export class Webdggrid {
             projection,
             aperture,
             apertureSequence,
+            datum,
+            sphereRadiusKm,
         } = this.dggs;
-
-        const isApertureSequence = !!apertureSequence;
-        const apSeq = apertureSequence || '';
 
         return [
             lng,
@@ -2019,8 +1958,10 @@ export class Webdggrid {
             resolution,
             topology,
             projection,
-            isApertureSequence,
-            apSeq
+            !!apertureSequence,
+            apertureSequence || '',
+            datum ?? Datum.AUTHALIC_SPHERE,
+            sphereRadiusKm ?? 0,
         ];
     }
 

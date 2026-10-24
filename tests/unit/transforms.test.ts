@@ -17,8 +17,9 @@ import { Webdggrid } from '../../lib-esm/webdggrid';
 
 type M = any;
 
-// Standard DGGS parameters (pole_lon, pole_lat, az, aperture, res, topo, proj, is_aperture_seq, aperture_seq)
-const P = [0, 0, 0, 4, 1, 'HEXAGON', 'ISEA', false, ''] as const;
+// Standard DGGS parameters (pole_lon, pole_lat, az, aperture, res, topo, proj,
+// is_aperture_seq, aperture_seq, datum, sphere_radius_km)
+const P = [0, 0, 0, 4, 1, 'HEXAGON', 'ISEA', false, '', 'AUTHALIC_SPHERE', 0] as const;
 
 let m: M;
 beforeAll(async () => {
@@ -72,10 +73,16 @@ describe('GEO_to_GEO', () => {
   });
 });
 
+// With the pole at (0, 0), the point (0, 0) is icosahedron vertex 0: the
+// apex shared by triangles 0-4 (quads 1-5). Any of them is a valid answer;
+// DGGRID 9.1 places it exactly on the vertex and picks triangle 2 / quad 3,
+// where 9.03b's round-off gave triangle 0 / quad 1.
+
 describe('GEO_to_PLANE', () => {
   test('converts (0,0) to correct plane coordinates', () => {
     const r = m.GEO_to_PLANE(...P, [0], [0]);
-    expect(r[0]).toBeCloseTo(0.5, 5);                  // x
+    // the apex of a polar triangle in the plane layout: x = tnum + 0.5
+    expect([0.5, 1.5, 2.5, 3.5, 4.5].some((x) => Math.abs(r[0] - x) < 1e-5)).toBe(true);
     expect(r[1]).toBeCloseTo(2.598076211344939, 5);    // y
   });
 
@@ -88,9 +95,10 @@ describe('GEO_to_PLANE', () => {
 describe('GEO_to_PROJTRI', () => {
   test('converts (0,0) to correct projected triangle coords', () => {
     const r = m.GEO_to_PROJTRI(...P, [0], [0]);
-    expect(r[0]).toBe(0);                              // tnum
+    expect(r[0]).toBeGreaterThanOrEqual(0);            // tnum: a polar triangle
+    expect(r[0]).toBeLessThanOrEqual(4);
     expect(r[1]).toBeCloseTo(0.5, 5);                  // x
-    expect(r[2]).toBeCloseTo(0.8660254037760619, 8);   // y
+    expect(r[2]).toBeCloseTo(Math.sqrt(3) / 2, 8);     // y: the apex
   });
 
   test('batch: two inputs give six outputs [tnum0,tnum1, x0,x1, y0,y1]', () => {
@@ -102,9 +110,10 @@ describe('GEO_to_PROJTRI', () => {
 describe('GEO_to_Q2DD', () => {
   test('converts (0,0) to correct Q2DD coordinates', () => {
     const r = m.GEO_to_Q2DD(...P, [0], [0]);
-    expect(r[0]).toBe(1);                              // quad
+    expect(r[0]).toBeGreaterThanOrEqual(1);            // quad: one of quads 1-5
+    expect(r[0]).toBeLessThanOrEqual(5);
     expect(r[1]).toBeCloseTo(-0.5, 5);                 // x
-    expect(r[2]).toBeCloseTo(0.8660254037802503, 8);   // y
+    expect(r[2]).toBeCloseTo(Math.sqrt(3) / 2, 8);     // y
   });
 
   test('batch: two inputs give six outputs', () => {

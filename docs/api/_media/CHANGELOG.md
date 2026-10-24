@@ -1,5 +1,72 @@
 # Changelog
 
+## [1.11.0](https://github.com/am2222/webDggrid/compare/v1.10.0...v1.11.0) (2026-10-18)
+
+
+### Features
+
+* **cmake:** add support for double precision in DGGRID compilation ([#43](https://github.com/am2222/webDggrid/issues/43)) ([f0f855d](https://github.com/am2222/webDggrid/commit/f0f855dd0670474b298ec149627d5547a1ba357d))
+
+## [1.10.0](https://github.com/am2222/webDggrid/compare/v1.9.3...v1.10.0) (2026-10-18)
+
+
+### Features
+
+* **hierarchy:** add sequenceNumIndexParent and sequenceNumIndexChildren for DGGRID v9 indexing parent/children, with IndexingSystem enum (children support Z7 only) ([e612334](https://github.com/am2222/webDggrid/commit/e612334c441fb6f58539fa8ce17957888ddf95ba))
+
+
+### Bug Fixes
+
+* **z-index:** convert Z3/Z7/ZORDER through the v9 indexing system RF to avoid a DGGRID v9.03b abort ([e612334](https://github.com/am2222/webDggrid/commit/e612334c441fb6f58539fa8ce17957888ddf95ba))
+* **zorder:** throw a clear error for ZORDER on aperture-sequence grids instead of crashing ([e612334](https://github.com/am2222/webDggrid/commit/e612334c441fb6f58539fa8ce17957888ddf95ba))
+
+## [1.9.3](https://github.com/am2222/webDggrid/compare/v1.9.2...v1.9.3) (2026-10-10)
+
+
+### Miscellaneous Chores
+
+* release 1.9.3 ([#38](https://github.com/am2222/webDggrid/issues/38)) ([9b51348](https://github.com/am2222/webDggrid/commit/9b5134884f10bb26b0038280f4da5b0b48362d81))
+
+## [1.9.2](https://github.com/am2222/webDggrid/compare/v1.9.1...v1.9.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* **publish:** simplify npm publishing workflow and update package files ([68b6ae6](https://github.com/am2222/webDggrid/commit/68b6ae645d16a67d599257cc319f89beed930d4a))
+
+## [1.9.1](https://github.com/am2222/webDggrid/compare/v1.9.0...v1.9.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* **build:** drop the unresolvable libdggrid.wasm URL from the embedded glue ([0676e15](https://github.com/am2222/webDggrid/commit/0676e1514ce00f43f7a8a3119e7e8291cd69f4e7))
+* **build:** keep locateFile, print, printErr, onAbort and onRuntimeInitialized as Module options ([b48fa2a](https://github.com/am2222/webDggrid/commit/b48fa2a0ff9c779252171deb97e1b6c1a6f3ff10))
+* **build:** load the embedded WASM with Emscripten 6 and drop the unresolvable WASM URL ([1e2acd2](https://github.com/am2222/webDggrid/commit/1e2acd210af60f00e45133525a2fc1c7d2f30d59))
+* **build:** pass the embedded wasmBinary through with Emscripten 6.0.2+ ([389c76a](https://github.com/am2222/webDggrid/commit/389c76a13fe4d65df35698da500a715b8f05e699))
+
+## [1.9.0](https://github.com/am2222/webDggrid/compare/v1.8.0...v1.9.0) (2026-05-02)
+
+
+### Features
+
+* Added cesium as demo ([46d3220](https://github.com/am2222/webDggrid/commit/46d3220e4b260396a281ac7fc8c31a562326bb54))
+* Enhance DGGS functionality with authalic latitude conversion and GeoJSON support ([9331596](https://github.com/am2222/webDggrid/commit/93315961490bf7f17751490c6e9666d0f128a580))
+* improved demo ([5df111c](https://github.com/am2222/webDggrid/commit/5df111c3c6208028d868e6f203c8249d154b0342))
+
+
+### Bug Fixes
+
+* changed globe colors ([0a5f9d5](https://github.com/am2222/webDggrid/commit/0a5f9d50289ce6f618f3e042b437d7feb1bac77f))
+* fix the over pole cell bug ([62544b2](https://github.com/am2222/webDggrid/commit/62544b244ecf036037149f81bc90e0fa7718511e))
+
+## [1.8.0](https://github.com/am2222/webDggrid/compare/v1.7.0...v1.8.0) (2026-04-25)
+
+
+### Features
+
+* add igeo7_duckdb submodule for enhanced functionality ([6a20c6a](https://github.com/am2222/webDggrid/commit/6a20c6a662c56fec4ef89c53e60cb9df7b144cb1))
+* add IGEO7/Z7 hexagonal hierarchical index support ([f3b93b4](https://github.com/am2222/webDggrid/commit/f3b93b4574858938866d0f33dc8f2045cd2b550a))
+
 ## [1.7.0](https://github.com/am2222/webDggrid/compare/v1.6.0...v1.7.0) (2026-04-07)
 
 

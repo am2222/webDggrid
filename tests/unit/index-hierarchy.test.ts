@@ -17,6 +17,11 @@ describe('Hierarchical index values (pinned to DGGRID v8.44 output)', () => {
     // Golden values captured from the v8.44 build before the DGGRID v9
     // upgrade. Any drift here means the index encoding changed upstream.
     // Values are unsigned 64-bit, as the API returns them.
+    //
+    // Exception: at ISEA3H res 11, (0, 0) lies on the equator exactly between
+    // two cells mirrored across it (cells 412209 and 412452, equidistant).
+    // DGGRID 9.1's exact constants resolve that tie to the southern cell, so
+    // its seqnum and indexes are re-pinned from the 9.1 build.
     let dggs: Webdggrid;
 
     beforeAll(async () => {
@@ -36,14 +41,14 @@ describe('Hierarchical index values (pinned to DGGRID v8.44 output)', () => {
         },
         {
             name: 'ISEA3H Z3', aperture: 3, res: 11, method: 'sequenceNumToZ3',
-            seq: ['412209', '373218', '103607', '1666557', '1638893', '124'],
-            values: ['3482780871428145151', '4153799348842397695', '1324147625766682623',
+            seq: ['412452', '373218', '103607', '1666557', '1638893', '124'],
+            values: ['3482780596550238207', '4153799348842397695', '1324147625766682623',
                 '11643663486281580543', '12279452786508169215', '1921534283369938943'],
         },
         {
             name: 'ISEA3H ZORDER', aperture: 3, res: 11, method: 'sequenceNumToZOrder',
-            seq: ['412209', '373218', '103607', '1666557', '1638893', '124'],
-            values: ['3506796954157842432', '3610362428279226368', '1549418591722405888',
+            seq: ['412452', '373218', '103607', '1666557', '1638893', '124'],
+            values: ['3506797229035749376', '3610362428279226368', '1549418591722405888',
                 '11828740705172324352', '11638009522613649408', '1229783964458156032'],
         },
         {
@@ -105,40 +110,48 @@ describe('Indexing parent/children (DGGRID v9)', () => {
         });
     }
 
-    describe('Z7 children', () => {
-        const res = 4;
+    // DGGRID 9.1 fixed Z3 and ZORDER indexing children (9.03b applied the
+    // Z7 digit rules to them), so every system is checked.
+    for (const s of systems) {
+        describe(`${s.name} children`, () => {
+            const res = 4;
 
-        test('children extend the parent index by one digit', () => {
-            dggs.setDggs(grid(7), res);
-            const cells = dggs.geoToSequenceNum(PTS, res);
-            const children = dggs.sequenceNumIndexChildren(cells, res);
+            test('children extend the parent index by one digit', () => {
+                dggs.setDggs(grid(s.aperture), res);
+                const cells = dggs.geoToSequenceNum(PTS, res);
+                const children = dggs.sequenceNumIndexChildren(cells, res, s.system);
 
-            expect(children).toHaveLength(cells.length);
-            cells.forEach((cell, i) => {
-                const kids = children[i];
-                expect(new Set(kids).size).toBe(kids.length);
+                expect(children).toHaveLength(cells.length);
+                cells.forEach((cell, i) => {
+                    const kids = children[i];
+                    expect(kids.length).toBeGreaterThan(0);
+                    expect(new Set(kids).size).toBe(kids.length);
 
-                const p = dggs.z7ExtractDigits(dggs.sequenceNumToZ7(cell, res), res);
-                const digits = kids.map((kid) => {
-                    const c = dggs.z7ExtractDigits(dggs.sequenceNumToZ7(kid, res + 1), res + 1);
-                    expect(c.quad).toBe(p.quad);
-                    expect(c.digits.slice(0, res)).toEqual(p.digits);
-                    return c.digits[res];
+                    const p = dggs[s.extract](dggs[s.toIndex](cell, res), res);
+                    const digits = kids.map((kid) => {
+                        const c = dggs[s.extract](dggs[s.toIndex](kid, res + 1), res + 1);
+                        expect(c.quad).toBe(p.quad);
+                        expect(c.digits.slice(0, res)).toEqual(p.digits);
+                        return c.digits[res];
+                    });
+                    expect(new Set(digits).size).toBe(kids.length);
                 });
-                expect(new Set(digits).size).toBe(kids.length);
+            });
+
+            test('parent of each child is the original cell', () => {
+                dggs.setDggs(grid(s.aperture), res);
+                const cells = dggs.geoToSequenceNum(PTS, res);
+                const children = dggs.sequenceNumIndexChildren(cells, res, s.system);
+
+                cells.forEach((cell, i) => {
+                    const parents = dggs.sequenceNumIndexParent(children[i], res + 1, s.system);
+                    expect(parents).toEqual(children[i].map(() => cell));
+                });
             });
         });
+    }
 
-        test('parent of each child is the original cell', () => {
-            dggs.setDggs(grid(7), res);
-            const cells = dggs.geoToSequenceNum(PTS, res);
-            const children = dggs.sequenceNumIndexChildren(cells, res);
-
-            cells.forEach((cell, i) => {
-                const parents = dggs.sequenceNumIndexParent(children[i], res + 1);
-                expect(parents).toEqual(children[i].map(() => cell));
-            });
-        });
+    describe('Z7 children', () => {
 
         test('7 per hexagon, 6 per pentagon', () => {
             dggs.setDggs(grid(7), 3);
@@ -155,12 +168,6 @@ describe('Indexing parent/children (DGGRID v9)', () => {
         test('resolution 0 has no indexing parent', () => {
             dggs.setDggs(grid(7), 0);
             expect(() => dggs.sequenceNumIndexParent([1n], 0)).toThrow(/resolution 0/);
-        });
-
-        test('Z3 and ZORDER children are rejected', () => {
-            dggs.setDggs(grid(3), 3);
-            expect(() => dggs.sequenceNumIndexChildren([1n], 3)).toThrow(/only supported for Z7/);
-            expect(() => dggs.sequenceNumIndexChildren([1n], 3, IndexingSystem.ZORDER)).toThrow(/only supported for Z7/);
         });
 
         test('system not matching the aperture', () => {

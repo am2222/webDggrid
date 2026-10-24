@@ -1,7 +1,7 @@
 // dggrid_transform.hpp
 //
 // Public API for dggrid coordinate transforms and grid utilities.
-// Implemented against the DGGRID v8 dglib API.
+// Implemented against the DGGRID v9.1 dglib API.
 //
 #pragma once
 
@@ -30,6 +30,16 @@ struct DggsParams {
     // Only valid for HEXAGON topology.
     bool         is_aperture_sequence = false;
     std::string  aperture_sequence    = "";  // e.g., "434747"
+
+    // Datum of geographic input/output coordinates (DGGRID 9.1
+    // input_datum/output_datum): "AUTHALIC_SPHERE" uses them unchanged on
+    // the grid sphere; "WGS84" treats them as WGS84 geodetic and converts
+    // latitudes to/from the authalic sphere.
+    std::string  datum                = "AUTHALIC_SPHERE";
+    // Radius of the sphere the grid is built on (DGGRID custom_sphere_radius);
+    // 0 = the WGS84 authalic radius. Only affects areas and distances.
+    // WGS84 requires the authalic sphere.
+    double       sphere_radius_km     = 0.0;
 
     DggsParams withRes(int r) const {
         DggsParams p = *this;
@@ -75,7 +85,9 @@ DggsParams            construct(const std::string& projection,
                                  double             pole_lat_deg,
                                  double             pole_lon_deg,
                                  bool               is_aperture_sequence = false,
-                                 const std::string& aperture_sequence = "");
+                                 const std::string& aperture_sequence = "",
+                                 const std::string& datum = "AUTHALIC_SPHERE",
+                                 double             sphere_radius_km = 0.0);
 
 DggsParams            setRes(const DggsParams& p, int res);
 std::vector<ResInfo>  getRes(const DggsParams& p);
