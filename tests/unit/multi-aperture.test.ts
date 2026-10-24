@@ -137,7 +137,7 @@ describe('Multi-Aperture Configuration Validation', () => {
 
     test('rejects empty aperture sequence when flag is true', () => {
         // This is tested at C++ level through direct module call
-        const P = [0, 0, 0, 4, 1, 'HEXAGON', 'ISEA', true, ''] as const;
+        const P = [0, 0, 0, 4, 1, 'HEXAGON', 'ISEA', true, '', 'AUTHALIC_SPHERE', 0] as const;
         expect(() => {
             m.nCells(...P);
         }).toThrow(/cannot be empty/i);
@@ -434,26 +434,26 @@ describe('Multi-Aperture Edge Cases', () => {
 
 describe('Multi-Aperture Direct Module Tests', () => {
     test('module.nCells with aperture sequence', () => {
-        // [lng, lat, az, aperture, res, topo, proj, isApSeq, apSeq]
-        const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '34'] as const;
+        // [lng, lat, az, aperture, res, topo, proj, isApSeq, apSeq, datum, sphereRadiusKm]
+        const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '34', 'AUTHALIC_SPHERE', 0] as const;
         const cells = m.nCells(...P);
         expect(cells).toBeGreaterThan(0);
     });
 
     test('module.cellAreaKM with aperture sequence', () => {
-        const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '77'] as const;
+        const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '77', 'AUTHALIC_SPHERE', 0] as const;
         const area = m.cellAreaKM(...P);
         expect(area).toBeGreaterThan(0);
     });
 
     test('module.cellDistKM with aperture sequence', () => {
-        const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '43'] as const;
+        const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '43', 'AUTHALIC_SPHERE', 0] as const;
         const dist = m.cellDistKM(...P);
         expect(dist).toBeGreaterThan(0);
     });
 
     test('module.SeqNumGrid with aperture sequence', () => {
-        const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '34'] as const;
+        const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '34', 'AUTHALIC_SPHERE', 0] as const;
         const seqNums = [1n];
 
         const result = m.SeqNumGrid(...P, seqNums);

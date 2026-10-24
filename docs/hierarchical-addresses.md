@@ -411,7 +411,7 @@ For complete API documentation, see:
 
 ### DGGRID Implementation
 
-These address types are provided by DGGRID v9.03b. VERTEX2DD is a reference frame of each grid; ZORDER, Z3 and Z7 are hierarchical indexing systems (`DgHierNdxSystemRFSBase`) built over the whole multi-resolution grid:
+These address types are provided by DGGRID v9.1. VERTEX2DD is a reference frame of each grid; ZORDER, Z3 and Z7 are hierarchical indexing systems (`DgHierNdxSystemRFSBase`) built over the whole multi-resolution grid:
 
 - `DgVertex2DDRF`: Always available for all apertures
 - ZORDER (`DgZOrderSystem`): pure aperture 3 and 4 hexagons (not aperture 7 or aperture sequences)

@@ -47,14 +47,3 @@ This compiles the WASM via Emscripten and builds the TypeScript wrapper and bund
 yarn test
 ```
 
-### Serve the Emscripten output (development only)
-
-```bash
-yarn serve
-```
-
-Opens the Emscripten default page — navigate to `libdggrid.html` to test the raw WASM. You can invoke functions directly:
-
-```js
-Module.DgGEO_to_SEQNUM(0, 0, 0, 4, 10, 'HEXAGON', 'ISEA', [0], [0])
-```

@@ -8,7 +8,9 @@
 #
 #   long double      -> double
 #   sinl( cosl( ...  -> sin( cos( ...     (libm's long double functions)
-#   %Lf %Le %Lg      -> %f %e %g          (printf formats)
+#   %Lf %Le %Lg      -> %lf %le %lg       (printf/scanf formats)
+#   0.5L 1e-15L      -> 0.5 1e-15         (floating literals)
+#   LDBL_MAX ...     -> DBL_MAX ...       (<cfloat> limits)
 #
 # leaving the submodule untouched. DGGRID builds where long double is already
 # double (MSVC, Apple arm64) compute at this same precision.
@@ -38,7 +40,12 @@ function(dggrid_double_precision_copy src_lib_dir out_lib_dir)
             set(prev "${text}")
             string(REGEX REPLACE "([^A-Za-z0-9_])(${math_fns})l\\(" "\\1\\2(" text "${text}")
         endwhile()
-        string(REGEX REPLACE "(%[-+ #0-9.]*)L([fegFEG])" "\\1\\2" text "${text}")
+        # %lf is a double for both printf and scanf (%f would make sscanf
+        # write a float into a double)
+        string(REGEX REPLACE "(%[-+ #0-9.]*)L([fegFEG])" "\\1l\\2" text "${text}")
+        # sentinels such as UNDEFVAL (LDBL_MAX) must stay representable, or
+        # they become inf when stored and never compare equal
+        string(REGEX REPLACE "([^A-Za-z0-9_])LDBL_" "\\1DBL_" text "${text}")
         # long double floating literals (0.5L, 1e-15L) become double, so they
         # still deduce the same type as the rewritten variables in templates
         # such as std::min(1.0L, x). The char after the L is consumed and put

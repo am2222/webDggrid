@@ -396,9 +396,7 @@ const children = dggs.sequenceNumIndexChildren([cellId], 5)[0];
 
 The system defaults to the one matching the grid (Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4); pass `IndexingSystem.ZORDER` to use ZORDER on an aperture 3 grid. Only pure-aperture hexagon grids are supported.
 
-::: warning
-`sequenceNumIndexChildren()` supports **Z7 only**. DGGRID v9.03b generates incorrect Z3 and ZORDER indexing children (it applies the Z7 digit rules), so those throw. `sequenceNumIndexParent()` works for all three systems.
-:::
+Both methods work for all three systems. Z3 and ZORDER indexing children need webdggrid 2.0 (DGGRID 9.1); earlier versions supported Z7 children only, because DGGRID 9.03b applied the Z7 digit rules to the other systems.
 
 ## API Reference
 
@@ -409,4 +407,4 @@ The system defaults to the one matching the grid (Z7 for aperture 7, Z3 for aper
 | [`sequenceNumAllParents()`](api/classes/Webdggrid.md#sequencenumallparents) | Get all touching parent cells at `resolution - 1` (primary first) |
 | [`sequenceNumChildren()`](api/classes/Webdggrid.md#sequencenumchildren) | Get child cells at `resolution + 1` |
 | [`sequenceNumIndexParent()`](api/classes/Webdggrid.md#sequencenumindexparent) | Get the Z3/Z7/ZORDER indexing parent at `resolution - 1` |
-| [`sequenceNumIndexChildren()`](api/classes/Webdggrid.md#sequencenumindexchildren) | Get the Z7 indexing children at `resolution + 1` |
+| [`sequenceNumIndexChildren()`](api/classes/Webdggrid.md#sequencenumindexchildren) | Get the Z3 / Z7 / ZORDER indexing children at `resolution + 1` |
