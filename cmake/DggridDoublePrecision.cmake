@@ -39,6 +39,12 @@ function(dggrid_double_precision_copy src_lib_dir out_lib_dir)
             string(REGEX REPLACE "([^A-Za-z0-9_])(${math_fns})l\\(" "\\1\\2(" text "${text}")
         endwhile()
         string(REGEX REPLACE "(%[-+ #0-9.]*)L([fegFEG])" "\\1\\2" text "${text}")
+        # long double floating literals (0.5L, 1e-15L) become double, so they
+        # still deduce the same type as the rewritten variables in templates
+        # such as std::min(1.0L, x). The char after the L is consumed and put
+        # back so 1.0L inside an identifier-like token is left alone.
+        string(REGEX REPLACE "([0-9]*\\.[0-9]*([eE][-+]?[0-9]+)?|[0-9]+[eE][-+]?[0-9]+)L([^A-Za-z0-9_])"
+               "\\1\\3" text "${text}")
 
         set(old "")
         if(EXISTS "${dst}")
