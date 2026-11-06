@@ -4,7 +4,7 @@
 
 > **DggsPresetName** = \`$\{"ISEA" \| "IVEA"\}$\{"3H" \| "4H" \| "7H" \| "4T" \| "4D"\}$\{"" \| "S" \| "L"\}\` \| \`$\{"ISEA" \| "IVEA"\}$\{"3H" \| "4H" \| "7H"\}$\{"S" \| "L"\}Z\` \| \`FULLER$\{"3H" \| "4H" \| "7H" \| "4T" \| "4D"\}\` \| `"IGEO7v1"` \| `"IGEO7v2"` \| `"PLANETRISK"`
 
-Defined in: [webdggrid.ts:307](https://github.com/am2222/webDggrid/blob/580262862c407d886c0c501445632ae6dc75bc82/src-ts/webdggrid.ts#L307)
+Defined in: [webdggrid.ts:336](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L336)
 
 DGGRID 9.1 preset grid names (`dggs_type`) that WebDggrid supports.
 

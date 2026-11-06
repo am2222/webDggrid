@@ -456,7 +456,8 @@ describe('Multi-Aperture Direct Module Tests', () => {
         const P = [0, 0, 0, 4, 2, 'HEXAGON', 'ISEA', true, '34', 'AUTHALIC_SPHERE', 0] as const;
         const seqNums = [1n];
 
-        const result = m.SeqNumGrid(...P, seqNums);
+        // densification 0, no edge crossings
+        const result = m.SeqNumGrid(...P, 0, false, seqNums);
         expect(result).toBeDefined();
         expect(result.length).toBeGreaterThan(0);
     });

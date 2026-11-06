@@ -14,6 +14,7 @@
 
 ## Interfaces
 
+- [CellBoundaryOptions](interfaces/CellBoundaryOptions.md)
 - [Coordinate](interfaces/Coordinate.md)
 - [IDGGSProps](interfaces/IDGGSProps.md)
 - [Vertex2DDCoordinate](interfaces/Vertex2DDCoordinate.md)

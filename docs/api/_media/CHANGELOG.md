@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0](https://github.com/am2222/webDggrid/compare/v1.11.0...v2.0.0) (2026-10-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* grids are computed with DGGRID v9.1, which changes some results from 1.x (exact icosahedron, ISEA and WGS84 constants; corrected ISEA rotation for points on face medians; corrected cell boundaries across face edges in odd-resolution aperture 7 grids).
+
+### Features
+
+* expose DGGRID 9.1 projections, datums and presets ([6d5ea4f](https://github.com/am2222/webDggrid/commit/6d5ea4fc992c960d6e12fe631cf69b597da27bcb))
+* upgrade DGGRID to v9.1 ([6d5ea4f](https://github.com/am2222/webDggrid/commit/6d5ea4fc992c960d6e12fe631cf69b597da27bcb))
+
 ## [1.11.0](https://github.com/am2222/webDggrid/compare/v1.10.0...v1.11.0) (2026-10-18)
 
 

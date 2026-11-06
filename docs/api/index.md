@@ -24,11 +24,12 @@ A WebAssembly wrapper for [DGGRID](https://github.com/sahrk/DGGRID), the C++ lib
 - 🚀 **WebAssembly Performance** - Full DGGRID C++ library compiled to WASM
 - 🌐 **Browser & Node.js** - Works in any modern JavaScript environment
 - 🔷 **Multiple Topologies** - HEXAGON, TRIANGLE, DIAMOND shapes supported
-- 📐 **ISEA, IVEA, FULLER & GNOMONIC** - All DGGRID 9.1 projections
+- 📐 **ISEA, IVEA, FULLER & GNOMONIC** - All DGGRID 9.2 projections
 - 🌍 **WGS84 or authalic sphere** - Take and return WGS84 coordinates, or use any sphere radius
 - 🧭 **DGGRID presets** - `dggsPreset('IGEO7v2')`, `ISEA4HS`, `IVEA7HL`, … and the ISEA / ISEAL / DYMAXION orientations
 - 🎯 **Multi-Aperture Grids** - Define custom aperture sequences (e.g., `"434747"`) for mixed refinement
-- 🗺️ **GeoJSON Output** - Direct export to GeoJSON FeatureCollections
+- 🗺️ **GeoJSON Output** - Direct export to GeoJSON FeatureCollections, with optional edge densification and face edge crossings
+- 📏 **Distances** - Great-circle or WGS84 ellipsoidal geodesic distance between points
 - 📊 **Grid Statistics** - Cell counts, areas, and spacing at any resolution
 
 ## How to use
