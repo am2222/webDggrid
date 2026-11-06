@@ -1,7 +1,7 @@
 // dggrid_transform.cpp
 //
 // All coordinate transforms and grid utilities implemented against the
-// DGGRID v9.1 dglib API (ported from v8.44; see the Z-index notes in
+// DGGRID v9.2 dglib API (ported from v8.44; see the Z-index notes in
 // buildTransformer), verified against the actual header files:
 //
 //   DgIDGGBase.h   — the Q2DI frame + all RF accessors
@@ -194,29 +194,10 @@ struct Transformer {
         out_y    = static_cast<double>(c->coord().y());
     }
 
-    // Convert loc into the Q2DI frame (dgg). DGGRID 9.1 resolves a point
-    // exactly on icosahedron vertex 0 or 11 to the vertex "quad" 0/11, where
-    // only hexagon grids have a cell (the pentagon); for triangle and diamond
-    // grids bndRF would map it to an unrelated cell. v9.03b's round-off kept
-    // such points off the vertex. Nudge them off it, so they land in one of
-    // the cells that share the vertex.
-    void toQ2DI(LocPtr &loc) const {
-        dgg->convert(loc.get());
-        const int quad = dgg->getAddress(*loc)->quadNum();
-        if (dgg->gridTopo() == Hexagon || (quad != 0 && quad != 11))
-            return;
-        geoRF->convert(loc.get());
-        const DgGeoCoord g = *geoRF->getAddress(*loc);
-        const long double nudge = 1e-9L * M_PI_180;  // radians
-        DgGeoCoord moved(g.lon(), g.lat() + (g.lat() > 0 ? -nudge : nudge), true);
-        loc.reset(geoRF->makeLocation(moved));
-        dgg->convert(loc.get());
-    }
-
     void outQ2DI(LocPtr &loc,
                  uint64_t &out_quad, int64_t &out_i, int64_t &out_j) const {
         // dgg IS the Q2DI RF — convert into it, then getAddress
-        toQ2DI(loc);
+        dgg->convert(loc.get());
         const DgQ2DICoord *c = dgg->getAddress(*loc);
         out_quad = static_cast<uint64_t>(c->quadNum());
         out_i    = static_cast<int64_t>(c->coord().i());
@@ -225,7 +206,7 @@ struct Transformer {
 
     void outSEQNUM(LocPtr &loc, uint64_t &out_seqnum) const {
         // convert to Q2DI frame (dgg), extract Q2DICoord, then linearise
-        toQ2DI(loc);
+        dgg->convert(loc.get());
         const DgQ2DICoord *c = dgg->getAddress(*loc);
         out_seqnum = static_cast<uint64_t>(
             bndRF->seqNumAddress(*c));
@@ -592,6 +573,8 @@ static unsigned int computeCellVertices(
     const DgBoundedIDGG &bndRF,
     const DgEllipsoidRF &ioRF,
     uint64_t sn,
+    int densify,
+    bool edgeCrossings,
     std::vector<std::pair<double,double>> &scratch,
     std::vector<double> &out_x,
     std::vector<double> &out_y)
@@ -601,7 +584,7 @@ static unsigned int computeCellVertices(
     std::unique_ptr<DgLocation> loc(dgg.makeLocation(q2di));
 
     DgPolygon verts(dgg);
-    dgg.setVertices(*loc, verts, 0);
+    dgg.setVertices(*loc, verts, densify, edgeCrossings);
 
     // the vertices are in dgg.geoRF(); convert them to the output datum
     if (&ioRF != &dgg.geoRF())
@@ -631,8 +614,14 @@ static unsigned int computeCellVertices(
 }
 
 CellVerticesResult seqNumsToVertices(const DggsParams &p,
-                                      const std::vector<SeqNum> &seqnums)
+                                      const std::vector<SeqNum> &seqnums,
+                                      int densify, bool edgeCrossings)
 {
+    // DGGRID's densification parameter has the same range
+    if (densify < 0 || densify > 500)
+        throw std::invalid_argument("densification must be 0–500, got " +
+                                    std::to_string(densify));
+
     auto t = getTransformer(p);   // reuses cached DgRFNetwork
     CellVerticesResult out;
 
@@ -641,6 +630,7 @@ CellVerticesResult seqNumsToVertices(const DggsParams &p,
     std::size_t vertsPerCell = 7;
     if      (p.topology == "TRIANGLE") vertsPerCell = 4;
     else if (p.topology == "DIAMOND")  vertsPerCell = 5;
+    vertsPerCell = (vertsPerCell - 1) * (static_cast<std::size_t>(densify) + 1) + 1;
 
     out.counts.reserve(seqnums.size());
     out.x.reserve(seqnums.size() * vertsPerCell);
@@ -651,10 +641,41 @@ CellVerticesResult seqNumsToVertices(const DggsParams &p,
 
     for (auto sn : seqnums) {
         const unsigned int nv =
-            computeCellVertices(*t->dgg, *t->bndRF, *t->ioRF, sn, scratch, out.x, out.y);
+            computeCellVertices(*t->dgg, *t->bndRF, *t->ioRF, sn, densify,
+                                edgeCrossings, scratch, out.x, out.y);
         out.counts.push_back(static_cast<double>(nv));
     }
     return out;
+}
+
+// ===========================================================================
+// Distance
+// ===========================================================================
+
+double geoDistanceKM(const DggsParams &p,
+                     double lon1_deg, double lat1_deg,
+                     double lon2_deg, double lat2_deg)
+{
+    // dglib reports bad coordinates with a fatal error (exit), so check here
+    for (double v : { lon1_deg, lat1_deg, lon2_deg, lat2_deg })
+        if (!std::isfinite(v))
+            throw std::invalid_argument("coordinates must be finite numbers");
+    if (std::fabs(lat1_deg) > 90.0 || std::fabs(lat2_deg) > 90.0)
+        throw std::invalid_argument("latitude must be within [-90, 90]");
+
+    auto t = getTransformer(p);
+    const DgGeoCoord a(lon1_deg, lat1_deg, false);   // degrees
+    const DgGeoCoord b(lon2_deg, lat2_deg, false);
+
+    // DgEllipsoidRF::dist (Vincenty) exits when it does not converge, which
+    // for WGS84 starts about 179.11 degrees apart; refuse those pairs.
+    if (t->ioRF != t->geoRF &&
+        DgGeoCoord::gcDist(a, b) * M_180_PI > 179.0L)
+        throw std::invalid_argument(
+            "WGS84 geodesic distance is undefined for nearly antipodal points "
+            "(more than 179 degrees apart)");
+
+    return static_cast<double>(t->ioRF->dist(a, b));
 }
 
 // ===========================================================================

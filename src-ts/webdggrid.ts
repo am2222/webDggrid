@@ -157,6 +157,35 @@ export type DGGSGeoJsonProperty = GeoJsonProperties & {
 };
 
 /**
+ * Options for the cell boundaries returned by
+ * {@link Webdggrid.sequenceNumToGrid} and
+ * {@link Webdggrid.sequenceNumToGridFeatureCollection}.
+ */
+export interface CellBoundaryOptions {
+    /**
+     * Pass antimeridian-crossing rings through {@link unwrapAntimeridianRing}
+     * so longitudes stay contiguous (they may exceed 180°). Defaults to
+     * `true`. See {@link Webdggrid.sequenceNumToGrid}.
+     */
+    unwrap?: boolean;
+    /**
+     * Number of points inserted along each cell edge (DGGRID
+     * `densification`), 0–500. Densified edges follow the projection, so the
+     * boundary keeps its true shape when drawn with straight lines.
+     * Defaults to `0`.
+     */
+    densification?: number;
+    /**
+     * Insert the points where a cell edge crosses an icosahedron face edge
+     * and bends there (DGGRID 9.2 `insert_cell_bdry_edge_crossing`). Without
+     * them, an edge that spans two faces is drawn as one straight segment.
+     * With `densification`, each piece between these points is densified.
+     * Defaults to `false`.
+     */
+    edgeCrossings?: boolean;
+}
+
+/**
  * Full configuration of a Discrete Global Grid System.
  *
  * A DGGS is fully defined by its polyhedron orientation (`poleCoordinates`,
@@ -712,6 +741,44 @@ export class Webdggrid {
     }
 
     /**
+     * Returns the distance in kilometres from each point in `from` to the
+     * point at the same index in `to`, in the grid's {@link Datum}:
+     *
+     * - `AUTHALIC_SPHERE` — great-circle distance on the grid sphere (see
+     *   {@link IDGGSProps.sphereRadiusKm}).
+     * - `WGS84` — geodesic distance on the WGS84 ellipsoid (DGGRID 9.2,
+     *   Vincenty's inverse formula).
+     *
+     * ```ts
+     * dggs.setDggs({ ...dggs.dggs, datum: Datum.WGS84 }, 5);
+     * const [km] = dggs.geoDistanceKM([[-74.006, 40.7128]], [[-0.1276, 51.5072]]);
+     * ```
+     *
+     * @param from - `[lng, lat]` start points.
+     * @param to - `[lng, lat]` end points, one per start point.
+     * @returns One distance in km per pair.
+     * @throws If the arrays differ in length, a coordinate is out of range, or,
+     *   with `WGS84`, two points are nearly antipodal (more than 179° apart),
+     *   where the ellipsoidal geodesic does not converge.
+     */
+    geoDistanceKM(from: Position[], to: Position[]): number[] {
+        if (from.length !== to.length) {
+            throw new Error('from and to must have the same length');
+        }
+        try {
+            return Array.from(this._module.GEO_distanceKM(
+                ...this._getParams(this.resolution),
+                from.map((c) => c[0]),
+                from.map((c) => c[1]),
+                to.map((c) => c[0]),
+                to.map((c) => c[1])
+            ) as Float64Array);
+        } catch (e) {
+            throw new Error(this._exceptionMessage(e), { cause: e });
+        }
+    }
+
+    /**
      * Converts an array of geographic coordinates to their corresponding DGGS
      * cell sequence numbers (cell IDs) at the given resolution.
      *
@@ -860,14 +927,16 @@ export class Webdggrid {
      *   retrieve.
      * @param resolution - Resolution at which the IDs were generated. Defaults
      *   to the instance's current {@link resolution}.
-     * @param unwrap - When `true` (default), antimeridian-crossing rings are
-     *   passed through {@link unwrapAntimeridianRing} so longitudes stay
-     *   contiguous (lons may exceed 180°). Required by MapLibre GL / Mapbox
-     *   GL globe projection. Set to `false` to receive the raw DGGRID output
-     *   in `[-180, 180]` — required by Cesium's `GeoJsonDataSource` (which
-     *   internally normalises lons and breaks polar caps under unwrap), and
-     *   by any sphere-aware renderer that interpolates edges as great-circle
-     *   arcs.
+     * @param options - {@link CellBoundaryOptions}, or a boolean for
+     *   `unwrap` alone. When `unwrap` is `true` (default),
+     *   antimeridian-crossing rings are passed through
+     *   {@link unwrapAntimeridianRing} so longitudes stay contiguous (lons may
+     *   exceed 180°). Required by MapLibre GL / Mapbox GL globe projection.
+     *   Set it to `false` to receive the raw DGGRID output in `[-180, 180]` —
+     *   required by Cesium's `GeoJsonDataSource` (which internally normalises
+     *   lons and breaks polar caps under unwrap), and by any sphere-aware
+     *   renderer that interpolates edges as great-circle arcs.
+     *   `densification` and `edgeCrossings` add points along the edges.
      * @returns A 2-D array: `result[i]` is the vertex ring of `sequenceNum[i]`.
      *   Each vertex is a `[lng, lat]` position.
      * @throws If the WASM module encounters an invalid cell ID.
@@ -875,14 +944,21 @@ export class Webdggrid {
     sequenceNumToGrid(
         sequenceNum: bigint[],
         resolution: number = DEFAULT_RESOLUTION,
-        unwrap: boolean = true
+        options: boolean | CellBoundaryOptions = true
     ): Position[][] {
+        const {
+            unwrap = true,
+            densification = 0,
+            edgeCrossings = false,
+        } = typeof options === 'boolean' ? { unwrap: options } : options;
         const inputSize = sequenceNum.length;
 
         let resultArray;
         try {
             resultArray = this._module.SeqNumGrid(
                 ...this._getParams(resolution),
+                densification,
+                edgeCrossings,
                 sequenceNum
             );
         } catch (e) {
@@ -946,19 +1022,19 @@ export class Webdggrid {
      * @param sequenceNum - Array of `BigInt` cell IDs to convert.
      * @param resolution - Resolution at which the IDs were generated. Defaults
      *   to the instance's current {@link resolution}.
-     * @param unwrap - Forwarded to {@link sequenceNumToGrid}. Defaults to
-     *   `true` (MapLibre-style unwrap). Pass `false` for Cesium and other
-     *   great-circle-arc renderers.
+     * @param options - Forwarded to {@link sequenceNumToGrid}: a boolean for
+     *   `unwrap` (default `true`, MapLibre-style; pass `false` for Cesium and
+     *   other great-circle-arc renderers), or {@link CellBoundaryOptions}.
      * @returns A GeoJSON `FeatureCollection` of `Polygon` features, one per
      *   input cell ID.
      */
     sequenceNumToGridFeatureCollection(
         sequenceNum: bigint[],
         resolution: number = DEFAULT_RESOLUTION,
-        unwrap: boolean = true
+        options: boolean | CellBoundaryOptions = true
     ): FeatureCollection<Polygon, DGGSGeoJsonProperty> {
 
-        const coordinatesArray = this.sequenceNumToGrid(sequenceNum, resolution, unwrap);
+        const coordinatesArray = this.sequenceNumToGrid(sequenceNum, resolution, options);
 
         const features = coordinatesArray.map((coordinates, index) => {
             const seqNum = sequenceNum[index];

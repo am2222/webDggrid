@@ -1,8 +1,8 @@
 # Projections, Datums & Presets
 
-WebDggrid 2.0 is built on DGGRID 9.1, which adds two projections, a WGS84
+WebDggrid is built on DGGRID 9.2. DGGRID 9.1 added two projections, a WGS84
 datum, a custom sphere radius, named orientations and a family of preset
-grids. All of them are set through the same [`IDGGSProps`](api/interfaces/IDGGSProps.md) object you
+grids; 9.2 adds WGS84 ellipsoidal distances (see [Distances](#distances)). All of them are set through the same [`IDGGSProps`](api/interfaces/IDGGSProps.md) object you
 pass to `setDggs`.
 
 ```ts
@@ -54,6 +54,21 @@ The conversion is the same shift as
 [`igeo7GeoToAuthalic`](./authalic.md): up to about 0.19° of latitude, zero
 at the equator and the poles. With `AUTHALIC_SPHERE` you can still apply it
 yourself.
+
+## Distances
+
+`geoDistanceKM(from, to)` returns the distance in km between each pair of
+points, in the grid's datum: the great-circle distance on the grid sphere
+for `AUTHALIC_SPHERE` (so it follows `sphereRadiusKm`), and the geodesic on
+the WGS84 ellipsoid for `WGS84` (DGGRID 9.2, Vincenty's inverse formula).
+
+```ts
+dggs.setDggs({ ...dggsPreset('ISEA4H'), datum: Datum.WGS84 }, 5)
+const [km] = dggs.geoDistanceKM([[-74.006, 40.7128]], [[-0.1276, 51.5072]])
+```
+
+Vincenty's method does not converge for nearly antipodal points, so with
+`WGS84` a pair more than 179° apart throws an error.
 
 ## Sphere radius
 

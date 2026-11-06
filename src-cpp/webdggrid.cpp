@@ -2,7 +2,7 @@
 #include "dggrid_transform.hpp"
 #include <emscripten/bind.h>
 
-// DGGRID v8 headers needed for cell polygon generation (SeqNumGrid)
+// DGGRID headers needed for cell polygon generation (SeqNumGrid)
 #include <dglib/DgIDGGBase.h>
 #include <dglib/DgBoundedIDGG.h>
 #include <dglib/DgEllipsoidRF.h>
@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -143,6 +144,7 @@ val SeqNumGrid(
     std::string topology, std::string projection,
     bool is_aperture_sequence, std::string aperture_sequence,
     std::string datum, double sphere_radius_km,
+    int densify, bool edge_crossings,
     val seqnum)
 {
     auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
@@ -153,7 +155,7 @@ val SeqNumGrid(
         convertJSArrayToNumberVector<uint64_t>(seqnum);
 
     // Use the cached transformer — no DgRFNetwork rebuild on repeat calls
-    auto r = dggrid::seqNumsToVertices(p, seqnumVector);
+    auto r = dggrid::seqNumsToVertices(p, seqnumVector, densify, edge_crossings);
 
     // Format: [count0..countN, x_all..., y_all...]
     std::vector<double> result;
@@ -252,6 +254,32 @@ val GEO_to_GEO(
     for (std::size_t i = 0; i < xv.size(); i++)
         out[i] = dggrid::geoToGeo(p, xv[i], yv[i]);
     return geoArray(out);
+}
+
+// Distance in km from (xs1[i], ys1[i]) to (xs2[i], ys2[i]) in the grid's
+// datum (see dggrid::geoDistanceKM).
+val GEO_distanceKM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    std::string datum, double sphere_radius_km,
+    val xs1, val ys1, val xs2, val ys2)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence,
+                        datum, sphere_radius_km);
+    const auto x1 = convertJSArrayToNumberVector<double>(xs1);
+    const auto y1 = convertJSArrayToNumberVector<double>(ys1);
+    const auto x2 = convertJSArrayToNumberVector<double>(xs2);
+    const auto y2 = convertJSArrayToNumberVector<double>(ys2);
+    if (y1.size() != x1.size() || x2.size() != x1.size() || y2.size() != x1.size())
+        throw std::invalid_argument("coordinate arrays must have the same length");
+    std::vector<double> out(x1.size());
+    for (std::size_t i = 0; i < x1.size(); i++)
+        out[i] = dggrid::geoDistanceKM(p, x1[i], y1[i], x2[i], y2[i]);
+    return toFloat64Array(out);
 }
 
 val GEO_to_PLANE(
@@ -1317,6 +1345,7 @@ EMSCRIPTEN_BINDINGS(my_module)
 
     // FROM GEO
     emscripten::function("GEO_to_GEO",     &GEO_to_GEO);
+    emscripten::function("GEO_distanceKM", &GEO_distanceKM);
     emscripten::function("GEO_to_PLANE",   &GEO_to_PLANE);
     emscripten::function("GEO_to_PROJTRI", &GEO_to_PROJTRI);
     emscripten::function("GEO_to_Q2DD",    &GEO_to_Q2DD);

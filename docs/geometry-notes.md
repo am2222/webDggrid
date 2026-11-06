@@ -13,6 +13,31 @@ const ring = fc.features[0].geometry.coordinates[0];
 // ring.length === 7 → hexagon (6 unique + 1 closing vertex)
 ```
 
+## Edge Detail: Densification and Face Edge Crossings
+
+By default a cell ring holds only the cell's corners. On the sphere, the
+edges between them are curves of the projection, and an edge that crosses
+from one icosahedron face onto another bends where it crosses. Two options of
+`sequenceNumToGrid` and `sequenceNumToGridFeatureCollection` add points so
+straight-line renderers follow that shape:
+
+- `densification` (0–500) inserts that many points along every edge (DGGRID's
+  `densification`).
+- `edgeCrossings` inserts the point where an edge crosses a face edge and
+  bends (DGGRID 9.2's `insert_cell_bdry_edge_crossing`). Only cells that
+  cross a face edge change. With both options, each piece between crossings
+  is densified.
+
+```js
+const fc = dggs.sequenceNumToGridFeatureCollection(seqNums, resolution, {
+  densification: 4,
+  edgeCrossings: true,
+  unwrap: true, // the default; see below
+});
+```
+
+The third argument may still be a boolean, which sets `unwrap` alone.
+
 ## Antimeridian Handling
 
 Cells that straddle the ±180° meridian need special treatment. webdggrid outputs **standard GeoJSON** with all longitudes in `[-180, 180]`, which is correct for most consumers (Leaflet, Turf.js, PostGIS, etc.).

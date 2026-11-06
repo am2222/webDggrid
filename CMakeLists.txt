@@ -43,6 +43,10 @@ set(IGEO7_Z7_SOURCES
 
 # ── Source files ──────────────────────────────────────────────────────────
 file(GLOB DGLIB_SOURCES  "${DGLIB_LIB}/*.cpp")
+# DGGRID 9.2 dropped DgWGS84RF.cpp from its build (DgEllipsoidRF::dist now
+# computes ellipsoidal geodesics) but left the file in the tree. It defines a
+# dist() override the header no longer declares, so it no longer compiles.
+list(FILTER DGLIB_SOURCES EXCLUDE REGEX "/DgWGS84RF\\.cpp$")
 file(GLOB PROJ4_SOURCES  "${PROJ4_LIB}/*.cpp")
 file(GLOB SHAPE_SOURCES  "${SHAPE_LIB}/*.c")
 

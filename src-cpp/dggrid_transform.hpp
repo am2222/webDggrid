@@ -1,7 +1,7 @@
 // dggrid_transform.hpp
 //
 // Public API for dggrid coordinate transforms and grid utilities.
-// Implemented against the DGGRID v9.1 dglib API.
+// Implemented against the DGGRID v9.2 dglib API.
 //
 #pragma once
 
@@ -144,8 +144,24 @@ struct CellVerticesResult {
     std::vector<double> y;        // all y (latitude) values
 };
 
+// densify: points inserted per cell edge (DGGRID densification), 0–500.
+// edgeCrossings: also insert the points where an edge crosses an icosahedron
+// face edge and bends there (DGGRID 9.2 insert_cell_bdry_edge_crossing).
 CellVerticesResult seqNumsToVertices(const DggsParams& p,
-                                      const std::vector<SeqNum>& seqnums);
+                                      const std::vector<SeqNum>& seqnums,
+                                      int  densify       = 0,
+                                      bool edgeCrossings = false);
+
+// ---------------------------------------------------------------------------
+// Distance between geographic points in km, in the grid's datum: the
+// great-circle distance on the grid sphere for AUTHALIC_SPHERE, the WGS84
+// ellipsoidal geodesic (DGGRID 9.2, Vincenty) for WGS84. Throws for
+// coordinates out of range and, for WGS84, nearly antipodal points, where
+// the geodesic does not converge.
+// ---------------------------------------------------------------------------
+double geoDistanceKM(const DggsParams& p,
+                     double lon1_deg, double lat1_deg,
+                     double lon2_deg, double lat2_deg);
 
 // ---------------------------------------------------------------------------
 // FROM SEQNUM
