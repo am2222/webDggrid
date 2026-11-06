@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.1.0](https://github.com/am2222/webDggrid/compare/v2.0.0...v2.1.0) (2026-11-06)
+
+
+### Features
+
+* add densification and edgeCrossings options to cell boundaries ([0a50105](https://github.com/am2222/webDggrid/commit/0a50105d16f75e052ae8c057da8b85f8744dc62a))
+* add densification and edgeCrossings options to cell boundaries ([6514f5b](https://github.com/am2222/webDggrid/commit/6514f5b7a6e6268054fdfcdb46483e9bf4146ebb))
+* add geoDistanceKM for great-circle and WGS84 geodesic distances ([0a50105](https://github.com/am2222/webDggrid/commit/0a50105d16f75e052ae8c057da8b85f8744dc62a))
+* add geoDistanceKM for great-circle and WGS84 geodesic distances ([6514f5b](https://github.com/am2222/webDggrid/commit/6514f5b7a6e6268054fdfcdb46483e9bf4146ebb))
+* **dggrid:** upgrade to DGGRID v9.2 ([0a50105](https://github.com/am2222/webDggrid/commit/0a50105d16f75e052ae8c057da8b85f8744dc62a))
+* **dggrid:** upgrade to DGGRID v9.2 ([6514f5b](https://github.com/am2222/webDggrid/commit/6514f5b7a6e6268054fdfcdb46483e9bf4146ebb))
+
+
+### Bug Fixes
+
+* assign points near quad boundaries in triangle and diamond grids correctly ([0a50105](https://github.com/am2222/webDggrid/commit/0a50105d16f75e052ae8c057da8b85f8744dc62a))
+* assign points near quad boundaries in triangle and diamond grids correctly ([6514f5b](https://github.com/am2222/webDggrid/commit/6514f5b7a6e6268054fdfcdb46483e9bf4146ebb))
+* correct great-circle distances and azimuths at and across the poles ([0a50105](https://github.com/am2222/webDggrid/commit/0a50105d16f75e052ae8c057da8b85f8744dc62a))
+* correct great-circle distances and azimuths at and across the poles ([6514f5b](https://github.com/am2222/webDggrid/commit/6514f5b7a6e6268054fdfcdb46483e9bf4146ebb))
+* remove longitude noise for points within rounding of a pole ([0a50105](https://github.com/am2222/webDggrid/commit/0a50105d16f75e052ae8c057da8b85f8744dc62a))
+* remove longitude noise for points within rounding of a pole ([6514f5b](https://github.com/am2222/webDggrid/commit/6514f5b7a6e6268054fdfcdb46483e9bf4146ebb))
+
 ## [2.0.0](https://github.com/am2222/webDggrid/compare/v1.11.0...v2.0.0) (2026-10-24)
 
 
