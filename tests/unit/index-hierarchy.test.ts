@@ -175,9 +175,13 @@ describe('Indexing parent/children (DGGRID v9)', () => {
             expect(() => dggs.sequenceNumIndexChildren([1n], 3, IndexingSystem.Z7)).toThrow(/Z7 not available/);
         });
 
-        test('non-hexagon topology', () => {
+        test('topologies without an indexing system', () => {
+            // aperture 4 triangles (QUADTREE) and diamonds (ZORDER) have one
+            // since DGGRID 9.3; ZORDER is not defined on triangles
             dggs.setDggs(grid(4, Projection.ISEA, Topology.TRIANGLE), 3);
-            expect(() => dggs.sequenceNumIndexParent([1n], 3)).toThrow(/not available/);
+            expect(() => dggs.sequenceNumIndexParent([1n], 3, IndexingSystem.ZORDER)).toThrow(/not available/);
+            dggs.setDggs(grid(4, Projection.ISEA, Topology.DIAMOND), 3);
+            expect(() => dggs.sequenceNumIndexParent([1n], 3, IndexingSystem.QUADTREE)).toThrow(/not available/);
         });
 
         test('aperture sequences', () => {

@@ -4,7 +4,7 @@
 
 > **dggsPreset**(`name`): [`IDGGSProps`](../interfaces/IDGGSProps.md)
 
-Defined in: [webdggrid.ts:360](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L360)
+Defined in: [webdggrid.ts:393](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L393)
 
 Returns the [IDGGSProps](../interfaces/IDGGSProps.md) of a DGGRID preset grid (DGGRID's
 `dggs_type`), for [Webdggrid.setDggs](../classes/Webdggrid.md#setdggs).

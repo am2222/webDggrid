@@ -94,8 +94,25 @@ export enum IndexingSystem {
     'Z3' = 'Z3',
     /** Z7 — pure aperture 7 hexagon grids (e.g. IGEO7). */
     'Z7' = 'Z7',
-    /** ZORDER — pure aperture 3 or 4 hexagon grids. */
+    /** ZORDER — pure aperture 3 or 4 hexagon grids, and aperture 4 diamond grids. */
     'ZORDER' = 'ZORDER',
+    /** QUADTREE — pure aperture 4 triangle grids (DGGRID 9.3), resolutions 0–29. */
+    'QUADTREE' = 'QUADTREE',
+}
+
+/**
+ * Result of {@link Webdggrid.geodesicInverse}: the shortest path between two
+ * points in the grid's {@link Datum}.
+ */
+export interface GeodesicInverse {
+    /** Length of the geodesic in km. */
+    distanceKM: number;
+    /**
+     * Forward azimuth at the start point in degrees, clockwise from north, in
+     * (-180, 180]. 0 for coincident points. At a pole it is relative to the
+     * meridian of the longitude given for that point.
+     */
+    azimuth: number;
 }
 
 /**
@@ -319,16 +336,22 @@ export function orientationPreset(preset: OrientationPreset): { poleCoordinates:
 }
 
 /**
- * DGGRID 9.1 preset grid names (`dggs_type`) that WebDggrid supports.
+ * DGGRID 9.31 preset grid names (`dggs_type`) that WebDggrid supports.
  *
  * Names are `<projection><aperture><topology>` plus suffixes:
  * - `S` — spherical: authalic-sphere coordinates and the ISEA orientation.
  *   The unsuffixed legacy names (e.g. `ISEA4H`) are the same grids.
  * - `L` — ellipsoidal: WGS84 coordinates ({@link Datum.WGS84}) and the ISEAL
  *   orientation.
- * - `Z` — hierarchically indexed (Z3 / ZORDER / Z7 by aperture). The grid is
- *   the same as without `Z`; WebDggrid exposes every index for every grid
- *   that supports it.
+ * - `Z` — hierarchically indexed (Z3 / ZORDER / Z7 by aperture; ZORDER for
+ *   the aperture 4 diamond presets `ISEA4DSZ`, `IVEA4DSZ`, `IVEA4DLZ`,
+ *   `FULLER4DZ`).
+ * - `Q` — QUADTREE indexed aperture 4 triangle grids (DGGRID 9.3):
+ *   `ISEA4TSQ`, `IVEA4TSQ`, `ISEA4TLQ`, `IVEA4TLQ`, `FULLER4TQ`.
+ *
+ * `Z`/`Q` grids are the same as without the suffix; WebDggrid exposes every
+ * index for every grid that supports it. `FULLER…S` (DGGRID 9.3) are aliases
+ * of the plain `FULLER…` names.
  *
  * `IGEO7v1` is `ISEA7HSZ` and `IGEO7v2` is `ISEA7HLZ`. The mixed-aperture
  * `…43H` grids, SUPERFUND, and H3 are not supported.
@@ -336,8 +359,18 @@ export function orientationPreset(preset: OrientationPreset): { poleCoordinates:
 export type DggsPresetName =
     | `${'ISEA' | 'IVEA'}${'3H' | '4H' | '7H' | '4T' | '4D'}${'' | 'S' | 'L'}`
     | `${'ISEA' | 'IVEA'}${'3H' | '4H' | '7H'}${'S' | 'L'}Z`
-    | `FULLER${'3H' | '4H' | '7H' | '4T' | '4D'}`
+    | 'ISEA4DSZ' | 'IVEA4DSZ' | 'IVEA4DLZ' | 'FULLER4DZ'
+    | `${'ISEA' | 'IVEA'}4T${'S' | 'L'}Q` | 'FULLER4TQ'
+    | `FULLER${'3H' | '4H' | '7H' | '4T' | '4D'}${'' | 'S'}`
     | 'IGEO7v1' | 'IGEO7v2' | 'PLANETRISK';
+
+// Indexed triangle/diamond presets added in DGGRID 9.3. Hexagon Z presets
+// are the S/L forms of every ISEA/IVEA hexagon grid; these are listed
+// one by one, as DGGRID does.
+const INDEXED_TD_PRESETS = new Set([
+    'ISEA4DSZ', 'IVEA4DSZ', 'IVEA4DLZ', 'FULLER4DZ',
+    'ISEA4TSQ', 'IVEA4TSQ', 'ISEA4TLQ', 'IVEA4TLQ', 'FULLER4TQ',
+]);
 
 /**
  * Returns the {@link IDGGSProps} of a DGGRID preset grid (DGGRID's
@@ -374,11 +407,12 @@ export function dggsPreset(name: DggsPresetName): IDGGSProps {
         };
     }
 
-    const m = /^(ISEA|IVEA|FULLER)([347])([HTD])(S|L)?(Z)?$/.exec(grid);
+    const m = /^(ISEA|IVEA|FULLER)([347])([HTD])(S|L)?(Z|Q)?$/.exec(grid);
     const fuller = m?.[1] === 'FULLER';
+    const hexZ = m?.[3] === 'H' && m[5] === 'Z' && !!m[4] && !fuller;  // ISEA3HSZ, IVEA7HLZ, ...
     const valid = m && (m[3] === 'H' || m[2] === '4')                  // T and D are aperture 4 only
-        && !(fuller && (m[4] || m[5]))                                  // FULLER has no S/L/Z forms
-        && !(m[5] && (m[3] !== 'H' || !m[4]));                          // Z needs a hexagon grid and S/L
+        && !(fuller && m[4] === 'L')                                    // FULLER is spherical only
+        && (!m[5] || hexZ || INDEXED_TD_PRESETS.has(grid));             // Z/Q: listed forms only
     if (!m || !valid) throw new Error(`Unknown or unsupported DGGS preset '${name}'`);
 
     const ellipsoidal = m[4] === 'L';
@@ -567,13 +601,13 @@ export class Webdggrid {
      * Returns the version string of the underlying DGGRID C++ library.
      *
      * ```ts
-     * console.log(dggs.version()); // e.g. "8.3b"
+     * console.log(dggs.version()); // e.g. "9.31"
      * ```
      *
      * @returns The DGGRID C++ library version string.
      */
     version(): string {
-        return this._module.Webdggrid.prototype.version();
+        return this._module.dggridVersion();
     }
 
     /**
@@ -746,8 +780,9 @@ export class Webdggrid {
      *
      * - `AUTHALIC_SPHERE` — great-circle distance on the grid sphere (see
      *   {@link IDGGSProps.sphereRadiusKm}).
-     * - `WGS84` — geodesic distance on the WGS84 ellipsoid (DGGRID 9.2,
-     *   Vincenty's inverse formula).
+     * - `WGS84` — geodesic distance on the WGS84 ellipsoid (DGGRID 9.31
+     *   `DgGeodesic`, which converges for every pair of points, antipodal
+     *   ones included).
      *
      * ```ts
      * dggs.setDggs({ ...dggs.dggs, datum: Datum.WGS84 }, 5);
@@ -757,9 +792,7 @@ export class Webdggrid {
      * @param from - `[lng, lat]` start points.
      * @param to - `[lng, lat]` end points, one per start point.
      * @returns One distance in km per pair.
-     * @throws If the arrays differ in length, a coordinate is out of range, or,
-     *   with `WGS84`, two points are nearly antipodal (more than 179° apart),
-     *   where the ellipsoidal geodesic does not converge.
+     * @throws If the arrays differ in length or a coordinate is out of range.
      */
     geoDistanceKM(from: Position[], to: Position[]): number[] {
         if (from.length !== to.length) {
@@ -772,6 +805,126 @@ export class Webdggrid {
                 from.map((c) => c[1]),
                 to.map((c) => c[0]),
                 to.map((c) => c[1])
+            ) as Float64Array);
+        } catch (e) {
+            throw new Error(this._exceptionMessage(e), { cause: e });
+        }
+    }
+
+    /**
+     * Solves the inverse geodesic problem for each pair of points in the
+     * grid's {@link Datum}: the length of the shortest path from `from[i]` to
+     * `to[i]` and its forward azimuth at `from[i]` (DGGRID 9.31). On the
+     * authalic sphere that path is a great circle; on `WGS84` it is the
+     * ellipsoidal geodesic.
+     *
+     * ```ts
+     * const [{ distanceKM, azimuth }] = dggs.geodesicInverse(
+     *     [[-74.006, 40.7128]], [[-0.1276, 51.5072]]);
+     * ```
+     *
+     * @param from - `[lng, lat]` start points.
+     * @param to - `[lng, lat]` end points, one per start point.
+     * @returns One {@link GeodesicInverse} per pair.
+     * @throws If the arrays differ in length or a coordinate is out of range.
+     */
+    geodesicInverse(from: Position[], to: Position[]): GeodesicInverse[] {
+        if (from.length !== to.length) {
+            throw new Error('from and to must have the same length');
+        }
+        let r: Float64Array;
+        try {
+            r = this._module.GEO_geodesicInverse(
+                ...this._getParams(this.resolution),
+                from.map((c) => c[0]),
+                from.map((c) => c[1]),
+                to.map((c) => c[0]),
+                to.map((c) => c[1])
+            ) as Float64Array;
+        } catch (e) {
+            throw new Error(this._exceptionMessage(e), { cause: e });
+        }
+        const n = from.length;
+        return Array.from({ length: n }, (_, i) => ({
+            distanceKM: r[i],
+            azimuth: r[n + i],
+        }));
+    }
+
+    /**
+     * Solves the direct geodesic problem in the grid's {@link Datum}: the
+     * point reached by travelling `distancesKM[i]` from `from[i]` along
+     * `azimuths[i]` (degrees clockwise from north) (DGGRID 9.31). A negative
+     * distance travels the opposite way.
+     *
+     * ```ts
+     * // 100 km due east of Null Island
+     * const [[lng, lat]] = dggs.geodesicDirect([[0, 0]], [90], [100]);
+     * ```
+     *
+     * @param from - `[lng, lat]` start points.
+     * @param azimuths - Start azimuths in degrees, one per point.
+     * @param distancesKM - Distances in km, one per point.
+     * @returns The destination `[lng, lat]` of each point, longitude in
+     *   [-180, 180].
+     * @throws If the arrays differ in length or an input is out of range or
+     *   not finite.
+     */
+    geodesicDirect(from: Position[], azimuths: number[], distancesKM: number[]): Position[] {
+        if (azimuths.length !== from.length || distancesKM.length !== from.length) {
+            throw new Error('from, azimuths and distancesKM must have the same length');
+        }
+        let r: Float64Array;
+        try {
+            r = this._module.GEO_geodesicDirect(
+                ...this._getParams(this.resolution),
+                from.map((c) => c[0]),
+                from.map((c) => c[1]),
+                azimuths,
+                distancesKM
+            ) as Float64Array;
+        } catch (e) {
+            throw new Error(this._exceptionMessage(e), { cause: e });
+        }
+        const n = from.length;
+        return Array.from({ length: n }, (_, i) => [r[i], r[n + i]]);
+    }
+
+    /**
+     * Returns the area in km² of each cell, measured with geodesic edges in
+     * the grid's {@link Datum} (DGGRID 9.31): great-circle edges on the grid
+     * sphere for `AUTHALIC_SPHERE`, ellipsoidal geodesics for `WGS84`.
+     *
+     * Unlike {@link cellAreaKM}, the average area of a cell at a resolution,
+     * this measures each cell's own boundary. On an equal-area projection
+     * the values are close to the average (pentagons are 5/6 of a hexagon);
+     * the small differences come from measuring geodesic rather than
+     * projected edges. Add `densification` to follow the projected edges
+     * more closely.
+     *
+     * ```ts
+     * const [km2] = dggs.sequenceNumToAreaKM([1n], 5, { densification: 10 });
+     * ```
+     *
+     * @param sequenceNum - Array of `BigInt` cell IDs.
+     * @param resolution - Resolution of the IDs. Defaults to the instance's
+     *   current {@link resolution}.
+     * @param options - `densification`: points inserted along each cell edge
+     *   before measuring, 0–500 (default 0).
+     * @returns One area in km² per cell.
+     * @throws If an ID is out of range or `densification` is not 0–500.
+     */
+    sequenceNumToAreaKM(
+        sequenceNum: bigint[],
+        resolution: number = DEFAULT_RESOLUTION,
+        options: { densification?: number } = {}
+    ): number[] {
+        const { densification = 0 } = options;
+        try {
+            return Array.from(this._module.SeqNumAreaKM2(
+                ...this._getParams(resolution),
+                densification,
+                sequenceNum
             ) as Float64Array);
         } catch (e) {
             throw new Error(this._exceptionMessage(e), { cause: e });
@@ -1287,7 +1440,7 @@ export class Webdggrid {
 
     /**
      * Returns the **indexing parent** of each input cell at resolution - 1,
-     * as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
+     * as defined by a hierarchical indexing system (Z3, Z7, ZORDER or QUADTREE).
      *
      * The indexing parent is the cell whose index is the input's index with
      * the last digit removed. It is defined by the index's digit structure,
@@ -1301,9 +1454,10 @@ export class Webdggrid {
      * ```
      *
      * ::: info
-     * Requires DGGRID v9 indexing systems: only pure-aperture hexagon grids
-     * are supported (Z7 for aperture 7, Z3 for aperture 3, ZORDER for
-     * aperture 3 or 4). Aperture sequences are not supported.
+     * Requires DGGRID v9 indexing systems: pure-aperture hexagon grids (Z7
+     * for aperture 7, Z3 for aperture 3, ZORDER for aperture 3 or 4),
+     * aperture 4 diamond grids (ZORDER) and aperture 4 triangle grids
+     * (QUADTREE). Aperture sequences are not supported.
      * :::
      *
      * @param sequenceNum - Array of `BigInt` cell IDs whose indexing parents
@@ -1311,7 +1465,8 @@ export class Webdggrid {
      * @param resolution - Resolution of the input IDs (must be > 0).
      *   Defaults to the instance's current {@link resolution}.
      * @param system - Indexing system to use. Defaults to the one matching
-     *   the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4.
+     *   the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4,
+     *   QUADTREE for aperture 4 triangles.
      * @returns Array of `BigInt` parent cell IDs at resolution - 1, one per
      *   input cell, in the same order.
      * @throws If resolution is 0, or the system is not available for the grid.
@@ -1338,7 +1493,7 @@ export class Webdggrid {
 
     /**
      * Returns the **indexing children** of each input cell at resolution + 1,
-     * as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
+     * as defined by a hierarchical indexing system (Z3, Z7, ZORDER or QUADTREE).
      *
      * The indexing children are the cells whose indexes extend the input's
      * index by one digit: up to 7 per cell for Z7, 3 for Z3, 4 for ZORDER on
@@ -1357,7 +1512,8 @@ export class Webdggrid {
      * @param resolution - Resolution of the input IDs. Defaults to the
      *   instance's current {@link resolution}.
      * @param system - Indexing system to use. Defaults to the one matching
-     *   the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4.
+     *   the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4,
+     *   QUADTREE for aperture 4 triangles.
      * @returns A 2-D array: `result[i]` holds the child IDs of
      *   `sequenceNum[i]` at resolution + 1.
      * @throws If the system is not available for the grid (see
@@ -1475,9 +1631,10 @@ export class Webdggrid {
      * ZORDER uses digit-interleaved coordinates to create a space-filling
      * curve index. This provides good spatial locality for range queries.
      *
-     * **Compatibility:** ZORDER is only available for **aperture 3 and 4**
-     * hexagon grids. It is **NOT supported** for aperture 7 or for aperture
-     * sequences (DGGRID v9 restricts ZORDER to pure-aperture grids).
+     * **Compatibility:** ZORDER is available for **aperture 3 and 4**
+     * hexagon grids and (since DGGRID 9.3) **aperture 4 diamond** grids. It
+     * is **NOT supported** for aperture 7, triangle grids (use
+     * {@link sequenceNumToQuadtree}) or aperture sequences.
      *
      * ```ts
      * // With aperture 4:
@@ -1758,6 +1915,76 @@ export class Webdggrid {
             }
             console.error(errMsg);
             throw new Error(errMsg, { cause: e });
+        }
+    }
+
+    /**
+     * Converts a SEQNUM cell ID to a QUADTREE index (DGGRID 9.3).
+     *
+     * QUADTREE indexes pure aperture 4 **triangle** grids: a root for each
+     * of the 20 icosahedron-face triangles, then one 2-bit digit per
+     * resolution (0 = center child, 1–3 = corner children). Packed INT64:
+     * root in bits 63..59, digits in bits 58..1, coarsest first.
+     *
+     * ```ts
+     * dggs.setDggs(dggsPreset('ISEA4TSQ'), 5);
+     * const q = dggs.sequenceNumToQuadtree(100n, 5);
+     * ```
+     *
+     * @param sequenceNum - The cell sequence number to convert.
+     * @param resolution - Resolution of the input cell (0–29). Defaults to
+     *   the instance's current {@link resolution}.
+     * @returns The QUADTREE index as a BigInt.
+     * @throws If the grid is not a pure aperture 4 triangle grid.
+     */
+    sequenceNumToQuadtree(
+        sequenceNum: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        this._assertQuadtree();
+        try {
+            return this._u64(this._module.SEQNUM_to_QUADTREE(
+                ...this._getParams(resolution),
+                sequenceNum
+            ));
+        } catch (e) {
+            throw new Error(this._exceptionMessage(e).toString(), { cause: e });
+        }
+    }
+
+    /**
+     * Converts a QUADTREE index (DGGRID 9.3) to a SEQNUM cell ID. See
+     * {@link sequenceNumToQuadtree}.
+     *
+     * @param quadtreeValue - The QUADTREE index (BigInt).
+     * @param resolution - Resolution of the index (0–29). Defaults to the
+     *   instance's current {@link resolution}.
+     * @returns The sequence number of the cell.
+     * @throws If the grid is not a pure aperture 4 triangle grid.
+     */
+    quadtreeToSequenceNum(
+        quadtreeValue: bigint,
+        resolution: number = DEFAULT_RESOLUTION
+    ): bigint {
+        this._assertQuadtree();
+        try {
+            return this._module.QUADTREE_to_SEQNUM(
+                ...this._getParams(resolution),
+                quadtreeValue
+            );
+        } catch (e) {
+            throw new Error(this._exceptionMessage(e).toString(), { cause: e });
+        }
+    }
+
+    /** @internal */
+    private _assertQuadtree(): void {
+        const { aperture, topology, apertureSequence } = this.dggs;
+        if (aperture !== 4 || topology !== Topology.TRIANGLE || apertureSequence) {
+            throw new Error(
+                'QUADTREE is only available for pure aperture 4 triangle grids. ' +
+                `Current configuration: aperture ${aperture}, topology ${topology}.`
+            );
         }
     }
 

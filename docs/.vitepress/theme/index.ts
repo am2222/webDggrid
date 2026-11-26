@@ -1,6 +1,7 @@
 import DefaultTheme from 'vitepress/theme'
 import { h } from 'vue'
 import DggsGlobe from './components/DggsGlobe.vue'
+import DggsNavaraGlobe from './components/DggsNavaraGlobe.vue'
 import DggsD3Globe from './components/DggsD3Globe.vue'
 import DggsHeroBackground from './components/DggsHeroBackground.vue'
 import DggsAddressTypesDemo from './components/DggsAddressTypesDemo.vue'
@@ -13,6 +14,7 @@ export default {
 
   enhanceApp({ app }: { app: any }) {
     app.component('DggsGlobe', DggsGlobe)
+    app.component('DggsNavaraGlobe', DggsNavaraGlobe)
     app.component('DggsD3Globe', DggsD3Globe)
     app.component('DggsHeroBackground', DggsHeroBackground)
     app.component('DggsAddressTypesDemo', DggsAddressTypesDemo)

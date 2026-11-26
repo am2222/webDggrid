@@ -3,6 +3,7 @@
 #include <emscripten/bind.h>
 
 // DGGRID headers needed for cell polygon generation (SeqNumGrid)
+#include <dglib/DgBase.h>        // DGGRID_VERSION
 #include <dglib/DgIDGGBase.h>
 #include <dglib/DgBoundedIDGG.h>
 #include <dglib/DgEllipsoidRF.h>
@@ -280,6 +281,62 @@ val GEO_distanceKM(
     for (std::size_t i = 0; i < x1.size(); i++)
         out[i] = dggrid::geoDistanceKM(p, x1[i], y1[i], x2[i], y2[i]);
     return toFloat64Array(out);
+}
+
+// Inverse geodesic in the grid's datum, pairwise. Returns
+// [distance_km_0..N-1, azimuth_deg_0..N-1].
+val GEO_geodesicInverse(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    std::string datum, double sphere_radius_km,
+    val xs1, val ys1, val xs2, val ys2)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence,
+                        datum, sphere_radius_km);
+    const auto x1 = convertJSArrayToNumberVector<double>(xs1);
+    const auto y1 = convertJSArrayToNumberVector<double>(ys1);
+    const auto x2 = convertJSArrayToNumberVector<double>(xs2);
+    const auto y2 = convertJSArrayToNumberVector<double>(ys2);
+    if (y1.size() != x1.size() || x2.size() != x1.size() || y2.size() != x1.size())
+        throw std::invalid_argument("coordinate arrays must have the same length");
+    const std::size_t n = x1.size();
+    std::vector<double> out(2 * n);
+    for (std::size_t i = 0; i < n; i++) {
+        const auto r = dggrid::geodesicInverse(p, x1[i], y1[i], x2[i], y2[i]);
+        out[i]     = r.distance_km;
+        out[n + i] = r.azimuth_deg;
+    }
+    return toFloat64Array(out);
+}
+
+// Direct geodesic in the grid's datum: the point reached from (xs[i], ys[i])
+// along azimuths[i] (degrees) after distances[i] km. Returns [lons..., lats...].
+val GEO_geodesicDirect(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    std::string datum, double sphere_radius_km,
+    val xs, val ys, val azimuths, val distances)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence,
+                        datum, sphere_radius_km);
+    const auto x  = convertJSArrayToNumberVector<double>(xs);
+    const auto y  = convertJSArrayToNumberVector<double>(ys);
+    const auto az = convertJSArrayToNumberVector<double>(azimuths);
+    const auto d  = convertJSArrayToNumberVector<double>(distances);
+    if (y.size() != x.size() || az.size() != x.size() || d.size() != x.size())
+        throw std::invalid_argument("input arrays must have the same length");
+    std::vector<dggrid::GeoCoord> out(x.size());
+    for (std::size_t i = 0; i < x.size(); i++)
+        out[i] = dggrid::geodesicDirect(p, x[i], y[i], az[i], d[i]);
+    return geoArray(out);
 }
 
 val GEO_to_PLANE(
@@ -1294,6 +1351,61 @@ uint64_t Z7_to_SEQNUM(
     return dggrid::z7ToSeqNum(p, value);
 }
 
+// Version of the bundled DGGRID library, e.g. "9.31"
+std::string dggridVersion() { return DGGRID_VERSION; }
+
+// ── QUADTREE (DGGRID 9.3) ──────────────────────────────────────────────────
+
+uint64_t SEQNUM_to_QUADTREE(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    std::string datum, double sphere_radius_km,
+    uint64_t seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence,
+                        datum, sphere_radius_km);
+    return dggrid::seqNumToQuadtree(p, seqnum).value;
+}
+
+uint64_t QUADTREE_to_SEQNUM(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    std::string datum, double sphere_radius_km,
+    uint64_t value)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence,
+                        datum, sphere_radius_km);
+    return dggrid::quadtreeToSeqNum(p, value);
+}
+
+// ── Cell area (DGGRID 9.31) ────────────────────────────────────────────────
+
+// Geodesic area in km² of each cell, in the grid's datum.
+val SeqNumAreaKM2(
+    double pole_lon_deg, double pole_lat_deg, double azimuth_deg,
+    unsigned int aperture, int res,
+    std::string topology, std::string projection,
+    bool is_aperture_sequence, std::string aperture_sequence,
+    std::string datum, double sphere_radius_km,
+    int densify, val seqnum)
+{
+    auto p = makeParams(pole_lon_deg, pole_lat_deg, azimuth_deg,
+                        aperture, res, topology, projection,
+                        is_aperture_sequence, aperture_sequence,
+                        datum, sphere_radius_km);
+    const std::vector<uint64_t> sv =
+        convertJSArrayToNumberVector<uint64_t>(seqnum);
+    return toFloat64Array(dggrid::seqNumsToAreaKM2(p, sv, densify));
+}
+
 // ===========================================================================
 // Utilities
 // ===========================================================================
@@ -1345,7 +1457,10 @@ EMSCRIPTEN_BINDINGS(my_module)
 
     // FROM GEO
     emscripten::function("GEO_to_GEO",     &GEO_to_GEO);
+    emscripten::function("dggridVersion", &dggridVersion);
     emscripten::function("GEO_distanceKM", &GEO_distanceKM);
+    emscripten::function("GEO_geodesicInverse", &GEO_geodesicInverse);
+    emscripten::function("GEO_geodesicDirect",  &GEO_geodesicDirect);
     emscripten::function("GEO_to_PLANE",   &GEO_to_PLANE);
     emscripten::function("GEO_to_PROJTRI", &GEO_to_PROJTRI);
     emscripten::function("GEO_to_Q2DD",    &GEO_to_Q2DD);
@@ -1407,4 +1522,7 @@ EMSCRIPTEN_BINDINGS(my_module)
     emscripten::function("Z3_to_SEQNUM",        &Z3_to_SEQNUM);
     emscripten::function("SEQNUM_to_Z7",        &SEQNUM_to_Z7);
     emscripten::function("Z7_to_SEQNUM",        &Z7_to_SEQNUM);
+    emscripten::function("SEQNUM_to_QUADTREE",  &SEQNUM_to_QUADTREE);
+    emscripten::function("QUADTREE_to_SEQNUM",  &QUADTREE_to_SEQNUM);
+    emscripten::function("SeqNumAreaKM2",       &SeqNumAreaKM2);
 }

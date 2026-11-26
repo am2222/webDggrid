@@ -1,7 +1,7 @@
 // dggrid_transform.hpp
 //
 // Public API for dggrid coordinate transforms and grid utilities.
-// Implemented against the DGGRID v9.2 dglib API.
+// Implemented against the DGGRID v9.31 dglib API.
 //
 #pragma once
 
@@ -62,6 +62,7 @@ struct Vertex2DDCoord { bool keep; int vertNum; int triNum; double x, y; };
 struct ZOrderCoord  { uint64_t value; };
 struct Z3Coord      { uint64_t value; };
 struct Z7Coord      { uint64_t value; };
+struct QuadtreeCoord { uint64_t value; };
 
 // ---------------------------------------------------------------------------
 // Resolution information
@@ -155,13 +156,39 @@ CellVerticesResult seqNumsToVertices(const DggsParams& p,
 // ---------------------------------------------------------------------------
 // Distance between geographic points in km, in the grid's datum: the
 // great-circle distance on the grid sphere for AUTHALIC_SPHERE, the WGS84
-// ellipsoidal geodesic (DGGRID 9.2, Vincenty) for WGS84. Throws for
-// coordinates out of range and, for WGS84, nearly antipodal points, where
-// the geodesic does not converge.
+// ellipsoidal geodesic (DGGRID 9.31 DgGeodesic) for WGS84. Throws for
+// coordinates out of range. Since 9.31 the geodesic converges for every
+// pair of points, antipodal ones included.
 // ---------------------------------------------------------------------------
 double geoDistanceKM(const DggsParams& p,
                      double lon1_deg, double lat1_deg,
                      double lon2_deg, double lat2_deg);
+
+// Inverse geodesic problem in the grid's datum: shortest distance (km) and
+// forward azimuth at the start point (degrees clockwise from north, in
+// (-180, 180]; 0 for coincident points).
+struct GeodesicInverseResult { double distance_km; double azimuth_deg; };
+GeodesicInverseResult geodesicInverse(const DggsParams& p,
+                                      double lon1_deg, double lat1_deg,
+                                      double lon2_deg, double lat2_deg);
+
+// Direct geodesic problem in the grid's datum: the point reached by
+// travelling distance_km (negative goes backwards) from (lon, lat) along
+// azimuth_deg (clockwise from north). Longitude is in [-180, 180].
+GeoCoord geodesicDirect(const DggsParams& p,
+                        double lon_deg, double lat_deg,
+                        double azimuth_deg, double distance_km);
+
+// ---------------------------------------------------------------------------
+// Cell area in km² with geodesic edges (DGGRID 9.31 cellAreaKM), measured in
+// the grid's datum: great-circle edges on the grid sphere for
+// AUTHALIC_SPHERE, ellipsoidal geodesics for WGS84. densify (0–500) inserts
+// points along each projected edge before measuring, so the measured
+// boundary follows the true (projection-curved) cell edge more closely.
+// ---------------------------------------------------------------------------
+std::vector<double> seqNumsToAreaKM2(const DggsParams& p,
+                                     const std::vector<SeqNum>& seqnums,
+                                     int densify = 0);
 
 // ---------------------------------------------------------------------------
 // FROM SEQNUM
@@ -176,6 +203,7 @@ Vertex2DDCoord seqNumToVertex2DD (const DggsParams& p, SeqNum seqnum);
 ZOrderCoord  seqNumToZOrder (const DggsParams& p, SeqNum seqnum);
 Z3Coord      seqNumToZ3     (const DggsParams& p, SeqNum seqnum);
 Z7Coord      seqNumToZ7     (const DggsParams& p, SeqNum seqnum);
+QuadtreeCoord seqNumToQuadtree (const DggsParams& p, SeqNum seqnum);
 
 // ---------------------------------------------------------------------------
 // FROM VERTEX2DD
@@ -197,6 +225,11 @@ SeqNum       z3ToSeqNum (const DggsParams& p, uint64_t value);
 // FROM Z7
 // ---------------------------------------------------------------------------
 SeqNum       z7ToSeqNum (const DggsParams& p, uint64_t value);
+
+// ---------------------------------------------------------------------------
+// FROM QUADTREE (DGGRID 9.3; pure aperture 4 triangle grids)
+// ---------------------------------------------------------------------------
+SeqNum       quadtreeToSeqNum (const DggsParams& p, uint64_t value);
 
 // ---------------------------------------------------------------------------
 // NEIGHBORS - Get topologically adjacent cells (share an edge)
@@ -227,8 +260,9 @@ std::vector<std::vector<SeqNum>> seqNumsChildren (const DggsParams& p,
 // INDEXING PARENT/CHILDREN (DGGRID v9)
 // ===========================================================================
 // Parent/children by the digit structure of a hierarchical index system
-// ("Z3", "Z7", "ZORDER"; empty = the system matching the grid's aperture).
-// Pure-aperture hexagon grids only.
+// ("Z3", "Z7", "ZORDER", "QUADTREE"; empty = the system matching the grid).
+// Pure-aperture hexagon grids, aperture 4 diamond grids (ZORDER) and
+// aperture 4 triangle grids (QUADTREE).
 
 SeqNum              seqNumIndexParent (const DggsParams& p, SeqNum seqnum,
                                        const std::string& system);

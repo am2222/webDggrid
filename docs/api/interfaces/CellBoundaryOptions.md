@@ -2,7 +2,7 @@
 
 # Interface: CellBoundaryOptions
 
-Defined in: [webdggrid.ts:164](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L164)
+Defined in: [webdggrid.ts:181](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L181)
 
 Options for the cell boundaries returned by
 [Webdggrid.sequenceNumToGrid](../classes/Webdggrid.md#sequencenumtogrid) and
@@ -14,7 +14,7 @@ Options for the cell boundaries returned by
 
 > `optional` **densification?**: `number`
 
-Defined in: [webdggrid.ts:177](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L177)
+Defined in: [webdggrid.ts:194](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L194)
 
 Number of points inserted along each cell edge (DGGRID
 `densification`), 0–500. Densified edges follow the projection, so the
@@ -27,7 +27,7 @@ Defaults to `0`.
 
 > `optional` **edgeCrossings?**: `boolean`
 
-Defined in: [webdggrid.ts:185](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L185)
+Defined in: [webdggrid.ts:202](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L202)
 
 Insert the points where a cell edge crosses an icosahedron face edge
 and bends there (DGGRID 9.2 `insert_cell_bdry_edge_crossing`). Without
@@ -41,7 +41,7 @@ Defaults to `false`.
 
 > `optional` **unwrap?**: `boolean`
 
-Defined in: [webdggrid.ts:170](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L170)
+Defined in: [webdggrid.ts:187](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L187)
 
 Pass antimeridian-crossing rings through [unwrapAntimeridianRing](../functions/unwrapAntimeridianRing.md)
 so longitudes stay contiguous (they may exceed 180°). Defaults to

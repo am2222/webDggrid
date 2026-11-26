@@ -4,7 +4,7 @@
 
 > **orientationPreset**(`preset`): `object`
 
-Defined in: [webdggrid.ts:315](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L315)
+Defined in: [webdggrid.ts:332](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L332)
 
 Returns the `poleCoordinates` and `azimuth` of a named orientation.
 
