@@ -2,7 +2,7 @@
 
 # Class: Webdggrid
 
-Defined in: [webdggrid.ts:472](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L472)
+Defined in: [webdggrid.ts:506](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L506)
 
 Main entry point for the WebDggrid library.
 
@@ -45,7 +45,7 @@ the returned instance throughout your application. Call
 
 > `protected` **\_module**: `any`
 
-Defined in: [webdggrid.ts:495](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L495)
+Defined in: [webdggrid.ts:529](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L529)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [webdggrid.ts:495](https://github.com/am2222/webDggrid/blob/36270011
 
 > **dggs**: [`IDGGSProps`](../interfaces/IDGGSProps.md) = `DEFAULT_DGGS`
 
-Defined in: [webdggrid.ts:481](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L481)
+Defined in: [webdggrid.ts:515](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L515)
 
 The active DGGS configuration used by all conversion and statistics
 methods. Change it at any time via [setDggs](#setdggs).
@@ -67,7 +67,7 @@ pole at 0° N 0° E, azimuth 0°).
 
 > **resolution**: `number` = `DEFAULT_RESOLUTION`
 
-Defined in: [webdggrid.ts:493](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L493)
+Defined in: [webdggrid.ts:527](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L527)
 
 The active grid resolution. Higher values produce finer, smaller cells.
 The valid range depends on the aperture — for aperture 4 the practical
@@ -84,7 +84,7 @@ Defaults to `1`.
 
 > `readonly` `static` **Z3\_BITS\_PER\_DIGIT**: `2n` = `2n`
 
-Defined in: [webdggrid.ts:1780](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1780)
+Defined in: [webdggrid.ts:2007](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2007)
 
 **`Internal`**
 
@@ -94,7 +94,7 @@ Defined in: [webdggrid.ts:1780](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z3\_DIGIT\_MASK**: `3n` = `3n`
 
-Defined in: [webdggrid.ts:1781](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1781)
+Defined in: [webdggrid.ts:2008](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2008)
 
 **`Internal`**
 
@@ -104,7 +104,7 @@ Defined in: [webdggrid.ts:1781](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z3\_MAX\_RES**: `30` = `30`
 
-Defined in: [webdggrid.ts:1779](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1779)
+Defined in: [webdggrid.ts:2006](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2006)
 
 **`Internal`**
 
@@ -114,7 +114,7 @@ Defined in: [webdggrid.ts:1779](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z3\_QUAD\_MASK**: `17293822569102704640n` = `0xF000000000000000n`
 
-Defined in: [webdggrid.ts:1783](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1783)
+Defined in: [webdggrid.ts:2010](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2010)
 
 **`Internal`**
 
@@ -124,7 +124,7 @@ Defined in: [webdggrid.ts:1783](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z3\_QUAD\_OFFSET**: `60n` = `60n`
 
-Defined in: [webdggrid.ts:1782](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1782)
+Defined in: [webdggrid.ts:2009](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2009)
 
 **`Internal`**
 
@@ -134,7 +134,7 @@ Defined in: [webdggrid.ts:1782](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z7\_BITS\_PER\_DIGIT**: `3n` = `3n`
 
-Defined in: [webdggrid.ts:1773](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1773)
+Defined in: [webdggrid.ts:2000](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2000)
 
 **`Internal`**
 
@@ -144,7 +144,7 @@ Defined in: [webdggrid.ts:1773](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z7\_DIGIT\_MASK**: `7n` = `7n`
 
-Defined in: [webdggrid.ts:1774](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1774)
+Defined in: [webdggrid.ts:2001](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2001)
 
 **`Internal`**
 
@@ -154,7 +154,7 @@ Defined in: [webdggrid.ts:1774](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z7\_MAX\_RES**: `20` = `20`
 
-Defined in: [webdggrid.ts:1772](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1772)
+Defined in: [webdggrid.ts:1999](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1999)
 
 **`Internal`**
 
@@ -164,7 +164,7 @@ Defined in: [webdggrid.ts:1772](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z7\_QUAD\_MASK**: `17293822569102704640n` = `0xF000000000000000n`
 
-Defined in: [webdggrid.ts:1776](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1776)
+Defined in: [webdggrid.ts:2003](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2003)
 
 **`Internal`**
 
@@ -174,7 +174,7 @@ Defined in: [webdggrid.ts:1776](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **Z7\_QUAD\_OFFSET**: `60n` = `60n`
 
-Defined in: [webdggrid.ts:1775](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1775)
+Defined in: [webdggrid.ts:2002](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2002)
 
 **`Internal`**
 
@@ -184,7 +184,7 @@ Defined in: [webdggrid.ts:1775](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **ZORDER\_BITS\_PER\_DIGIT**: `2n` = `2n`
 
-Defined in: [webdggrid.ts:1787](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1787)
+Defined in: [webdggrid.ts:2014](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2014)
 
 **`Internal`**
 
@@ -194,7 +194,7 @@ Defined in: [webdggrid.ts:1787](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **ZORDER\_DIGIT\_MASK**: `3n` = `3n`
 
-Defined in: [webdggrid.ts:1788](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1788)
+Defined in: [webdggrid.ts:2015](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2015)
 
 **`Internal`**
 
@@ -204,7 +204,7 @@ Defined in: [webdggrid.ts:1788](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **ZORDER\_MAX\_RES**: `30` = `30`
 
-Defined in: [webdggrid.ts:1786](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1786)
+Defined in: [webdggrid.ts:2013](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2013)
 
 **`Internal`**
 
@@ -214,7 +214,7 @@ Defined in: [webdggrid.ts:1786](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **ZORDER\_QUAD\_MASK**: `17293822569102704640n` = `0xF000000000000000n`
 
-Defined in: [webdggrid.ts:1790](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1790)
+Defined in: [webdggrid.ts:2017](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2017)
 
 **`Internal`**
 
@@ -224,7 +224,7 @@ Defined in: [webdggrid.ts:1790](https://github.com/am2222/webDggrid/blob/3627001
 
 > `readonly` `static` **ZORDER\_QUAD\_OFFSET**: `60n` = `60n`
 
-Defined in: [webdggrid.ts:1789](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1789)
+Defined in: [webdggrid.ts:2016](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2016)
 
 **`Internal`**
 
@@ -234,7 +234,7 @@ Defined in: [webdggrid.ts:1789](https://github.com/am2222/webDggrid/blob/3627001
 
 > **\_main**(): `any`
 
-Defined in: [webdggrid.ts:637](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L637)
+Defined in: [webdggrid.ts:671](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L671)
 
 **`Internal`**
 
@@ -251,7 +251,7 @@ Not intended for production use.
 
 > **cellAreaKM**(`resolution?`): `number`
 
-Defined in: [webdggrid.ts:688](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L688)
+Defined in: [webdggrid.ts:722](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L722)
 
 Returns the average area of a single cell in square kilometres at the
 given resolution.
@@ -284,7 +284,7 @@ Average cell area in km².
 
 > **cellDistKM**(`resolution?`): `number`
 
-Defined in: [webdggrid.ts:711](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L711)
+Defined in: [webdggrid.ts:745](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L745)
 
 Returns the average centre-to-centre distance between neighbouring cells
 in kilometres at the given resolution.
@@ -313,19 +313,113 @@ Average cell spacing in km.
 
 ***
 
+### geodesicDirect()
+
+> **geodesicDirect**(`from`, `azimuths`, `distancesKM`): `Position`[]
+
+Defined in: [webdggrid.ts:873](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L873)
+
+Solves the direct geodesic problem in the grid's [Datum](../enumerations/Datum.md): the
+point reached by travelling `distancesKM[i]` from `from[i]` along
+`azimuths[i]` (degrees clockwise from north) (DGGRID 9.31). A negative
+distance travels the opposite way.
+
+```ts
+// 100 km due east of Null Island
+const [[lng, lat]] = dggs.geodesicDirect([[0, 0]], [90], [100]);
+```
+
+#### Parameters
+
+##### from
+
+`Position`[]
+
+`[lng, lat]` start points.
+
+##### azimuths
+
+`number`[]
+
+Start azimuths in degrees, one per point.
+
+##### distancesKM
+
+`number`[]
+
+Distances in km, one per point.
+
+#### Returns
+
+`Position`[]
+
+The destination `[lng, lat]` of each point, longitude in
+  [-180, 180].
+
+#### Throws
+
+If the arrays differ in length or an input is out of range or
+  not finite.
+
+***
+
+### geodesicInverse()
+
+> **geodesicInverse**(`from`, `to`): [`GeodesicInverse`](../interfaces/GeodesicInverse.md)[]
+
+Defined in: [webdggrid.ts:831](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L831)
+
+Solves the inverse geodesic problem for each pair of points in the
+grid's [Datum](../enumerations/Datum.md): the length of the shortest path from `from[i]` to
+`to[i]` and its forward azimuth at `from[i]` (DGGRID 9.31). On the
+authalic sphere that path is a great circle; on `WGS84` it is the
+ellipsoidal geodesic.
+
+```ts
+const [{ distanceKM, azimuth }] = dggs.geodesicInverse(
+    [[-74.006, 40.7128]], [[-0.1276, 51.5072]]);
+```
+
+#### Parameters
+
+##### from
+
+`Position`[]
+
+`[lng, lat]` start points.
+
+##### to
+
+`Position`[]
+
+`[lng, lat]` end points, one per start point.
+
+#### Returns
+
+[`GeodesicInverse`](../interfaces/GeodesicInverse.md)[]
+
+One [GeodesicInverse](../interfaces/GeodesicInverse.md) per pair.
+
+#### Throws
+
+If the arrays differ in length or a coordinate is out of range.
+
+***
+
 ### geoDistanceKM()
 
 > **geoDistanceKM**(`from`, `to`): `number`[]
 
-Defined in: [webdggrid.ts:764](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L764)
+Defined in: [webdggrid.ts:797](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L797)
 
 Returns the distance in kilometres from each point in `from` to the
 point at the same index in `to`, in the grid's [Datum](../enumerations/Datum.md):
 
 - `AUTHALIC_SPHERE` — great-circle distance on the grid sphere (see
   [IDGGSProps.sphereRadiusKm](../interfaces/IDGGSProps.md#sphereradiuskm)).
-- `WGS84` — geodesic distance on the WGS84 ellipsoid (DGGRID 9.2,
-  Vincenty's inverse formula).
+- `WGS84` — geodesic distance on the WGS84 ellipsoid (DGGRID 9.31
+  `DgGeodesic`, which converges for every pair of points, antipodal
+  ones included).
 
 ```ts
 dggs.setDggs({ ...dggs.dggs, datum: Datum.WGS84 }, 5);
@@ -354,9 +448,7 @@ One distance in km per pair.
 
 #### Throws
 
-If the arrays differ in length, a coordinate is out of range, or,
-  with `WGS84`, two points are nearly antipodal (more than 179° apart),
-  where the ellipsoidal geodesic does not converge.
+If the arrays differ in length or a coordinate is out of range.
 
 ***
 
@@ -364,7 +456,7 @@ If the arrays differ in length, a coordinate is out of range, or,
 
 > **geoToGeo**(`coordinates`, `resolution?`): `Position`[]
 
-Defined in: [webdggrid.ts:889](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L889)
+Defined in: [webdggrid.ts:1042](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1042)
 
 Snaps an array of geographic coordinates to the centroid of the DGGS
 cell that contains each point.
@@ -414,7 +506,7 @@ Array of `[lng, lat]` cell centroid positions, one per input
 
 > **geoToPlane**(`coordinates`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2055](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2055)
+Defined in: [webdggrid.ts:2282](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2282)
 
 Converts geographic coordinates to PLANE coordinates.
 
@@ -444,7 +536,7 @@ Array of `{x, y}` plane coordinates
 
 > **geoToProjtri**(`coordinates`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2076](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2076)
+Defined in: [webdggrid.ts:2303](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2303)
 
 Converts geographic coordinates to PROJTRI coordinates.
 
@@ -474,7 +566,7 @@ Array of `{tnum, x, y}` projection triangle coordinates
 
 > **geoToQ2dd**(`coordinates`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2101](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2101)
+Defined in: [webdggrid.ts:2328](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2328)
 
 Converts geographic coordinates to Q2DD coordinates.
 
@@ -504,7 +596,7 @@ Array of `{quad, x, y}` quad 2D double coordinates
 
 > **geoToQ2di**(`coordinates`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2126](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2126)
+Defined in: [webdggrid.ts:2353](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2353)
 
 Converts geographic coordinates to Q2DI coordinates.
 
@@ -534,7 +626,7 @@ Array of `{quad, i, j}` quad 2D integer coordinates
 
 > **geoToSequenceNum**(`coordinates`, `resolution?`): `bigint`[]
 
-Defined in: [webdggrid.ts:810](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L810)
+Defined in: [webdggrid.ts:963](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L963)
 
 Converts an array of geographic coordinates to their corresponding DGGS
 cell sequence numbers (cell IDs) at the given resolution.
@@ -586,7 +678,7 @@ Array of `BigInt` sequence numbers, one per input coordinate,
 
 > **getResolution**(): `number`
 
-Defined in: [webdggrid.ts:613](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L613)
+Defined in: [webdggrid.ts:647](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L647)
 
 Returns the currently active grid resolution.
 
@@ -607,7 +699,7 @@ The current resolution level.
 
 > **gridStatCLS**(`resolution?`): `number`
 
-Defined in: [webdggrid.ts:735](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L735)
+Defined in: [webdggrid.ts:769](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L769)
 
 Returns the characteristic length scale (CLS) of the grid at the given
 resolution — defined as the square root of the average cell area.
@@ -641,7 +733,7 @@ Grid CLS value.
 
 > **igeo7AuthalicToGeo**(`latDeg`): `number`
 
-Defined in: [webdggrid.ts:2842](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2842)
+Defined in: [webdggrid.ts:3069](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L3069)
 
 Inverse of [igeo7GeoToAuthalic](#igeo7geotoauthalic) — convert an authalic latitude
 back to geodetic.
@@ -666,7 +758,7 @@ Geodetic latitude (WGS84) in degrees.
 
 > **igeo7Encode**(`base`, `digits`): `bigint`
 
-Defined in: [webdggrid.ts:2682](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2682)
+Defined in: [webdggrid.ts:2909](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2909)
 
 Pack a base cell and exactly 20 digit slots into a 64-bit Z7 index.
 
@@ -711,7 +803,7 @@ If `digits.length !== 20`.
 
 > **igeo7FirstNonZero**(`index`): `number`
 
-Defined in: [webdggrid.ts:2807](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2807)
+Defined in: [webdggrid.ts:3034](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L3034)
 
 Position (1-20) of the first non-zero digit slot in a Z7 index.
 Returns `0` when no non-zero digit exists (centre of the base cell).
@@ -736,7 +828,7 @@ Position of first non-zero digit, or 0.
 
 > **igeo7FromString**(`s`): `bigint`
 
-Defined in: [webdggrid.ts:2642](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2642)
+Defined in: [webdggrid.ts:2869](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2869)
 
 Parse a Z7 compact string into a packed 64-bit index.
 
@@ -765,7 +857,7 @@ Packed index as BigInt (unsigned).
 
 > **igeo7GeoToAuthalic**(`latDeg`): `number`
 
-Defined in: [webdggrid.ts:2831](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2831)
+Defined in: [webdggrid.ts:3058](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L3058)
 
 Convert a geodetic latitude (WGS84 ellipsoid) to its authalic latitude
 on the equal-area sphere. Implementation follows Karney (2022) — same
@@ -793,7 +885,7 @@ Authalic latitude in degrees.
 
 > **igeo7GetBaseCell**(`index`): `number`
 
-Defined in: [webdggrid.ts:2711](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2711)
+Defined in: [webdggrid.ts:2938](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2938)
 
 Extract the base cell (0-11) of a packed Z7 index.
 
@@ -817,7 +909,7 @@ Base cell ID.
 
 > **igeo7GetDigit**(`index`, `position`): `number`
 
-Defined in: [webdggrid.ts:2723](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2723)
+Defined in: [webdggrid.ts:2950](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2950)
 
 Extract the `i`-th digit (1-20) of a packed Z7 index.
 Positions outside `[1, 20]` return `7` (matches DuckDB extension).
@@ -848,7 +940,7 @@ Digit value (0-7).
 
 > **igeo7GetResolution**(`index`): `number`
 
-Defined in: [webdggrid.ts:2701](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2701)
+Defined in: [webdggrid.ts:2928](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2928)
 
 Extract the resolution (0-20) of a packed Z7 index.
 
@@ -872,7 +964,7 @@ Resolution level.
 
 > **igeo7IsValid**(`index`): `boolean`
 
-Defined in: [webdggrid.ts:2817](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2817)
+Defined in: [webdggrid.ts:3044](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L3044)
 
 Whether a packed Z7 index is valid (i.e. not the `UINT64_MAX` sentinel).
 
@@ -896,7 +988,7 @@ Packed Z7 index.
 
 > **igeo7Neighbour**(`index`, `direction`): `bigint`
 
-Defined in: [webdggrid.ts:2796](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2796)
+Defined in: [webdggrid.ts:3023](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L3023)
 
 Single neighbour of a Z7 cell by GBT direction (1-6).
 
@@ -929,7 +1021,7 @@ Neighbour index as BigInt.
 
 > **igeo7Neighbours**(`index`): `bigint`[]
 
-Defined in: [webdggrid.ts:2781](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2781)
+Defined in: [webdggrid.ts:3008](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L3008)
 
 Return all 6 neighbour indices of a Z7 cell, in GBT directions 1-6.
 
@@ -964,7 +1056,7 @@ Array of exactly 6 BigInt neighbour indices.
 
 > **igeo7Parent**(`index`): `bigint`
 
-Defined in: [webdggrid.ts:2741](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2741)
+Defined in: [webdggrid.ts:2968](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2968)
 
 Parent of a Z7 cell — one hierarchy level up.
 
@@ -996,7 +1088,7 @@ Parent index as BigInt.
 
 > **igeo7ParentAt**(`index`, `resolution`): `bigint`
 
-Defined in: [webdggrid.ts:2760](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2760)
+Defined in: [webdggrid.ts:2987](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2987)
 
 Ancestor of a Z7 cell at a specific resolution.
 
@@ -1034,7 +1126,7 @@ Ancestor index as BigInt.
 
 > **igeo7ToString**(`index`): `string`
 
-Defined in: [webdggrid.ts:2659](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2659)
+Defined in: [webdggrid.ts:2886](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2886)
 
 Render a packed Z7 index as its compact string form.
 
@@ -1065,7 +1157,7 @@ Compact Z7 string.
 
 > **igeo7TransformGeoJson**\<`T`\>(`input`, `direction?`): `T`
 
-Defined in: [webdggrid.ts:2860](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2860)
+Defined in: [webdggrid.ts:3087](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L3087)
 
 Apply [igeo7GeoToAuthalic](#igeo7geotoauthalic) (or its inverse) to every coordinate of
 a GeoJSON geometry, feature, or feature collection. Mirrors the
@@ -1108,7 +1200,7 @@ A new GeoJSON object of the same shape with transformed lats.
 
 > **nCells**(`resolution?`): `number`
 
-Defined in: [webdggrid.ts:665](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L665)
+Defined in: [webdggrid.ts:699](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L699)
 
 Returns the total number of cells that tile the entire globe at the
 given resolution under the current DGGS configuration.
@@ -1150,7 +1242,7 @@ Total number of cells at the given resolution.
 
 > **projtriToGeo**(`coords`, `resolution?`): `Position`[]
 
-Defined in: [webdggrid.ts:2473](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2473)
+Defined in: [webdggrid.ts:2700](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2700)
 
 Converts PROJTRI coordinates to geographic coordinates.
 
@@ -1180,7 +1272,7 @@ Array of `[lng, lat]` positions
 
 > **projtriToPlane**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2510](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2510)
+Defined in: [webdggrid.ts:2737](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2737)
 
 Converts PROJTRI coordinates to PLANE coordinates.
 
@@ -1210,7 +1302,7 @@ Array of `{x, y}` plane coordinates
 
 > **projtriToQ2dd**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2532](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2532)
+Defined in: [webdggrid.ts:2759](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2759)
 
 Converts PROJTRI coordinates to Q2DD coordinates.
 
@@ -1240,7 +1332,7 @@ Array of `{quad, x, y}` quad 2D double coordinates
 
 > **projtriToQ2di**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2558](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2558)
+Defined in: [webdggrid.ts:2785](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2785)
 
 Converts PROJTRI coordinates to Q2DI coordinates.
 
@@ -1270,7 +1362,7 @@ Array of `{quad, i, j}` quad 2D integer coordinates
 
 > **projtriToSequenceNum**(`coords`, `resolution?`): `bigint`[]
 
-Defined in: [webdggrid.ts:2495](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2495)
+Defined in: [webdggrid.ts:2722](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2722)
 
 Converts PROJTRI coordinates to sequence numbers.
 
@@ -1300,7 +1392,7 @@ Array of cell IDs
 
 > **q2ddToGeo**(`coords`, `resolution?`): `Position`[]
 
-Defined in: [webdggrid.ts:2358](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2358)
+Defined in: [webdggrid.ts:2585](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2585)
 
 Converts Q2DD coordinates to geographic coordinates.
 
@@ -1330,7 +1422,7 @@ Array of `[lng, lat]` positions
 
 > **q2ddToPlane**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2395](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2395)
+Defined in: [webdggrid.ts:2622](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2622)
 
 Converts Q2DD coordinates to PLANE coordinates.
 
@@ -1360,7 +1452,7 @@ Array of `{x, y}` plane coordinates
 
 > **q2ddToProjtri**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2417](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2417)
+Defined in: [webdggrid.ts:2644](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2644)
 
 Converts Q2DD coordinates to PROJTRI coordinates.
 
@@ -1390,7 +1482,7 @@ Array of `{tnum, x, y}` projection triangle coordinates
 
 > **q2ddToQ2di**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2443](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2443)
+Defined in: [webdggrid.ts:2670](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2670)
 
 Converts Q2DD coordinates to Q2DI coordinates.
 
@@ -1420,7 +1512,7 @@ Array of `{quad, i, j}` quad 2D integer coordinates
 
 > **q2ddToSequenceNum**(`coords`, `resolution?`): `bigint`[]
 
-Defined in: [webdggrid.ts:2380](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2380)
+Defined in: [webdggrid.ts:2607](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2607)
 
 Converts Q2DD coordinates to sequence numbers.
 
@@ -1450,7 +1542,7 @@ Array of cell IDs
 
 > **q2diToGeo**(`coords`, `resolution?`): `Position`[]
 
-Defined in: [webdggrid.ts:2243](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2243)
+Defined in: [webdggrid.ts:2470](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2470)
 
 Converts Q2DI coordinates to geographic coordinates.
 
@@ -1480,7 +1572,7 @@ Array of `[lng, lat]` positions
 
 > **q2diToPlane**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2280](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2280)
+Defined in: [webdggrid.ts:2507](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2507)
 
 Converts Q2DI coordinates to PLANE coordinates.
 
@@ -1510,7 +1602,7 @@ Array of `{x, y}` plane coordinates
 
 > **q2diToProjtri**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2302](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2302)
+Defined in: [webdggrid.ts:2529](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2529)
 
 Converts Q2DI coordinates to PROJTRI coordinates.
 
@@ -1540,7 +1632,7 @@ Array of `{tnum, x, y}` projection triangle coordinates
 
 > **q2diToQ2dd**(`coords`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2328](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2328)
+Defined in: [webdggrid.ts:2555](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2555)
 
 Converts Q2DI coordinates to Q2DD coordinates.
 
@@ -1570,7 +1662,7 @@ Array of `{quad, x, y}` quad 2D double coordinates
 
 > **q2diToSequenceNum**(`coords`, `resolution?`): `bigint`[]
 
-Defined in: [webdggrid.ts:2265](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2265)
+Defined in: [webdggrid.ts:2492](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2492)
 
 Converts Q2DI coordinates to sequence numbers.
 
@@ -1596,11 +1688,47 @@ Array of cell IDs
 
 ***
 
+### quadtreeToSequenceNum()
+
+> **quadtreeToSequenceNum**(`quadtreeValue`, `resolution?`): `bigint`
+
+Defined in: [webdggrid.ts:1965](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1965)
+
+Converts a QUADTREE index (DGGRID 9.3) to a SEQNUM cell ID. See
+[sequenceNumToQuadtree](#sequencenumtoquadtree).
+
+#### Parameters
+
+##### quadtreeValue
+
+`bigint`
+
+The QUADTREE index (BigInt).
+
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
+
+Resolution of the index (0–29). Defaults to the
+  instance's current [resolution](#quadtreetosequencenum).
+
+#### Returns
+
+`bigint`
+
+The sequence number of the cell.
+
+#### Throws
+
+If the grid is not a pure aperture 4 triangle grid.
+
+***
+
 ### sequenceNumAllParents()
 
 > **sequenceNumAllParents**(`sequenceNum`, `resolution?`): `bigint`[][]
 
-Defined in: [webdggrid.ts:1196](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1196)
+Defined in: [webdggrid.ts:1349](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1349)
 
 Returns **all** parent cells that touch each input cell at the coarser
 resolution (resolution - 1).
@@ -1653,7 +1781,7 @@ If `resolution` is 0 or negative, or if an invalid cell ID is
 
 > **sequenceNumChildren**(`sequenceNum`, `resolution?`): `bigint`[][]
 
-Defined in: [webdggrid.ts:1257](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1257)
+Defined in: [webdggrid.ts:1410](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1410)
 
 Returns all child cells at the next finer resolution (resolution + 1)
 for each input cell.
@@ -1709,10 +1837,10 @@ If an invalid cell ID is provided or if the maximum resolution
 
 > **sequenceNumIndexChildren**(`sequenceNum`, `resolution?`, `system?`): `bigint`[][]
 
-Defined in: [webdggrid.ts:1366](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1366)
+Defined in: [webdggrid.ts:1522](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1522)
 
 Returns the **indexing children** of each input cell at resolution + 1,
-as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
+as defined by a hierarchical indexing system (Z3, Z7, ZORDER or QUADTREE).
 
 The indexing children are the cells whose indexes extend the input's
 index by one digit: up to 7 per cell for Z7, 3 for Z3, 4 for ZORDER on
@@ -1747,7 +1875,8 @@ Resolution of the input IDs. Defaults to the
 [`IndexingSystem`](../enumerations/IndexingSystem.md)
 
 Indexing system to use. Defaults to the one matching
-  the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4.
+  the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4,
+  QUADTREE for aperture 4 triangles.
 
 #### Returns
 
@@ -1767,10 +1896,10 @@ If the system is not available for the grid (see
 
 > **sequenceNumIndexParent**(`sequenceNum`, `resolution?`, `system?`): `bigint`[]
 
-Defined in: [webdggrid.ts:1319](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1319)
+Defined in: [webdggrid.ts:1474](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1474)
 
 Returns the **indexing parent** of each input cell at resolution - 1,
-as defined by a hierarchical indexing system (Z3, Z7 or ZORDER).
+as defined by a hierarchical indexing system (Z3, Z7, ZORDER or QUADTREE).
 
 The indexing parent is the cell whose index is the input's index with
 the last digit removed. It is defined by the index's digit structure,
@@ -1784,9 +1913,10 @@ const parents = dggs.sequenceNumIndexParent([1000n], 5);
 ```
 
 ::: info
-Requires DGGRID v9 indexing systems: only pure-aperture hexagon grids
-are supported (Z7 for aperture 7, Z3 for aperture 3, ZORDER for
-aperture 3 or 4). Aperture sequences are not supported.
+Requires DGGRID v9 indexing systems: pure-aperture hexagon grids (Z7
+for aperture 7, Z3 for aperture 3, ZORDER for aperture 3 or 4),
+aperture 4 diamond grids (ZORDER) and aperture 4 triangle grids
+(QUADTREE). Aperture sequences are not supported.
 :::
 
 #### Parameters
@@ -1810,7 +1940,8 @@ Resolution of the input IDs (must be > 0).
 [`IndexingSystem`](../enumerations/IndexingSystem.md)
 
 Indexing system to use. Defaults to the one matching
-  the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4.
+  the grid: Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4,
+  QUADTREE for aperture 4 triangles.
 
 #### Returns
 
@@ -1829,7 +1960,7 @@ If resolution is 0, or the system is not available for the grid.
 
 > **sequenceNumNeighbors**(`sequenceNum`, `resolution?`): `bigint`[][]
 
-Defined in: [webdggrid.ts:1087](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1087)
+Defined in: [webdggrid.ts:1240](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1240)
 
 Returns all neighboring cells (sharing an edge) for each input cell.
 
@@ -1882,7 +2013,7 @@ If Triangle topology is used or if an invalid cell ID is provided.
 
 > **sequenceNumParent**(`sequenceNum`, `resolution?`): `bigint`[]
 
-Defined in: [webdggrid.ts:1147](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1147)
+Defined in: [webdggrid.ts:1300](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1300)
 
 Returns the parent cell at the next coarser resolution (resolution - 1)
 for each input cell.
@@ -1929,11 +2060,68 @@ If resolution is 0 or if an invalid cell ID is provided.
 
 ***
 
+### sequenceNumToAreaKM()
+
+> **sequenceNumToAreaKM**(`sequenceNum`, `resolution?`, `options?`): `number`[]
+
+Defined in: [webdggrid.ts:917](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L917)
+
+Returns the area in km² of each cell, measured with geodesic edges in
+the grid's [Datum](../enumerations/Datum.md) (DGGRID 9.31): great-circle edges on the grid
+sphere for `AUTHALIC_SPHERE`, ellipsoidal geodesics for `WGS84`.
+
+Unlike [cellAreaKM](#cellareakm), the average area of a cell at a resolution,
+this measures each cell's own boundary. On an equal-area projection
+the values are close to the average (pentagons are 5/6 of a hexagon);
+the small differences come from measuring geodesic rather than
+projected edges. Add `densification` to follow the projected edges
+more closely.
+
+```ts
+const [km2] = dggs.sequenceNumToAreaKM([1n], 5, { densification: 10 });
+```
+
+#### Parameters
+
+##### sequenceNum
+
+`bigint`[]
+
+Array of `BigInt` cell IDs.
+
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
+
+Resolution of the IDs. Defaults to the instance's
+  current [resolution](#sequencenumtoareakm).
+
+##### options?
+
+`densification`: points inserted along each cell edge
+  before measuring, 0–500 (default 0).
+
+###### densification?
+
+`number`
+
+#### Returns
+
+`number`[]
+
+One area in km² per cell.
+
+#### Throws
+
+If an ID is out of range or `densification` is not 0–500.
+
+***
+
 ### sequenceNumToGeo()
 
 > **sequenceNumToGeo**(`sequenceNum`, `resolution?`): `Position`[]
 
-Defined in: [webdggrid.ts:844](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L844)
+Defined in: [webdggrid.ts:997](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L997)
 
 Converts an array of DGGS cell sequence numbers to the geographic
 coordinates of their centroids.
@@ -1974,7 +2162,7 @@ Array of `[lng, lat]` centroid positions, one per input ID, in
 
 > **sequenceNumToGrid**(`sequenceNum`, `resolution?`, `options?`): `Position`[][]
 
-Defined in: [webdggrid.ts:944](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L944)
+Defined in: [webdggrid.ts:1097](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1097)
 
 Returns the polygon boundary vertices for each cell in `sequenceNum`.
 
@@ -2038,7 +2226,7 @@ If the WASM module encounters an invalid cell ID.
 
 > **sequenceNumToGridFeatureCollection**(`sequenceNum`, `resolution?`, `options?`): `FeatureCollection`\<`Polygon`, `object` & `object`\>
 
-Defined in: [webdggrid.ts:1031](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1031)
+Defined in: [webdggrid.ts:1184](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1184)
 
 Converts an array of DGGS cell IDs into a GeoJSON `FeatureCollection`
 where each `Feature` is a `Polygon` representing the cell boundary.
@@ -2102,7 +2290,7 @@ A GeoJSON `FeatureCollection` of `Polygon` features, one per
 
 > **sequenceNumToPlane**(`sequenceNum`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2155](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2155)
+Defined in: [webdggrid.ts:2382](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2382)
 
 Converts sequence numbers to PLANE coordinates.
 
@@ -2132,7 +2320,7 @@ Array of `{x, y}` plane coordinates
 
 > **sequenceNumToProjtri**(`sequenceNum`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2173](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2173)
+Defined in: [webdggrid.ts:2400](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2400)
 
 Converts sequence numbers to PROJTRI coordinates.
 
@@ -2162,7 +2350,7 @@ Array of `{tnum, x, y}` projection triangle coordinates
 
 > **sequenceNumToQ2dd**(`sequenceNum`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2195](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2195)
+Defined in: [webdggrid.ts:2422](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2422)
 
 Converts sequence numbers to Q2DD coordinates.
 
@@ -2192,7 +2380,7 @@ Array of `{quad, x, y}` quad 2D double coordinates
 
 > **sequenceNumToQ2di**(`sequenceNum`, `resolution?`): `object`[]
 
-Defined in: [webdggrid.ts:2217](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L2217)
+Defined in: [webdggrid.ts:2444](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2444)
 
 Converts sequence numbers to Q2DI coordinates.
 
@@ -2218,11 +2406,56 @@ Array of `{quad, i, j}` quad 2D integer coordinates
 
 ***
 
+### sequenceNumToQuadtree()
+
+> **sequenceNumToQuadtree**(`sequenceNum`, `resolution?`): `bigint`
+
+Defined in: [webdggrid.ts:1940](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1940)
+
+Converts a SEQNUM cell ID to a QUADTREE index (DGGRID 9.3).
+
+QUADTREE indexes pure aperture 4 **triangle** grids: a root for each
+of the 20 icosahedron-face triangles, then one 2-bit digit per
+resolution (0 = center child, 1–3 = corner children). Packed INT64:
+root in bits 63..59, digits in bits 58..1, coarsest first.
+
+```ts
+dggs.setDggs(dggsPreset('ISEA4TSQ'), 5);
+const q = dggs.sequenceNumToQuadtree(100n, 5);
+```
+
+#### Parameters
+
+##### sequenceNum
+
+`bigint`
+
+The cell sequence number to convert.
+
+##### resolution?
+
+`number` = `DEFAULT_RESOLUTION`
+
+Resolution of the input cell (0–29). Defaults to
+  the instance's current [resolution](#sequencenumtoquadtree).
+
+#### Returns
+
+`bigint`
+
+The QUADTREE index as a BigInt.
+
+#### Throws
+
+If the grid is not a pure aperture 4 triangle grid.
+
+***
+
 ### sequenceNumToVertex2DD()
 
 > **sequenceNumToVertex2DD**(`sequenceNum`, `resolution?`): [`Vertex2DDCoordinate`](../interfaces/Vertex2DDCoordinate.md)
 
-Defined in: [webdggrid.ts:1414](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1414)
+Defined in: [webdggrid.ts:1570](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1570)
 
 Convert a SEQNUM cell ID to VERTEX2DD (icosahedral vertex) coordinates.
 
@@ -2262,7 +2495,7 @@ An object with `{keep, vertNum, triNum, x, y}` representing
 
 > **sequenceNumToZ3**(`sequenceNum`, `resolution?`): `bigint`
 
-Defined in: [webdggrid.ts:1591](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1591)
+Defined in: [webdggrid.ts:1748](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1748)
 
 Convert a SEQNUM cell ID to Z3 (base-3 Central Place Indexing) coordinate.
 
@@ -2308,7 +2541,7 @@ If used with an incompatible aperture (not 3) or topology.
 
 > **sequenceNumToZ7**(`sequenceNum`, `resolution?`): `bigint`
 
-Defined in: [webdggrid.ts:1688](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1688)
+Defined in: [webdggrid.ts:1845](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1845)
 
 Convert a SEQNUM cell ID to Z7 (base-7 Central Place Indexing) coordinate.
 
@@ -2355,16 +2588,17 @@ If used with an incompatible aperture (not 7) or topology.
 
 > **sequenceNumToZOrder**(`sequenceNum`, `resolution?`): `bigint`
 
-Defined in: [webdggrid.ts:1494](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1494)
+Defined in: [webdggrid.ts:1651](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1651)
 
 Convert a SEQNUM cell ID to ZORDER (Z-order curve) coordinate.
 
 ZORDER uses digit-interleaved coordinates to create a space-filling
 curve index. This provides good spatial locality for range queries.
 
-**Compatibility:** ZORDER is only available for **aperture 3 and 4**
-hexagon grids. It is **NOT supported** for aperture 7 or for aperture
-sequences (DGGRID v9 restricts ZORDER to pure-aperture grids).
+**Compatibility:** ZORDER is available for **aperture 3 and 4**
+hexagon grids and (since DGGRID 9.3) **aperture 4 diamond** grids. It
+is **NOT supported** for aperture 7, triangle grids (use
+[sequenceNumToQuadtree](#sequencenumtoquadtree)) or aperture sequences.
 
 ```ts
 // With aperture 4:
@@ -2403,7 +2637,7 @@ If used with an incompatible aperture (7) or topology.
 
 > **setDggs**(`dggs?`, `resolution?`): `void`
 
-Defined in: [webdggrid.ts:598](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L598)
+Defined in: [webdggrid.ts:632](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L632)
 
 Sets both the DGGS configuration and the resolution in one call.
 
@@ -2444,7 +2678,7 @@ The new resolution level. Defaults to `1`.
 
 > **setResolution**(`resolution`): `void`
 
-Defined in: [webdggrid.ts:628](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L628)
+Defined in: [webdggrid.ts:662](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L662)
 
 Sets the grid resolution used by default in all conversion and
 statistics methods.
@@ -2472,12 +2706,12 @@ The new resolution level. Must be a positive integer.
 
 > **version**(): `string`
 
-Defined in: [webdggrid.ts:575](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L575)
+Defined in: [webdggrid.ts:609](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L609)
 
 Returns the version string of the underlying DGGRID C++ library.
 
 ```ts
-console.log(dggs.version()); // e.g. "8.3b"
+console.log(dggs.version()); // e.g. "9.31"
 ```
 
 #### Returns
@@ -2492,7 +2726,7 @@ The DGGRID C++ library version string.
 
 > **vertex2DDToSequenceNum**(`keep`, `vertNum`, `triNum`, `x`, `y`, `resolution?`): `bigint`
 
-Defined in: [webdggrid.ts:1448](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1448)
+Defined in: [webdggrid.ts:1604](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1604)
 
 Convert VERTEX2DD (icosahedral vertex) coordinates to a SEQNUM cell ID.
 
@@ -2552,7 +2786,7 @@ The sequence number (BigInt) of the cell containing this coordinate.
 
 > **z3ExtractDigits**(`z3Value`, `resolution`): `object`
 
-Defined in: [webdggrid.ts:1929](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1929)
+Defined in: [webdggrid.ts:2156](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2156)
 
 Extract all digits from a Z3 index up to a given resolution.
 
@@ -2595,7 +2829,7 @@ Object with `quad` (number) and `digits` (number array).
 
 > **z3GetDigit**(`z3Value`, `res`): `number`
 
-Defined in: [webdggrid.ts:1895](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1895)
+Defined in: [webdggrid.ts:2122](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2122)
 
 Get the digit at a specific resolution level from a Z3 index.
 
@@ -2632,7 +2866,7 @@ The digit value (0–3).
 
 > **z3GetQuad**(`z3Value`): `number`
 
-Defined in: [webdggrid.ts:1877](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1877)
+Defined in: [webdggrid.ts:2104](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2104)
 
 Get the quad (icosahedron face) number from a Z3 index.
 
@@ -2660,7 +2894,7 @@ The quad number (0–11).
 
 > **z3SetDigit**(`z3Value`, `res`, `digit`): `bigint`
 
-Defined in: [webdggrid.ts:1912](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1912)
+Defined in: [webdggrid.ts:2139](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2139)
 
 Set the digit at a specific resolution level in a Z3 index.
 
@@ -2700,7 +2934,7 @@ A new Z3 value with the digit replaced.
 
 > **z3ToSequenceNum**(`z3Value`, `resolution?`): `bigint`
 
-Defined in: [webdggrid.ts:1636](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1636)
+Defined in: [webdggrid.ts:1793](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1793)
 
 Convert a Z3 (base-3 Central Place Indexing) coordinate to a SEQNUM cell ID.
 
@@ -2740,7 +2974,7 @@ If used with an incompatible aperture (not 3) or topology.
 
 > **z7ExtractDigits**(`z7Value`, `resolution`): `object`
 
-Defined in: [webdggrid.ts:1858](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1858)
+Defined in: [webdggrid.ts:2085](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2085)
 
 Extract all digits from a Z7 index up to a given resolution.
 
@@ -2783,7 +3017,7 @@ Object with `quad` (number) and `digits` (number array).
 
 > **z7GetDigit**(`z7Value`, `res`): `number`
 
-Defined in: [webdggrid.ts:1822](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1822)
+Defined in: [webdggrid.ts:2049](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2049)
 
 Get the digit at a specific resolution level from a Z7 index.
 
@@ -2820,7 +3054,7 @@ The digit value (0–7).
 
 > **z7GetQuad**(`z7Value`): `number`
 
-Defined in: [webdggrid.ts:1804](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1804)
+Defined in: [webdggrid.ts:2031](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2031)
 
 Get the quad (icosahedron face) number from a Z7 index.
 
@@ -2850,7 +3084,7 @@ The quad number (0–11).
 
 > **z7SetDigit**(`z7Value`, `res`, `digit`): `bigint`
 
-Defined in: [webdggrid.ts:1841](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1841)
+Defined in: [webdggrid.ts:2068](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2068)
 
 Set the digit at a specific resolution level in a Z7 index.
 
@@ -2892,7 +3126,7 @@ A new Z7 value with the digit replaced.
 
 > **z7ToSequenceNum**(`z7Value`, `resolution?`): `bigint`
 
-Defined in: [webdggrid.ts:1733](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1733)
+Defined in: [webdggrid.ts:1890](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1890)
 
 Convert a Z7 (base-7 Central Place Indexing) coordinate to a SEQNUM cell ID.
 
@@ -2932,7 +3166,7 @@ If used with an incompatible aperture (not 7) or topology.
 
 > **zOrderExtractDigits**(`zorderValue`, `resolution`): `object`
 
-Defined in: [webdggrid.ts:1999](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1999)
+Defined in: [webdggrid.ts:2226](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2226)
 
 Extract all digits from a ZORDER index up to a given resolution.
 
@@ -2975,7 +3209,7 @@ Object with `quad` (number) and `digits` (number array).
 
 > **zOrderGetDigit**(`zorderValue`, `res`): `number`
 
-Defined in: [webdggrid.ts:1965](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1965)
+Defined in: [webdggrid.ts:2192](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2192)
 
 Get the digit at a specific resolution level from a ZORDER index.
 
@@ -3011,7 +3245,7 @@ The digit value (0–3).
 
 > **zOrderGetQuad**(`zorderValue`): `number`
 
-Defined in: [webdggrid.ts:1948](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1948)
+Defined in: [webdggrid.ts:2175](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2175)
 
 Get the quad (icosahedron face) number from a ZORDER index.
 
@@ -3039,7 +3273,7 @@ The quad number (0–11).
 
 > **zOrderSetDigit**(`zorderValue`, `res`, `digit`): `bigint`
 
-Defined in: [webdggrid.ts:1982](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1982)
+Defined in: [webdggrid.ts:2209](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L2209)
 
 Set the digit at a specific resolution level in a ZORDER index.
 
@@ -3079,7 +3313,7 @@ A new ZORDER value with the digit replaced.
 
 > **zOrderToSequenceNum**(`zorderValue`, `resolution?`): `bigint`
 
-Defined in: [webdggrid.ts:1540](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L1540)
+Defined in: [webdggrid.ts:1697](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L1697)
 
 Convert a ZORDER (Z-order curve) coordinate to a SEQNUM cell ID.
 
@@ -3119,7 +3353,7 @@ If used with an incompatible aperture (7) or topology.
 
 > `static` **load**(): `Promise`\<*typeof* `Webdggrid`\>
 
-Defined in: [webdggrid.ts:549](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L549)
+Defined in: [webdggrid.ts:583](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L583)
 
 Compiles and instantiates the DGGRID WebAssembly module.
 
@@ -3149,7 +3383,7 @@ A promise that resolves to a fully initialised `Webdggrid` instance.
 
 > `static` **unload**(): `void`
 
-Defined in: [webdggrid.ts:562](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L562)
+Defined in: [webdggrid.ts:596](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L596)
 
 Releases the compiled WASM instance and frees its memory.
 

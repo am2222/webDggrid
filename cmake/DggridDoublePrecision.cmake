@@ -20,7 +20,7 @@
 #   Files are only rewritten when their content changes, so rebuilds stay
 #   incremental.
 function(dggrid_double_precision_copy src_lib_dir out_lib_dir)
-    set(math_fns "sin|cos|tan|asin|acos|atan|atan2|sqrt|fabs|pow|floor|ceil|fmod|round|log|exp|log10|trunc|lround|llround|rint|hypot|modf|frexp|ldexp")
+    set(math_fns "sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|sqrt|cbrt|fabs|pow|floor|ceil|fmod|remainder|round|log|exp|log10|log1p|expm1|trunc|lround|llround|rint|lrint|llrint|hypot|modf|frexp|ldexp|copysign|fmin|fmax")
 
     file(GLOB_RECURSE files RELATIVE "${src_lib_dir}"
         "${src_lib_dir}/dglib/*.cpp" "${src_lib_dir}/dglib/*.h" "${src_lib_dir}/dglib/*.hpp"

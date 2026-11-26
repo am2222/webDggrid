@@ -2,7 +2,7 @@
 
 # Interface: IDGGSProps
 
-Defined in: [webdggrid.ts:210](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L210)
+Defined in: [webdggrid.ts:227](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L227)
 
 Full configuration of a Discrete Global Grid System.
 
@@ -32,7 +32,7 @@ dggs.setDggs(myDggs, 5);
 
 > `optional` **aperture?**: `7` \| `3` \| `4` \| `5`
 
-Defined in: [webdggrid.ts:236](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L236)
+Defined in: [webdggrid.ts:253](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L253)
 
 Subdivision aperture — the number of child cells each parent cell is
 divided into when moving to the next finer resolution.
@@ -52,7 +52,7 @@ Ignored if `apertureSequence` is specified.
 
 > `optional` **apertureSequence?**: `string`
 
-Defined in: [webdggrid.ts:255](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L255)
+Defined in: [webdggrid.ts:272](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L272)
 
 Mixed aperture sequence (e.g., `"434747"`).
 
@@ -78,7 +78,7 @@ apertureSequence: "434747"
 
 > **azimuth**: `number`
 
-Defined in: [webdggrid.ts:222](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L222)
+Defined in: [webdggrid.ts:239](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L239)
 
 Azimuth of the icosahedron pole in decimal degrees.
 Rotates the grid around the pole axis. Defaults to `0`.
@@ -89,7 +89,7 @@ Rotates the grid around the pole axis. Defaults to `0`.
 
 > `optional` **datum?**: [`Datum`](../enumerations/Datum.md)
 
-Defined in: [webdggrid.ts:264](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L264)
+Defined in: [webdggrid.ts:281](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L281)
 
 Datum of geographic input and output coordinates. See [Datum](../enumerations/Datum.md).
 Defaults to `AUTHALIC_SPHERE`.
@@ -100,7 +100,7 @@ Defaults to `AUTHALIC_SPHERE`.
 
 > **poleCoordinates**: [`Coordinate`](Coordinate.md)
 
-Defined in: [webdggrid.ts:217](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L217)
+Defined in: [webdggrid.ts:234](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L234)
 
 Geographic location of the icosahedron pole used to orient the grid.
 Changing this rotates the entire grid on the globe, which can be used
@@ -113,7 +113,7 @@ Defaults to `{ lat: 0, lng: 0 }`.
 
 > **projection**: [`Projection`](../enumerations/Projection.md)
 
-Defined in: [webdggrid.ts:259](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L259)
+Defined in: [webdggrid.ts:276](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L276)
 
 Projection used to map the polyhedron faces onto the sphere. See [Projection](../enumerations/Projection.md).
 
@@ -123,7 +123,7 @@ Projection used to map the polyhedron faces onto the sphere. See [Projection](..
 
 > `optional` **sphereRadiusKm?**: `number`
 
-Defined in: [webdggrid.ts:271](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L271)
+Defined in: [webdggrid.ts:288](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L288)
 
 Radius in km of the sphere the grid is built on. Only cell areas and
 distances depend on it. `0` or omitted means the WGS84 authalic radius
@@ -136,6 +136,6 @@ authalic radius.
 
 > **topology**: [`Topology`](../enumerations/Topology.md)
 
-Defined in: [webdggrid.ts:257](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L257)
+Defined in: [webdggrid.ts:274](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L274)
 
 Shape of each cell. See [Topology](../enumerations/Topology.md).

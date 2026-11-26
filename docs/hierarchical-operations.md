@@ -382,7 +382,7 @@ Interior cells typically have 1 parent. Boundary cells may have 2–3 parents de
 
 ## Indexing Parents and Children
 
-DGGRID v9 adds parent/children defined by a hierarchical **index** (Z3, Z7 or ZORDER) instead of by geometry. The indexing parent is the cell whose index is the input's index with its last digit removed; the indexing children are the cells whose index extends the input's by one digit.
+DGGRID v9 adds parent/children defined by a hierarchical **index** (Z3, Z7, ZORDER or QUADTREE) instead of by geometry. The indexing parent is the cell whose index is the input's index with its last digit removed; the indexing children are the cells whose index extends the input's by one digit.
 
 ```ts
 dggs.setDggs({ ...dggs.dggs, aperture: 7 }, 5);
@@ -394,7 +394,7 @@ const parents = dggs.sequenceNumIndexParent([cellId], 5);
 const children = dggs.sequenceNumIndexChildren([cellId], 5)[0];
 ```
 
-The system defaults to the one matching the grid (Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4); pass `IndexingSystem.ZORDER` to use ZORDER on an aperture 3 grid. Only pure-aperture hexagon grids are supported.
+The system defaults to the one matching the grid (Z7 for aperture 7, Z3 for aperture 3, ZORDER for aperture 4 hexagons and diamonds, QUADTREE for aperture 4 triangles); pass `IndexingSystem.ZORDER` to use ZORDER on an aperture 3 grid. Pure-aperture hexagon grids, aperture 4 diamond grids and aperture 4 triangle grids are supported (the last two since DGGRID 9.3); aperture sequences are not.
 
 Both methods work for all three systems. Z3 and ZORDER indexing children need webdggrid 2.0 (DGGRID 9.1); earlier versions supported Z7 children only, because DGGRID 9.03b applied the Z7 digit rules to the other systems.
 
@@ -406,5 +406,5 @@ Both methods work for all three systems. Z3 and ZORDER indexing children need we
 | [`sequenceNumParent()`](api/classes/Webdggrid.md#sequencenumparent) | Get the primary (containing) parent at `resolution - 1` |
 | [`sequenceNumAllParents()`](api/classes/Webdggrid.md#sequencenumallparents) | Get all touching parent cells at `resolution - 1` (primary first) |
 | [`sequenceNumChildren()`](api/classes/Webdggrid.md#sequencenumchildren) | Get child cells at `resolution + 1` |
-| [`sequenceNumIndexParent()`](api/classes/Webdggrid.md#sequencenumindexparent) | Get the Z3/Z7/ZORDER indexing parent at `resolution - 1` |
-| [`sequenceNumIndexChildren()`](api/classes/Webdggrid.md#sequencenumindexchildren) | Get the Z3 / Z7 / ZORDER indexing children at `resolution + 1` |
+| [`sequenceNumIndexParent()`](api/classes/Webdggrid.md#sequencenumindexparent) | Get the Z3/Z7/ZORDER/QUADTREE indexing parent at `resolution - 1` |
+| [`sequenceNumIndexChildren()`](api/classes/Webdggrid.md#sequencenumindexchildren) | Get the Z3 / Z7 / ZORDER / QUADTREE indexing children at `resolution + 1` |

@@ -189,7 +189,7 @@ describe('DGGRID 9.1 features', () => {
             expect(dggsPreset('isea7hlz' as DggsPresetName)).toEqual(dggsPreset('ISEA7HLZ'));
         });
 
-        test.each(['IGEO7', 'ISEA43H', 'SUPERFUND', 'H3', 'ISEA3T', 'FULLER4HS', 'ISEA4DSZ', 'ISEA7HZ'])(
+        test.each(['IGEO7', 'ISEA43H', 'SUPERFUND', 'H3', 'ISEA3T', 'FULLER4HL', 'ISEA4DLZ', 'ISEA7HZ'])(
             '%s is rejected', (name) => {
                 expect(() => dggsPreset(name as DggsPresetName)).toThrow();
             });

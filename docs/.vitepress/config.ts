@@ -20,7 +20,15 @@ export default defineConfig({
       alias: {
         'webdggrid': fileURLToPath(new URL('../../lib-esm/webdggrid.js', import.meta.url)),
       },
+      // one copy of three for Navara and its default plugin
+      dedupe: ['three'],
     },
+    // Navara loads its WASM and workers via import.meta.url, which
+    // prebundling breaks (maplibre/navara#744)
+    optimizeDeps: {
+      exclude: ['@navaramap/three', '@navaramap/three-default-plugin', '@navaramap/three-default-descs'],
+    },
+    worker: { format: 'es' },
   },
 
   themeConfig: {
@@ -28,7 +36,13 @@ export default defineConfig({
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/getting-started' },
       { text: 'API', link: '/api/' },
-      { text: 'Demo', link: '/demo' },
+      {
+        text: 'Demo',
+        items: [
+          { text: 'Cesium globe', link: '/demo' },
+          { text: 'Navara globe (beta)', link: '/demo-navara' },
+        ],
+      },
       { text: 'Contributing', link: '/contributing' },
     ],
 

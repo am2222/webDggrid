@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>webdggrid × Navara POC</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0b0f17; color: #e6e8ee;
+      font: 13px/1.4 system-ui, -apple-system, sans-serif; }
+    #map { position: fixed; inset: 0; }
+    #panel { position: fixed; top: 12px; left: 12px; width: 290px; padding: 12px 14px;
+      background: rgba(14, 18, 28, 0.88); border: 1px solid #2a3142; border-radius: 10px;
+      backdrop-filter: blur(6px); z-index: 10; }
+    #panel h1 { font-size: 14px; margin: 0 0 8px; }
+    label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0; }
+    select, input[type=number] { background: #1a2030; color: inherit; border: 1px solid #323a4e;
+      border-radius: 6px; padding: 3px 6px; width: 140px; }
+    .row { display: flex; gap: 6px; margin-top: 8px; }
+    button { flex: 1; background: #24304a; color: inherit; border: 1px solid #36466a;
+      border-radius: 6px; padding: 5px 6px; cursor: pointer; }
+    button:hover { background: #2e3d5e; }
+    .hint { color: #9aa3b5; font-size: 12px; margin-top: 8px; }
+    .legend { display: flex; gap: 12px; margin-top: 6px; font-size: 12px; }
+    .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+    #status, #picked { margin-top: 8px; font-family: ui-monospace, monospace; font-size: 11.5px;
+      color: #c8cdd8; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="panel">
+    <h1>webdggrid × Navara — polar cells</h1>
+    <label>Preset
+      <select id="preset">
+        <option>ISEA4H</option><option>ISEA3H</option><option selected>ISEA7H</option>
+        <option>IVEA4H</option><option>ISEA4T</option><option>ISEA4D</option>
+        <option>FULLER4H</option><option>IGEO7v2</option>
+      </select>
+    </label>
+    <label>Resolution <input id="res" type="number" min="0" max="5" value="1" /></label>
+    <label>Render path
+      <select id="mode">
+        <option value="direct" selected>3D (not draped)</option>
+        <option value="draped">Draped (clampToGround)</option>
+      </select>
+    </label>
+    <label>Unwrap rings <input id="unwrap" type="checkbox" /></label>
+    <label>Densification <input id="dens" type="number" min="0" max="50" value="0" /></label>
+    <label>Only polar cells <input id="polarOnly" type="checkbox" /></label>
+    <div class="row">
+      <button id="north">North Pole</button>
+      <button id="south">South Pole</button>
+      <button id="world">Globe</button>
+    </div>
+    <div class="legend">
+      <span><span class="sw" style="background:#3b82f6"></span>cell</span>
+      <span><span class="sw" style="background:#f59e0b"></span>contains / touches a pole</span>
+    </div>
+    <div id="status">loading…</div>
+    <div id="picked"></div>
+    <div class="hint">Click a cell to see its ID. Switch “Render path” to compare
+      Navara’s 3D polygons with its draped (Web Mercator tiled) path.</div>
+  </div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

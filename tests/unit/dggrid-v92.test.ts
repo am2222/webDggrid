@@ -102,7 +102,7 @@ describe('DGGRID 9.2 features', () => {
             expect(d).toBeCloseTo(500 * Math.PI, 6);
         });
 
-        test('WGS84 geodesic distance (Vincenty)', () => {
+        test('WGS84 geodesic distance', () => {
             dggs.setDggs(grid({ datum: Datum.WGS84 }), 3);
             const dms = (d: number, m: number, s: number) => Math.sign(d) * (Math.abs(d) + m / 60 + s / 3600);
             const d = dggs.geoDistanceKM(
@@ -117,10 +117,9 @@ describe('DGGRID 9.2 features', () => {
             expect(d[2]).toBeCloseTo(54.972271, 5);
         });
 
-        test('WGS84 refuses nearly antipodal points instead of aborting', () => {
+        test('WGS84 handles nearly antipodal points (DGGRID 9.31)', () => {
             dggs.setDggs(grid({ datum: Datum.WGS84 }), 3);
-            expect(() => dggs.geoDistanceKM([[0, 0]], [[179.5, 0]])).toThrow(/antipodal/);
-            // the module is still usable afterwards
+            expect(dggs.geoDistanceKM([[0, 0]], [[179.5, 0]])[0]).toBeGreaterThan(19900);
             expect(dggs.geoDistanceKM([[0, 0]], [[178.5, 0]])[0]).toBeGreaterThan(19800);
         });
 

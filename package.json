@@ -82,27 +82,34 @@
   "devDependencies": {
     "@eslint/js": "^10",
     "@hpcc-js/wasm": "^2.33.2",
+    "@navaramap/three": "0.3.1",
+    "@navaramap/three-default-plugin": "0.3.1",
     "@rollup/plugin-commonjs": "^29.0.2",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
     "@stylistic/eslint-plugin": "^5",
     "@types/geojson": "^7946.0.16",
     "@types/node": "~22",
+    "@types/three": "^0",
     "eslint": "^10",
     "globals": "^17",
+    "postprocessing": "^6.39.6",
     "prettier": "~3.8",
     "rollup": "^4.60.1",
     "rollup-plugin-sourcemaps2": "0.5.6",
+    "three": "^0.187.0",
     "typedoc": "^0.28.18",
     "typedoc-plugin-markdown": "^4.11.0",
     "typedoc-vitepress-theme": "^1.1.2",
     "typescript": "~5.7",
     "typescript-eslint": "^8",
     "vitepress": "^1.6.4",
-    "vitest": "^4.1.11",
+    "vitest": "^4.1.12",
     "vue": "^3.5.44"
   },
   "resolutions": {
-    "vitepress/vite": "^6.4.3"
+    "vitepress/vite": "^6.4.5",
+    "glob": "^14.0.2",
+    "minimatch": "^11.0.1"
   }
 }

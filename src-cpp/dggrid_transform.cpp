@@ -1,7 +1,7 @@
 // dggrid_transform.cpp
 //
 // All coordinate transforms and grid utilities implemented against the
-// DGGRID v9.2 dglib API (ported from v8.44; see the Z-index notes in
+// DGGRID v9.31 dglib API (ported from v8.44; see the Z-index notes in
 // buildTransformer), verified against the actual header files:
 //
 //   DgIDGGBase.h   — the Q2DI frame + all RF accessors
@@ -64,6 +64,7 @@
 #include <dglib/DgHierNdxSystemRFSBase.h> // DgHierNdxSystemRFSBase::makeSystem (Z3/Z7/ZORDER)
 #include <dglib/DgHierNdxSystemRFBase.h>  // per-resolution system RF (DgHierNdx)
 #include <dglib/DgHierNdx.h>              // DgHierNdx, DgHierNdxIntCoord
+#include <dglib/DgPolygon.h>              // DgPolygon (cell area boundary)
 #include <dglib/DgWGS84RF.h>              // DgWGS84RF (WGS84 datum)
 #include <dglib/DgAuthalicConverter.h>    // Dg2WayAuthalicConverter
 
@@ -125,9 +126,11 @@ struct Transformer {
     const DgHierNdxSystemRFSBase *zorderSys = nullptr; // pure aperture 3/4 only
     const DgHierNdxSystemRFSBase *z3Sys     = nullptr; // pure aperture 3 only
     const DgHierNdxSystemRFSBase *z7Sys     = nullptr; // pure aperture 7 only
+    const DgHierNdxSystemRFSBase *quadtreeSys = nullptr; // aperture 4 triangles
     const DgHierNdxSystemRFBase *zorderRF = nullptr;
     const DgHierNdxSystemRFBase *z3RF     = nullptr;
     const DgHierNdxSystemRFBase *z7RF     = nullptr;
+    const DgHierNdxSystemRFBase *quadtreeRF = nullptr;
 
     // ── inX: create a DgLocation in the named source frame ──────────────
 
@@ -235,7 +238,7 @@ struct Transformer {
     
     void outZORDER(LocPtr &loc, uint64_t &out_value) const {
         if (!zorderRF)
-            throw std::runtime_error("ZORDER not available (requires pure aperture 3 or 4 hexagon grid, not aperture 7 or sequences)");
+            throw std::runtime_error("ZORDER not available (requires a pure aperture 3 or 4 hexagon grid or an aperture 4 diamond grid; not aperture 7, triangles or sequences)");
         zorderRF->convert(loc.get());
         const DgHierNdx *c = zorderRF->getAddress(*loc);
         out_value = c->intNdx().value();
@@ -257,6 +260,14 @@ struct Transformer {
         out_value = c->intNdx().value();
     }
     
+    void outQUADTREE(LocPtr &loc, uint64_t &out_value) const {
+        if (!quadtreeRF)
+            throw std::runtime_error("QUADTREE not available (requires a pure aperture 4 triangle grid at resolution 29 or below)");
+        quadtreeRF->convert(loc.get());
+        const DgHierNdx *c = quadtreeRF->getAddress(*loc);
+        out_value = c->intNdx().value();
+    }
+
     // ── inX for hierarchical types ───────────────────────────────────────
     
     LocPtr inVERTEX2DD(bool keep, int vertNum, int triNum, double x, double y) const {
@@ -270,7 +281,7 @@ struct Transformer {
     
     LocPtr inZORDER(uint64_t value) const {
         if (!zorderRF)
-            throw std::runtime_error("ZORDER not available (requires pure aperture 3 or 4 hexagon grid, not aperture 7 or sequences)");
+            throw std::runtime_error("ZORDER not available (requires a pure aperture 3 or 4 hexagon grid or an aperture 4 diamond grid; not aperture 7, triangles or sequences)");
         DgHierNdx ndx;
         ndx.setIntNdx(DgHierNdxIntCoord(value));
         zorderRF->setStringFromIntCoord(ndx);
@@ -293,6 +304,15 @@ struct Transformer {
         ndx.setIntNdx(DgHierNdxIntCoord(value));
         z7RF->setStringFromIntCoord(ndx);
         return LocPtr(z7RF->makeLocation(ndx));
+    }
+
+    LocPtr inQUADTREE(uint64_t value) const {
+        if (!quadtreeRF)
+            throw std::runtime_error("QUADTREE not available (requires a pure aperture 4 triangle grid at resolution 29 or below)");
+        DgHierNdx ndx;
+        ndx.setIntNdx(DgHierNdxIntCoord(value));
+        quadtreeRF->setStringFromIntCoord(ndx);
+        return LocPtr(quadtreeRF->makeLocation(ndx));
     }
 };
 
@@ -521,9 +541,17 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
 
     // Z-index systems (v9: DgHierNdxSystemRFSBase::makeSystem). makeSystem
     // calls exit() on an unsupported grid, which would kill the WASM module,
-    // so only build the systems DGGRID accepts: pure hexagon apertures.
+    // so only build the systems DGGRID accepts: pure hexagon apertures,
+    // ZORDER on aperture 4 diamonds (fixed in 9.3) and QUADTREE on aperture 4
+    // triangles (new in 9.3, resolutions 0–29).
     // The systems are RFs registered with net, which deletes them.
-    if (topo == Hexagon && !p.is_aperture_sequence) {
+    if (topo == Diamond && p.aperture == 4) {
+        t->zorderSys = DgHierNdxSystemRFSBase::makeSystem(
+            *idggs, dgg::addtype::ZOrder, dgg::addtype::Int64, "ZOrder");
+    } else if (topo == Triangle && p.aperture == 4 && nRes <= 30) {
+        t->quadtreeSys = DgHierNdxSystemRFSBase::makeSystem(
+            *idggs, dgg::addtype::Quadtree, dgg::addtype::Int64, "Quadtree");
+    } else if (topo == Hexagon && !p.is_aperture_sequence) {
         if (p.aperture == 7) {
             t->z7Sys = DgHierNdxSystemRFSBase::makeSystem(
                 *idggs, dgg::addtype::Z7, dgg::addtype::Int64, "Z7");
@@ -538,6 +566,7 @@ static std::shared_ptr<Transformer> buildTransformer(const DggsParams &p) {
     if (t->zorderSys) t->zorderRF = &t->zorderSys->sysRF(p.res);
     if (t->z3Sys)     t->z3RF     = &t->z3Sys->sysRF(p.res);
     if (t->z7Sys)     t->z7RF     = &t->z7Sys->sysRF(p.res);
+    if (t->quadtreeSys) t->quadtreeRF = &t->quadtreeSys->sysRF(p.res);
 
     return t;
 }
@@ -667,15 +696,79 @@ double geoDistanceKM(const DggsParams &p,
     const DgGeoCoord a(lon1_deg, lat1_deg, false);   // degrees
     const DgGeoCoord b(lon2_deg, lat2_deg, false);
 
-    // DgEllipsoidRF::dist (Vincenty) exits when it does not converge, which
-    // for WGS84 starts about 179.11 degrees apart; refuse those pairs.
-    if (t->ioRF != t->geoRF &&
-        DgGeoCoord::gcDist(a, b) * M_180_PI > 179.0L)
-        throw std::invalid_argument(
-            "WGS84 geodesic distance is undefined for nearly antipodal points "
-            "(more than 179 degrees apart)");
-
+    // DGGRID 9.31's DgGeodesic converges for every pair (antipodal included),
+    // so the old Vincenty "nearly antipodal" guard is gone.
     return static_cast<double>(t->ioRF->dist(a, b));
+}
+
+GeodesicInverseResult geodesicInverse(const DggsParams &p,
+                                      double lon1_deg, double lat1_deg,
+                                      double lon2_deg, double lat2_deg)
+{
+    for (double v : { lon1_deg, lat1_deg, lon2_deg, lat2_deg })
+        if (!std::isfinite(v))
+            throw std::invalid_argument("coordinates must be finite numbers");
+    if (std::fabs(lat1_deg) > 90.0 || std::fabs(lat2_deg) > 90.0)
+        throw std::invalid_argument("latitude must be within [-90, 90]");
+
+    auto t = getTransformer(p);
+    const DgGeoCoord a(lon1_deg, lat1_deg, false);
+    const DgGeoCoord b(lon2_deg, lat2_deg, false);
+    // dglib's long double, which DGGRID_DOUBLE_PRECISION rewrites to double
+    decltype(a.lat()) distM = 0, az = 0;
+    if (!t->ioRF->geodesicInverse(a, b, distM, az))
+        throw std::runtime_error("geodesic inverse failed for these coordinates");
+    return { static_cast<double>(distM / 1000),
+             static_cast<double>(az * M_180_PI) };
+}
+
+GeoCoord geodesicDirect(const DggsParams &p,
+                        double lon_deg, double lat_deg,
+                        double azimuth_deg, double distance_km)
+{
+    // geodesicDirect reports bad input with a fatal error (exit)
+    for (double v : { lon_deg, lat_deg, azimuth_deg, distance_km })
+        if (!std::isfinite(v))
+            throw std::invalid_argument(
+                "coordinates, azimuth and distance must be finite numbers");
+    if (std::fabs(lat_deg) > 90.0)
+        throw std::invalid_argument("latitude must be within [-90, 90]");
+
+    auto t = getTransformer(p);
+    const DgGeoCoord from(lon_deg, lat_deg, false);
+    const DgGeoCoord to = t->ioRF->geodesicDirect(
+        from, static_cast<long double>(azimuth_deg) * M_PI_180,
+        static_cast<long double>(distance_km) * 1000.0L);
+    return { static_cast<double>(to.lonDegs()),
+             static_cast<double>(to.latDegs()) };
+}
+
+std::vector<double> seqNumsToAreaKM2(const DggsParams &p,
+                                     const std::vector<SeqNum> &seqnums,
+                                     int densify)
+{
+    if (densify < 0 || densify > 500)
+        throw std::invalid_argument("densification must be 0–500, got " +
+                                    std::to_string(densify));
+
+    auto t = getTransformer(p);
+    const unsigned long long maxSn = t->bndRF->size();
+    std::vector<double> out;
+    out.reserve(seqnums.size());
+    for (auto sn : seqnums) {
+        // addFromSeqNum on an out-of-range id yields a bogus address, and
+        // cellAreaKM then exits on the degenerate boundary
+        if (sn < 1 || sn > maxSn)
+            throw std::invalid_argument(
+                "sequence number " + std::to_string(sn) +
+                " is out of range 1–" + std::to_string(maxSn) +
+                " at resolution " + std::to_string(p.res));
+        const DgQ2DICoord q2di = t->bndRF->addFromSeqNum(
+            static_cast<unsigned long long int>(sn));
+        out.push_back(static_cast<double>(t->idggs->cellAreaKM(
+            DgResAdd<DgQ2DICoord>(q2di, p.res), densify, *t->ioRF)));
+    }
+    return out;
 }
 
 // ===========================================================================
@@ -1267,22 +1360,27 @@ std::vector<std::vector<SeqNum>> seqNumsChildren(const DggsParams &p,
 // the containing cell or the cells covering the parent's area.
 
 // Select the indexing system for a transformer. An empty name picks the one
-// matching the grid (Z7 for aperture 7, Z3 for aperture 3, ZORDER for 4).
+// matching the grid (Z7 for aperture 7, Z3 for aperture 3, ZORDER for 4,
+// QUADTREE for aperture 4 triangles).
 static const DgHierNdxSystemRFSBase *indexSystem(const Transformer &t,
                                                  const std::string &system) {
     const DgHierNdxSystemRFSBase *sys = nullptr;
-    if (system.empty())          sys = t.z7Sys ? t.z7Sys : (t.z3Sys ? t.z3Sys : t.zorderSys);
-    else if (system == "Z7")     sys = t.z7Sys;
-    else if (system == "Z3")     sys = t.z3Sys;
-    else if (system == "ZORDER") sys = t.zorderSys;
+    if (system.empty())
+        sys = t.z7Sys ? t.z7Sys : (t.z3Sys ? t.z3Sys :
+              (t.zorderSys ? t.zorderSys : t.quadtreeSys));
+    else if (system == "Z7")       sys = t.z7Sys;
+    else if (system == "Z3")       sys = t.z3Sys;
+    else if (system == "ZORDER")   sys = t.zorderSys;
+    else if (system == "QUADTREE") sys = t.quadtreeSys;
     else throw std::invalid_argument(
-        "Unknown indexing system '" + system + "'. Use Z3, Z7, or ZORDER.");
+        "Unknown indexing system '" + system + "'. Use Z3, Z7, ZORDER or QUADTREE.");
 
     if (!sys)
         throw std::runtime_error(
             "Indexing system " + (system.empty() ? std::string("") : system + " ") +
             "not available (Z7 requires pure aperture 7, Z3 pure aperture 3, "
-            "ZORDER pure aperture 3 or 4 hexagon grids; not aperture sequences)");
+            "ZORDER pure aperture 3 or 4 hexagon or aperture 4 diamond grids, "
+            "QUADTREE aperture 4 triangle grids; not aperture sequences)");
     return sys;
 }
 
@@ -1425,6 +1523,24 @@ Z7Coord seqNumToZ7(const DggsParams &p, SeqNum seqnum) {
 SeqNum z7ToSeqNum(const DggsParams &p, uint64_t value) {
     auto t = getTransformer(p);
     auto loc = t->inZ7(value);
+    SeqNum r = 0;
+    t->outSEQNUM(loc, r);
+    return r;
+}
+
+// ── QUADTREE ───────────────────────────────────────────────────────────────
+
+QuadtreeCoord seqNumToQuadtree(const DggsParams &p, SeqNum seqnum) {
+    auto t = getTransformer(p);
+    auto loc = t->inSEQNUM(seqnum);
+    QuadtreeCoord r{};
+    t->outQUADTREE(loc, r.value);
+    return r;
+}
+
+SeqNum quadtreeToSeqNum(const DggsParams &p, uint64_t value) {
+    auto t = getTransformer(p);
+    auto loc = t->inQUADTREE(value);
     SeqNum r = 0;
     t->outSEQNUM(loc, r);
     return r;

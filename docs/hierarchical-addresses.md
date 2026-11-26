@@ -411,17 +411,18 @@ For complete API documentation, see:
 
 ### DGGRID Implementation
 
-These address types are provided by DGGRID v9.2. VERTEX2DD is a reference frame of each grid; ZORDER, Z3 and Z7 are hierarchical indexing systems (`DgHierNdxSystemRFSBase`) built over the whole multi-resolution grid:
+These address types are provided by DGGRID v9.31. VERTEX2DD is a reference frame of each grid; ZORDER, Z3, Z7 and QUADTREE are hierarchical indexing systems (`DgHierNdxSystemRFSBase`) built over the whole multi-resolution grid:
 
 - `DgVertex2DDRF`: Always available for all apertures
-- ZORDER (`DgZOrderSystem`): pure aperture 3 and 4 hexagons (not aperture 7 or aperture sequences)
+- ZORDER (`DgZOrderSystem`): pure aperture 3 and 4 hexagons and aperture 4 diamonds (not aperture 7, triangles or aperture sequences)
+- QUADTREE (`DgQuadtreeSystem`, DGGRID 9.3): pure aperture 4 triangles, resolutions 0–29. Use `sequenceNumToQuadtree()` / `quadtreeToSequenceNum()`.
 - Z3 (`DgZ3System`): pure aperture 3 hexagons only
 - Z7 (`DgZ7System`): pure aperture 7 hexagons only
 
 ### Coordinate Formats
 
 - **VERTEX2DD**: JavaScript object with boolean, integers, and floating-point coordinates
-- **ZORDER, Z3, Z7**: 64-bit unsigned integers (JavaScript `BigInt`)
+- **ZORDER, Z3, Z7, QUADTREE**: 64-bit unsigned integers (JavaScript `BigInt`). A QUADTREE index holds its root (`2 × (quad − 1) + t`, 0–19) in bits 63..59 and one 2-bit digit per resolution in bits 58..1, coarsest first.
 
 ### Error Handling
 

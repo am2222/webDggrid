@@ -2,7 +2,7 @@
 
 # Enumeration: OrientationPreset
 
-Defined in: [webdggrid.ts:280](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L280)
+Defined in: [webdggrid.ts:297](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L297)
 
 A named icosahedron orientation (DGGRID `dggs_orient_preset`). Use with
 [orientationPreset](../functions/orientationPreset.md) to fill `poleCoordinates` and `azimuth`.
@@ -13,7 +13,7 @@ A named icosahedron orientation (DGGRID `dggs_orient_preset`). Use with
 
 > **DYMAXION**: `"DYMAXION"`
 
-Defined in: [webdggrid.ts:289](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L289)
+Defined in: [webdggrid.ts:306](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L306)
 
 Fuller's Dymaxion placement (R. W. Gray's coordinates). Vertex and face
 numbering match H3's; used by the FULLER presets.
@@ -24,7 +24,7 @@ numbering match H3's; used by the FULLER presets.
 
 > **ISEA**: `"ISEA"`
 
-Defined in: [webdggrid.ts:282](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L282)
+Defined in: [webdggrid.ts:299](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L299)
 
 Snyder's ISEA orientation: vertex at 11.25° E, atan(φ)° N, azimuth 0.
 
@@ -34,6 +34,6 @@ Snyder's ISEA orientation: vertex at 11.25° E, atan(φ)° N, azimuth 0.
 
 > **ISEAL**: `"ISEAL"`
 
-Defined in: [webdggrid.ts:284](https://github.com/am2222/webDggrid/blob/36270011ea3d704cc993ef6f7202c9db27b0acbd/src-ts/webdggrid.ts#L284)
+Defined in: [webdggrid.ts:301](https://github.com/am2222/webDggrid/blob/52d49d8b04b1ed1db4f85a716269bf05d2f4e8cf/src-ts/webdggrid.ts#L301)
 
 The ISEA orientation shifted to 11.20° E, used by the ellipsoidal (`…L`) presets.
