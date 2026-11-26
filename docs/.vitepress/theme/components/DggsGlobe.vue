@@ -4,7 +4,7 @@ import { ylOrBrRgba } from '../utils/globeUtils.js'
 import { loadWebdggrid } from '../utils/loadWebdggrid.js'
 import {
   PRESETS, PROJECTIONS, DATUMS, indexTypesFor, indexLabel, CELL_STYLE,
-  WORLD, padExtent, extentContains, extentSeqNums,
+  WORLD, padExtent, extentContains, extentSeqNums, samplingSteps,
 } from '../utils/demoGrid.js'
 
 const props = defineProps({
@@ -445,12 +445,11 @@ function generateGrid({ keepSelection = false } = {}) {
         // cell (at res 15 that's billions and traps the WASM module).
         const visible = viewportExtent()
         const extent = visible ? padExtent(visible, MULTIRES_PAD) : WORLD
-        const steps = visible ? Math.round(80 * (1 + 2 * MULTIRES_PAD)) : 120
-        seqNums = extentSeqNums(webdggrid, resolution, extent, steps)
+        seqNums = extentSeqNums(webdggrid, resolution, extent, samplingSteps(webdggrid, resolution, extent))
 
         const baseRes = Math.max(1, resolution - 1)
         webdggrid.setDggs(dggsConfig, baseRes)
-        baseFc = buildFc(extentSeqNums(webdggrid, baseRes, extent, steps), baseRes)
+        baseFc = buildFc(extentSeqNums(webdggrid, baseRes, extent, samplingSteps(webdggrid, baseRes, extent)), baseRes)
 
         webdggrid.setDggs(dggsConfig, resolution)
         lastGen = { res: resolution, extent, cfgKey: JSON.stringify(dggsConfig) }

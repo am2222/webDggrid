@@ -13,7 +13,7 @@ import { ylOrBrRgba } from '../utils/globeUtils.js'
 import { loadWebdggrid } from '../utils/loadWebdggrid.js'
 import {
   PRESETS, PROJECTIONS, DATUMS, CELL_STYLE, indexTypesFor, indexLabel,
-  WORLD, padExtent, extentContains, extentSeqNums,
+  WORLD, padExtent, extentContains, extentSeqNums, samplingSteps,
 } from '../utils/demoGrid.js'
 
 const props = defineProps({
@@ -440,11 +440,10 @@ function generateGrid({ keepSelection = false } = {}) {
         // cover more than the viewport, so small pans need no new cells
         const visible = viewportExtent()
         const extent = visible ? padExtent(visible, MULTIRES_PAD) : WORLD
-        const steps = visible ? Math.round(90 * (1 + 2 * MULTIRES_PAD)) : 120
-        seqNums = extentSeqNums(webdggrid, resolution, extent, steps)
+        seqNums = extentSeqNums(webdggrid, resolution, extent, samplingSteps(webdggrid, resolution, extent))
         const baseRes = Math.max(1, resolution - 1)
         webdggrid.setDggs(cfg, baseRes)
-        base = cellFeatures(extentSeqNums(webdggrid, baseRes, extent, steps), baseRes)
+        base = cellFeatures(extentSeqNums(webdggrid, baseRes, extent, samplingSteps(webdggrid, baseRes, extent)), baseRes)
         webdggrid.setDggs(cfg, resolution)
         lastGen = { res: resolution, extent, cfgKey: JSON.stringify(cfg) }
       } else {
