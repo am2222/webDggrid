@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.2.0](https://github.com/am2222/webDggrid/compare/v2.1.1...v2.2.0) (2026-11-26)
+
+
+### Features
+
+* **demo:** add Navara globe demo page ([f2bcd27](https://github.com/am2222/webDggrid/commit/f2bcd270a877a4177439ff2b7cd766a16fa12d78))
+* **dggrid:** add geodesicInverse and geodesicDirect for azimuth and ([f2bcd27](https://github.com/am2222/webDggrid/commit/f2bcd270a877a4177439ff2b7cd766a16fa12d78))
+* **dggrid:** add sequenceNumToAreaKM for geodesic cell areas ([f2bcd27](https://github.com/am2222/webDggrid/commit/f2bcd270a877a4177439ff2b7cd766a16fa12d78))
+* **dggrid:** upgrade to DGGRID v9.31 with QUADTREE indexing and areas ([#52](https://github.com/am2222/webDggrid/issues/52)) ([f2bcd27](https://github.com/am2222/webDggrid/commit/f2bcd270a877a4177439ff2b7cd766a16fa12d78))
+
+
+### Bug Fixes
+
+* **dggrid:** compute WGS84 distances between nearly antipodal points ([f2bcd27](https://github.com/am2222/webDggrid/commit/f2bcd270a877a4177439ff2b7cd766a16fa12d78))
+
 ## [2.1.1](https://github.com/am2222/webDggrid/compare/v2.1.0...v2.1.1) (2026-11-26)
 
 
