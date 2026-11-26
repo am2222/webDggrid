@@ -122,18 +122,35 @@ export function extentContains(outer, inner) {
 }
 
 /**
+ * How many sample points to place along longitude and latitude so that none
+ * of the cells of `dggs` at `res` in `extent` falls between them: spaced at
+ * under half the distance between cell centers. A view tilted toward the
+ * horizon covers a large area, where a fixed point count would skip cells.
+ * Each axis is clamped to [minSteps, maxSteps].
+ */
+export function samplingSteps(dggs, res, extent, minSteps = 60, maxSteps = 1000) {
+  const spacingKm = dggs.cellDistKM(res) / 2.5
+  // longitude degrees are longest at the latitude nearest the equator
+  const widestLat = extent.minLat > 0 ? extent.minLat : extent.maxLat < 0 ? extent.maxLat : 0
+  const lngKm = (extent.maxLng - extent.minLng) * 111.32 * Math.cos(widestLat * Math.PI / 180)
+  const latKm = (extent.maxLat - extent.minLat) * 110.57
+  const clamp = (n) => Math.min(maxSteps, Math.max(minSteps, Math.ceil(n)))
+  return [clamp(lngKm / spacingKm), clamp(latKm / spacingKm)]
+}
+
+/**
  * The cells of `dggs` at `res` covering `extent`, found by sampling a grid of
- * points. `steps` points per side sample a viewport-sized extent; larger
- * (padded) extents get proportionally more so cells are not skipped.
+ * points; `steps` is [along longitude, along latitude] (see samplingSteps).
  */
 export function extentSeqNums(dggs, res, extent, steps) {
+  const [lngSteps, latSteps] = steps
   const coords = []
-  for (let i = 0; i <= steps; i++) {
-    for (let j = 0; j <= steps; j++) {
-      let lng = extent.minLng + (extent.maxLng - extent.minLng) * j / steps
+  for (let i = 0; i <= latSteps; i++) {
+    for (let j = 0; j <= lngSteps; j++) {
+      let lng = extent.minLng + (extent.maxLng - extent.minLng) * j / lngSteps
       while (lng > 180) lng -= 360
       while (lng < -180) lng += 360
-      coords.push([lng, extent.minLat + (extent.maxLat - extent.minLat) * i / steps])
+      coords.push([lng, extent.minLat + (extent.maxLat - extent.minLat) * i / latSteps])
     }
   }
   const seen = new Set(), out = []
