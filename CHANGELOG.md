@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/am2222/webDggrid/compare/v2.1.0...v2.1.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **exports:** use lowercase webdggrid file names in exports ([#50](https://github.com/am2222/webDggrid/issues/50)) ([9ec0fe6](https://github.com/am2222/webDggrid/commit/9ec0fe64681b73a19b3b47e9585cec06cea969f9)), closes [#49](https://github.com/am2222/webDggrid/issues/49)
+
 ## [2.1.0](https://github.com/am2222/webDggrid/compare/v2.0.0...v2.1.0) (2026-11-06)
 
 
