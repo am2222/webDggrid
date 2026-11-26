@@ -11,9 +11,9 @@
       "default": "./dist/index.umd.js"
     },
     "./Webdggrid": {
-      "types": "./types/Webdggrid.d.ts",
-      "import": "./dist/Webdggrid.js",
-      "default": "./dist/Webdggrid.umd.js"
+      "types": "./types/webdggrid.d.ts",
+      "import": "./dist/webdggrid.js",
+      "default": "./dist/webdggrid.umd.js"
     }
   },
   "main": "./dist/index.umd.js",
