@@ -1,6 +1,45 @@
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitepress'
+import { defineConfig, type Plugin } from 'vitepress'
 import typedocSidebar from '../api/typedoc-sidebar.json'
+
+// Navara's prebuilt web workers load their WASM by a fixed file name next to
+// the worker script, e.g. `navara_wasm_worker_bg-Dz-ZtOf1.wasm`. VitePress
+// names assets `[name].[hash]` (and won't let a config override that), so in
+// production builds the workers 404 on their WASM and cells and labels never
+// appear. Read the names the emitted worker scripts ask for and rename the
+// matching WASM assets to them.
+function navaraWorkerWasmNames(): Plugin {
+  const REQUESTED = /navara_wasm_\w*?worker_bg-[\w-]+\.wasm/g
+  return {
+    name: 'navara-worker-wasm-names',
+    apply: 'build',
+    generateBundle(_options, bundle) {
+      const requested = new Set<string>()
+      for (const file of Object.values(bundle)) {
+        const text = file.type === 'chunk' ? file.code
+          : typeof file.source === 'string' ? file.source
+          : file.fileName.endsWith('.js') ? new TextDecoder().decode(file.source) : ''
+        for (const m of text.matchAll(REQUESTED)) requested.add(m[0])
+      }
+      for (const want of requested) {
+        // navara_wasm_worker_bg-Dz-ZtOf1.wasm <- the asset named navara_wasm_worker_bg.wasm
+        const base = want.replace(/-[\w-]+\.wasm$/, '.wasm')
+        const entry = Object.entries(bundle).find(([, f]) =>
+          f.type === 'asset' && (f.names ?? []).includes(base))
+        if (!entry) {
+          this.warn(`no asset for ${want}; Navara workers will fail to load it`)
+          continue
+        }
+        const [key, file] = entry
+        const fileName = path.posix.join(path.posix.dirname(file.fileName), want)
+        delete bundle[key]
+        file.fileName = fileName
+        bundle[fileName] = file
+      }
+    },
+  }
+}
 
 const sidebarModified = typedocSidebar.map((groups) => {
   const items = groups.items.map((item) => {
@@ -16,6 +55,7 @@ export default defineConfig({
   base: "/webDggrid/",
 
   vite: {
+    plugins: [navaraWorkerWasmNames()],
     resolve: {
       alias: {
         'webdggrid': fileURLToPath(new URL('../../lib-esm/webdggrid.js', import.meta.url)),
@@ -36,13 +76,8 @@ export default defineConfig({
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/getting-started' },
       { text: 'API', link: '/api/' },
-      {
-        text: 'Demo',
-        items: [
-          { text: 'Cesium globe', link: '/demo' },
-          { text: 'Navara globe (beta)', link: '/demo-navara' },
-        ],
-      },
+      { text: 'Demo', link: '/demo' },
+      { text: 'Navara Demo', link: '/demo-navara' },
       { text: 'Contributing', link: '/contributing' },
     ],
 
