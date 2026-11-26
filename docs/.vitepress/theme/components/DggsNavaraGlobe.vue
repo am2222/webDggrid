@@ -8,9 +8,13 @@
 // each ring on a tangent plane, so cells that wind around a pole or have an
 // edge over it render correctly. The draped (clampToGround) path goes through
 // a Web Mercator tiler and breaks at the poles, so it is never used here.
-import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ylOrBrRgba } from '../utils/globeUtils.js'
 import { loadWebdggrid } from '../utils/loadWebdggrid.js'
+import {
+  PRESETS, PROJECTIONS, DATUMS, CELL_STYLE, indexTypesFor, indexLabel,
+  WORLD, padExtent, extentContains, extentSeqNums,
+} from '../utils/demoGrid.js'
 
 const props = defineProps({
   /** Show the controls panels */
@@ -57,6 +61,8 @@ const ctrlMultiRes      = ref(props.initialMultiRes)
 const ctrlZoomOffset    = ref(props.initialZoomOffset)
 const ctrlMixedAperture = ref(false)
 const ctrlApertureSeq   = ref('434747')
+const ctrlDatum         = ref('AUTHALIC_SPHERE')
+const ctrlPreset        = ref('custom')
 const showAperture      = computed(() => ctrlTopology.value === 'HEXAGON')
 const ctrlMaxResLabel   = computed(() => ctrlMultiRes.value ? 'Max Resolution' : 'Resolution')
 
@@ -88,25 +94,35 @@ const selectedCellId  = ref(null)
 const selectedCellRes = ref(null)
 const hierarchyInfo   = reactive({ parent: null, allParents: [], children: [], neighbors: [] })
 const ctrlIndexType   = ref('SEQNUM')
-const availableIndexTypes = computed(() => {
-  const types = ['SEQNUM']
-  const mixed = ctrlMixedAperture.value && showAperture.value
-  if (ctrlTopology.value === 'HEXAGON') {
-    types.push('VERTEX2DD')
-    if (!mixed) {
-      if (ctrlAperture.value !== 7) types.push('ZORDER')
-      if (ctrlAperture.value === 3) types.push('Z3')
-      if (ctrlAperture.value === 7) types.push('Z7')
-    }
-  } else if (ctrlTopology.value === 'DIAMOND') {
-    types.push('ZORDER')      // DGGRID 9.3
-  } else if (ctrlTopology.value === 'TRIANGLE') {
-    types.push('QUADTREE')    // DGGRID 9.3
-  }
-  return types
-})
+const availableIndexTypes = computed(() => indexTypesFor({
+  topology: ctrlTopology.value,
+  aperture: ctrlAperture.value,
+  mixed: ctrlMixedAperture.value && showAperture.value,
+}))
 watch(availableIndexTypes, (types) => {
   if (!types.includes(ctrlIndexType.value)) ctrlIndexType.value = 'SEQNUM'
+})
+
+// --- DGGRID presets: fill in the grid settings; editing any of them again
+// makes the selection "Custom" ---
+let applyingPreset = false
+watch(ctrlPreset, (name) => {
+  const p = PRESETS.find((x) => x.name === name)
+  if (!p) return
+  applyingPreset = true
+  ctrlTopology.value = p.topology
+  ctrlProjection.value = p.projection
+  ctrlAperture.value = p.aperture
+  ctrlAzimuth.value = Math.round(p.azimuth * 1e4) / 1e4
+  ctrlPoleLat.value = Math.round(p.poleCoordinates.lat * 1e4) / 1e4
+  ctrlPoleLng.value = Math.round(p.poleCoordinates.lng * 1e4) / 1e4
+  ctrlDatum.value = p.datum
+  ctrlMixedAperture.value = !!p.apertureSequence
+  if (p.apertureSequence) ctrlApertureSeq.value = p.apertureSequence
+  nextTick(() => { applyingPreset = false })
+})
+watch([ctrlTopology, ctrlProjection, ctrlAperture, ctrlAzimuth, ctrlPoleLat, ctrlPoleLng, ctrlDatum, ctrlMixedAperture, ctrlApertureSeq], () => {
+  if (!applyingPreset) ctrlPreset.value = 'custom'
 })
 
 // --- non-reactive engine state ---
@@ -158,8 +174,12 @@ function dropLayer(key) {
 }
 
 function addGeoJson(key, features, layerConfig, evaluate) {
-  dropLayer(key)
-  if (!features.length) return null
+  // add the new layer before removing the old one, so a regenerated layer
+  // never blinks out
+  const old = layers[key]
+  delete layers[key]
+  const dropOld = () => { if (old) { old.layer.delete(); old.source.delete() } }
+  if (!features.length) { dropOld(); return null }
   const source = view.addSource({ type: 'geojson', data: { type: 'FeatureCollection', features } })
   const layer = view.addLayer({ type: 'vector', source, ...layerConfig })
   if (evaluate) {
@@ -171,6 +191,7 @@ function addGeoJson(key, features, layerConfig, evaluate) {
     })
   }
   layers[key] = { layer, source }
+  dropOld()
   return layer
 }
 
@@ -366,25 +387,12 @@ function viewportExtent() {
   }
 }
 
-function viewportSeqNums(resolution) {
-  const e = viewportExtent() ?? { minLng: -180, maxLng: 180, minLat: -89, maxLat: 89 }
-  const steps = 90
-  const coords = []
-  for (let i = 0; i <= steps; i++) {
-    for (let j = 0; j <= steps; j++) {
-      let lng = e.minLng + (e.maxLng - e.minLng) * j / steps
-      while (lng > 180) lng -= 360
-      while (lng < -180) lng += 360
-      coords.push([lng, e.minLat + (e.maxLat - e.minLat) * i / steps])
-    }
-  }
-  const seen = new Set(), out = []
-  for (const n of webdggrid.geoToSequenceNum(coords, resolution)) {
-    const k = n.toString()
-    if (!seen.has(k)) { seen.add(k); out.push(n) }
-  }
-  return out
-}
+// What the current cells were generated for; a camera move only regenerates
+// when the resolution changes or the view leaves the (padded) area covered.
+let lastGen = null   // { res, extent, cfgKey }
+const MULTIRES_PAD = 0.5
+
+function cfgKey() { return JSON.stringify(dggsConfig()) }
 
 // ---------------------------------------------------------------------------
 // Main grid generation
@@ -397,6 +405,7 @@ function dggsConfig() {
     topology: ctrlTopology.value,
     projection: ctrlProjection.value,
     aperture: ctrlAperture.value,
+    datum: ctrlDatum.value,
   }
   if (ctrlMixedAperture.value && showAperture.value) cfg.apertureSequence = ctrlApertureSeq.value
   return cfg
@@ -410,9 +419,11 @@ function currentResolution() {
     : cap
 }
 
-function generateGrid() {
+// keepSelection: a camera-driven refresh keeps the selected cell and its
+// hierarchy; a settings change starts over.
+function generateGrid({ keepSelection = false } = {}) {
   if (!isReady.value || !webdggrid) return
-  clearSelection()
+  if (!keepSelection) clearSelection()
   if (tooltipEl.value) tooltipEl.value.style.display = 'none'
 
   const multiRes = ctrlMultiRes.value
@@ -426,12 +437,18 @@ function generateGrid() {
       webdggrid.setDggs(cfg, resolution)
       let seqNums, base = null
       if (multiRes) {
-        seqNums = viewportSeqNums(resolution)
+        // cover more than the viewport, so small pans need no new cells
+        const visible = viewportExtent()
+        const extent = visible ? padExtent(visible, MULTIRES_PAD) : WORLD
+        const steps = visible ? Math.round(90 * (1 + 2 * MULTIRES_PAD)) : 120
+        seqNums = extentSeqNums(webdggrid, resolution, extent, steps)
         const baseRes = Math.max(1, resolution - 1)
         webdggrid.setDggs(cfg, baseRes)
-        base = cellFeatures(viewportSeqNums(baseRes), baseRes)
+        base = cellFeatures(extentSeqNums(webdggrid, baseRes, extent, steps), baseRes)
         webdggrid.setDggs(cfg, resolution)
+        lastGen = { res: resolution, extent, cfgKey: JSON.stringify(cfg) }
       } else {
+        lastGen = null
         const total = webdggrid.nCells(resolution)
         if (total > MAX_GLOBE_CELLS) throw new Error(`${total} cells — lower the resolution or use multi-resolution`)
         seqNums = Array.from({ length: total }, (_, i) => BigInt(i + 1))
@@ -440,6 +457,8 @@ function generateGrid() {
       lastFine = fine; lastBase = base
       drawGrid(fine, base)
       drawPole()
+      // keep the selection drawn above the new grid
+      if (keepSelection && selectedCellId.value) drawHierarchy(selectedCellId.value, selectedCellRes.value)
       const apLabel = cfg.apertureSequence ? `mixed [${cfg.apertureSequence}]` : `${ctrlProjection.value} ${ctrlTopology.value.toLowerCase()} a${ctrlAperture.value}`
       status.value = `${seqNums.length} cells · res ${resolution} · ${multiRes ? 'viewport' : 'globe'} · ${apLabel}`
     } catch (err) {
@@ -456,21 +475,7 @@ function generateGrid() {
 // ---------------------------------------------------------------------------
 
 function getCellIndexLabel(seqnum, resolution) {
-  try {
-    switch (ctrlIndexType.value) {
-      case 'VERTEX2DD': {
-        const v = webdggrid.sequenceNumToVertex2DD(seqnum, resolution)
-        return `v${v.vertNum} t${v.triNum}`
-      }
-      case 'ZORDER':   return webdggrid.sequenceNumToZOrder(seqnum, resolution).toString(16)
-      case 'Z3':       return webdggrid.sequenceNumToZ3(seqnum, resolution).toString(16)
-      case 'Z7':       return webdggrid.sequenceNumToZ7(seqnum, resolution).toString(16)
-      case 'QUADTREE': return webdggrid.sequenceNumToQuadtree(seqnum, resolution).toString(16)
-      default:         return seqnum.toString()
-    }
-  } catch {
-    return seqnum.toString()
-  }
+  return indexLabel(webdggrid, ctrlIndexType.value, seqnum, resolution)
 }
 
 function selectCell(cellId, resolution) {
@@ -563,7 +568,7 @@ watch(ctrlIndexType, () => { if (selectedCellId.value) selectCell(selectedCellId
 
 // In multi-res mode there is no Generate button, so settings regenerate.
 watch(
-  [ctrlResolution, ctrlTopology, ctrlProjection, ctrlAperture, ctrlAzimuth, ctrlPoleLng, ctrlPoleLat, ctrlMixedAperture, ctrlApertureSeq],
+  [ctrlResolution, ctrlTopology, ctrlProjection, ctrlAperture, ctrlAzimuth, ctrlPoleLng, ctrlPoleLat, ctrlMixedAperture, ctrlApertureSeq, ctrlDatum],
   () => {
     if (!ctrlMultiRes.value || !isReady.value) return
     clearTimeout(settingsTimer)
@@ -605,7 +610,14 @@ function redrawAll() {
 function onMoveEnd() {
   if (!ctrlMultiRes.value || !isReady.value) return
   clearTimeout(multiResTimer)
-  multiResTimer = setTimeout(generateGrid, 300)
+  multiResTimer = setTimeout(() => {
+    const visible = viewportExtent()
+    const stillCovered = lastGen
+      && lastGen.res === currentResolution()
+      && lastGen.cfgKey === cfgKey()
+      && visible && extentContains(lastGen.extent, visible)
+    if (!stillCovered) generateGrid({ keepSelection: true })
+  }, 300)
 }
 
 function flyTo(lng, lat, zoom) {
@@ -743,6 +755,13 @@ defineExpose({ getView: () => view })
 
       <h4>Grid System</h4>
       <div class="field">
+        <label>Preset</label>
+        <select v-model="ctrlPreset">
+          <option value="custom">Custom</option>
+          <option v-for="p in PRESETS" :key="p.name" :value="p.name">{{ p.label }}</option>
+        </select>
+      </div>
+      <div class="field">
         <label>Topology</label>
         <select v-model="ctrlTopology">
           <option value="HEXAGON">Hexagon</option>
@@ -753,9 +772,13 @@ defineExpose({ getView: () => view })
       <div class="field">
         <label>Projection</label>
         <select v-model="ctrlProjection">
-          <option value="ISEA">ISEA</option>
-          <option value="IVEA">IVEA</option>
-          <option value="FULLER">Fuller</option>
+          <option v-for="p in PROJECTIONS" :key="p.value" :value="p.value">{{ p.label }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Datum</label>
+        <select v-model="ctrlDatum">
+          <option v-for="d in DATUMS" :key="d.value" :value="d.value">{{ d.label }}</option>
         </select>
       </div>
 

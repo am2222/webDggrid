@@ -1,11 +1,17 @@
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ylOrBrRgba } from '../utils/globeUtils.js'
 import { loadWebdggrid } from '../utils/loadWebdggrid.js'
+import {
+  PRESETS, PROJECTIONS, DATUMS, indexTypesFor, indexLabel, CELL_STYLE,
+  WORLD, padExtent, extentContains, extentSeqNums,
+} from '../utils/demoGrid.js'
 
 const props = defineProps({
-  /** Show OSM raster basemap */
+  /** Show a raster basemap */
   showBasemap: { type: Boolean, default: true },
+  /** Initial basemap: 'satellite' (Sentinel-2), 'osm' or 'none' */
+  initialBasemap: { type: String, default: 'satellite' },
   /** Show the controls panel */
   showControls: { type: Boolean, default: true },
   /** CSS height of the map container */
@@ -14,6 +20,10 @@ const props = defineProps({
   autoGenerate: { type: Boolean, default: false },
   // Initial grid settings (all overridable from controls when showControls=true)
   initialResolution: { type: Number, default: 3 },
+  /** Start in multi-resolution mode: cells for the viewport plus the next coarser level */
+  initialMultiRes: { type: Boolean, default: true },
+  /** Zoom → resolution offset used in multi-resolution mode */
+  initialZoomOffset: { type: Number, default: 1 },
   initialTopology: { type: String, default: 'HEXAGON' },
   initialProjection: { type: String, default: 'ISEA' },
   initialAperture: { type: Number, default: 4 },
@@ -23,10 +33,10 @@ const props = defineProps({
   initialCenter: { type: Array, default: () => [0, 20] },
   /** Equivalent MapLibre globe zoom level — mapped to a Cesium camera altitude. */
   initialZoom: { type: Number, default: 1.8 },
-  /** Cell fill color [r,g,b,a] */
-  fillColor: { type: Array, default: () => [56, 132, 255, 110] },
-  /** Cell line color [r,g,b,a] */
-  lineColor: { type: Array, default: () => [10, 70, 200, 245] },
+  /** Cell fill color (CSS); its opacity comes from the opacity slider */
+  fillColor: { type: String, default: CELL_STYLE.fill },
+  /** Cell line color (CSS) */
+  lineColor: { type: String, default: CELL_STYLE.outline },
   /** Allow map pan/zoom interaction */
   interactive: { type: Boolean, default: true },
 })
@@ -40,8 +50,9 @@ const status      = ref('Loading WASM…')
 const isReady     = ref(false)
 const isGenerating = ref(false)
 
-const ctrlResolution   = ref(props.initialResolution)
-const ctrlMaxResLabel  = ref('Resolution')
+// in multi-resolution mode the slider is the maximum resolution
+const ctrlResolution   = ref(props.initialMultiRes ? 15 : props.initialResolution)
+const ctrlMaxResLabel  = ref(props.initialMultiRes ? 'Max Resolution' : 'Resolution')
 const ctrlTopology     = ref(props.initialTopology)
 const ctrlProjection   = ref(props.initialProjection)
 const ctrlAperture     = ref(props.initialAperture)
@@ -49,8 +60,12 @@ const ctrlAzimuth      = ref(props.initialAzimuth)
 const ctrlPoleLng      = ref(props.initialPoleLng)
 const ctrlPoleLat      = ref(props.initialPoleLat)
 const ctrlColorCells   = ref(false)
-const ctrlMultiRes     = ref(false)
-const ctrlZoomOffset   = ref(0)
+const ctrlMultiRes     = ref(props.initialMultiRes)
+const ctrlZoomOffset   = ref(props.initialZoomOffset)
+const ctrlDatum        = ref('AUTHALIC_SPHERE')
+const ctrlPreset       = ref('custom')
+const ctrlOpacity      = ref(0.3)
+const ctrlBasemap      = ref(props.showBasemap ? props.initialBasemap : 'none')
 const showAperture     = ref(props.initialTopology === 'HEXAGON')
 const ctrlMixedAperture = ref(false)
 const ctrlApertureSeq   = ref('434747')
@@ -80,15 +95,35 @@ const hierarchyInfo   = reactive({
   neighbors: [],
 })
 const ctrlIndexType   = ref('SEQNUM')
-const availableIndexTypes = computed(() => {
-  const types = ['SEQNUM']
-  if (ctrlTopology.value === 'HEXAGON') {
-    types.push('VERTEX2DD')
-    if (ctrlAperture.value !== 7) types.push('ZORDER')
-    if (ctrlAperture.value === 3) types.push('Z3')
-    if (ctrlAperture.value === 7) types.push('Z7')
-  }
-  return types
+const availableIndexTypes = computed(() => indexTypesFor({
+  topology: ctrlTopology.value,
+  aperture: ctrlAperture.value,
+  mixed: ctrlMixedAperture.value && ctrlTopology.value === 'HEXAGON',
+}))
+watch(availableIndexTypes, (types) => {
+  if (!types.includes(ctrlIndexType.value)) ctrlIndexType.value = 'SEQNUM'
+})
+
+// --- DGGRID presets: fill in the grid settings; editing any of them again
+// makes the selection "Custom" ---
+let applyingPreset = false
+watch(ctrlPreset, (name) => {
+  const p = PRESETS.find((x) => x.name === name)
+  if (!p) return
+  applyingPreset = true
+  ctrlTopology.value = p.topology
+  ctrlProjection.value = p.projection
+  ctrlAperture.value = p.aperture
+  ctrlAzimuth.value = Math.round(p.azimuth * 1e4) / 1e4
+  ctrlPoleLat.value = Math.round(p.poleCoordinates.lat * 1e4) / 1e4
+  ctrlPoleLng.value = Math.round(p.poleCoordinates.lng * 1e4) / 1e4
+  ctrlDatum.value = p.datum
+  ctrlMixedAperture.value = !!p.apertureSequence
+  if (p.apertureSequence) ctrlApertureSeq.value = p.apertureSequence
+  nextTick(() => { applyingPreset = false })
+})
+watch([ctrlTopology, ctrlProjection, ctrlAperture, ctrlAzimuth, ctrlPoleLat, ctrlPoleLng, ctrlDatum, ctrlMixedAperture, ctrlApertureSeq], () => {
+  if (!applyingPreset) ctrlPreset.value = 'custom'
 })
 
 // --- non-reactive Cesium state ---
@@ -214,31 +249,54 @@ function zoomFromAltitude() {
 }
 
 // ---------------------------------------------------------------------------
+// Basemap
+// ---------------------------------------------------------------------------
+
+function applyBasemap() {
+  if (!viewer) return
+  viewer.imageryLayers.removeAll()
+  if (ctrlBasemap.value === 'satellite') {
+    viewer.imageryLayers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+      url: 'https://tiles.maps.eox.at/wmts?layer=s2cloudless-2020_3857&style=default' +
+        '&tilematrixset=g&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg' +
+        '&TileMatrix={z}&TileCol={x}&TileRow={y}',
+      maximumLevel: 15,
+      credit: 'Sentinel-2 cloudless 2020 by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2020)',
+    }))
+  } else if (ctrlBasemap.value === 'osm') {
+    viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
+      url: 'https://tile.openstreetmap.org/',
+      credit: '© OpenStreetMap contributors',
+    }))
+  }
+}
+
+function flyTo(lng, lat, zoom) {
+  viewer?.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lng, lat, fitAltitude(zoom)), duration: 1.8 })
+  if (isMobile.value) openSheet.value = null
+}
+
+// ---------------------------------------------------------------------------
 // Cesium layer helpers
 // ---------------------------------------------------------------------------
 
-async function buildCellDataSource(fc, { fill, stroke, isBase, colored }) {
-  const ds = await Cesium.GeoJsonDataSource.load(fc, {
-    fill: rgbaArrayToCesium(fill),
-    stroke: rgbaArrayToCesium(stroke),
-    strokeWidth: isBase ? 3 : 1.5,
-    clampToGround: false,
-  })
+// fill/stroke are CSS colors; opacity applies to the fill
+async function buildCellDataSource(fc, { fill, stroke, opacity = 1, isBase, colored }) {
+  const ds = await Cesium.GeoJsonDataSource.load(fc, { clampToGround: false })
 
-  const baseFill = rgbaArrayToCesium(fill)
-
-  const strokeColor = rgbaArrayToCesium(stroke)
+  const baseFill = Cesium.Color.fromCssColorString(fill).withAlpha(opacity)
+  const strokeColor = Cesium.Color.fromCssColorString(stroke)
+  const coloredAlpha = Math.round(Math.min(1, opacity + 0.35) * 255)
   ds.entities.values.forEach((e) => {
     if (!e.polygon) return
     e.polygon.arcType = Cesium.ArcType.GEODESIC
     e.polygon.height  = 0
-    setOutline(e, strokeColor, isBase ? 2.5 : 1.5)
+    setOutline(e, strokeColor, isBase ? 3 : 1.5)
     if (isBase) {
       e.polygon.fill = false
     } else if (colored) {
       const t = Number(e.properties?.colorValue?.getValue?.() ?? 0)
-      // Bumped alpha 179 → 220 for stronger fill in YlOrBr mode.
-      e.polygon.material = rgbaArrayToCesium(ylOrBrRgba(t, 220))
+      e.polygon.material = rgbaArrayToCesium(ylOrBrRgba(t, coloredAlpha))
     } else {
       e.polygon.material = baseFill
     }
@@ -251,13 +309,16 @@ async function updateLayers(fineFc, baseFc) {
   if (!viewer) return
   const colored = ctrlColorCells.value
 
-  if (gridDataSource) { viewer.dataSources.remove(gridDataSource, true); gridDataSource = null }
-  if (baseDataSource) { viewer.dataSources.remove(baseDataSource, true); baseDataSource = null }
+  // build the new data sources first and remove the old ones afterwards,
+  // so a refresh never blinks the grid out
+  const oldGrid = gridDataSource, oldBase = baseDataSource
+  gridDataSource = baseDataSource = null
 
   if (baseFc) {
     baseDataSource = await buildCellDataSource(baseFc, {
-      fill:    [0, 0, 0, 0],
-      stroke:  [245, 158, 11, 220],
+      fill:    '#000000',
+      stroke:  CELL_STYLE.base,
+      opacity: 0,
       isBase:  true,
       colored: false,
     })
@@ -266,12 +327,15 @@ async function updateLayers(fineFc, baseFc) {
   if (fineFc) {
     gridDataSource = await buildCellDataSource(fineFc, {
       fill:    props.fillColor,
-      stroke:  props.lineColor,
+      stroke:  colored ? CELL_STYLE.outlineColored : props.lineColor,
+      opacity: ctrlOpacity.value,
       isBase:  false,
       colored,
     })
     await viewer.dataSources.add(gridDataSource)
   }
+  if (oldGrid) viewer.dataSources.remove(oldGrid, true)
+  if (oldBase) viewer.dataSources.remove(oldBase, true)
 }
 
 // ---------------------------------------------------------------------------
@@ -283,62 +347,44 @@ function zoomToResolution(zoom, maxRes) {
   return Math.min(maxRes, Math.max(1, res))
 }
 
-function viewportSeqNums(resolution) {
+// The camera's view rectangle as an extent, or null when the view goes past
+// the globe's edge (whole-world view).
+function viewportExtent() {
   const rect = viewer.camera.computeViewRectangle()
-  let minLng, maxLng, minLat, maxLat
-  if (rect) {
-    minLng = Cesium.Math.toDegrees(rect.west)
-    maxLng = Cesium.Math.toDegrees(rect.east)
-    minLat = Math.max(Cesium.Math.toDegrees(rect.south), -89)
-    maxLat = Math.min(Cesium.Math.toDegrees(rect.north),  89)
-    if (maxLng < minLng) maxLng += 360 // antimeridian-crossing rectangle
-  } else {
-    // Camera is looking past the globe edge (whole-world view). Sample the
-    // entire world instead of trying to enumerate every cell at this
-    // resolution — at res 15 that's billions of cells and traps the WASM
-    // module ("RuntimeError: null function").
-    minLng = -180; maxLng = 180; minLat = -89; maxLat = 89
+  if (!rect) return null
+  const minLng = Cesium.Math.toDegrees(rect.west)
+  let maxLng = Cesium.Math.toDegrees(rect.east)
+  if (maxLng < minLng) maxLng += 360 // antimeridian-crossing rectangle
+  return {
+    minLng, maxLng,
+    minLat: Math.max(Cesium.Math.toDegrees(rect.south), -89.9),
+    maxLat: Math.min(Cesium.Math.toDegrees(rect.north), 89.9),
   }
-
-  const steps   = 80
-  const latStep = (maxLat - minLat) / steps
-  const lngStep = (maxLng - minLng) / steps
-
-  const coords = []
-  for (let i = 0; i <= steps; i++) {
-    for (let j = 0; j <= steps; j++) {
-      let lng = minLng + j * lngStep
-      while (lng >  180) lng -= 360
-      while (lng < -180) lng += 360
-      coords.push([lng, minLat + i * latStep])
-    }
-  }
-
-  const raw  = webdggrid.geoToSequenceNum(coords, resolution)
-  const seen = new Set()
-  const out  = []
-  for (const n of raw) {
-    const k = n.toString()
-    if (!seen.has(k)) { seen.add(k); out.push(n) }
-  }
-  return out
 }
+
+// What the current cells were generated for; a camera move only regenerates
+// when the resolution changes or the view leaves the (padded) area covered.
+let lastGen = null   // { res, extent, cfgKey }
+const MULTIRES_PAD = 0.5
 
 // ---------------------------------------------------------------------------
 // Main grid generation
 // ---------------------------------------------------------------------------
 
-function generateGrid() {
+// keepSelection: a camera-driven refresh keeps the selected cell and its
+// hierarchy; a settings change starts over.
+function generateGrid({ keepSelection = false } = {}) {
   if (!isReady.value || !webdggrid) return
 
-  // Clear any hierarchy selection when regenerating
-  selectedCellId.value = null
-  selectedCellRes.value = null
-  hierarchyInfo.parent = null
-  hierarchyInfo.allParents = []
-  hierarchyInfo.children = []
-  hierarchyInfo.neighbors = []
-  removeHierarchyLayers()
+  if (!keepSelection) {
+    selectedCellId.value = null
+    selectedCellRes.value = null
+    hierarchyInfo.parent = null
+    hierarchyInfo.allParents = []
+    hierarchyInfo.children = []
+    hierarchyInfo.neighbors = []
+    removeHierarchyLayers()
+  }
 
   const maxRes     = ctrlResolution.value
   const multiRes   = ctrlMultiRes.value
@@ -356,6 +402,7 @@ function generateGrid() {
   const dggsConfig = {
     poleCoordinates: { lat: poleLat, lng: poleLng },
     azimuth, topology, projection, aperture,
+    datum: ctrlDatum.value,
   }
   if (isMixed) dggsConfig.apertureSequence = ctrlApertureSeq.value
 
@@ -393,16 +440,24 @@ function generateGrid() {
       let baseFc = null
 
       if (multiRes) {
-        seqNums = viewportSeqNums(resolution)
+        // Cover more than the viewport, so small pans need no new cells. A
+        // whole-world view samples the world instead of enumerating every
+        // cell (at res 15 that's billions and traps the WASM module).
+        const visible = viewportExtent()
+        const extent = visible ? padExtent(visible, MULTIRES_PAD) : WORLD
+        const steps = visible ? Math.round(80 * (1 + 2 * MULTIRES_PAD)) : 120
+        seqNums = extentSeqNums(webdggrid, resolution, extent, steps)
 
         const baseRes = Math.max(1, resolution - 1)
         webdggrid.setDggs(dggsConfig, baseRes)
-        const baseSeqNums = viewportSeqNums(baseRes)
-        baseFc = buildFc(baseSeqNums, baseRes)
+        baseFc = buildFc(extentSeqNums(webdggrid, baseRes, extent, steps), baseRes)
 
         webdggrid.setDggs(dggsConfig, resolution)
+        lastGen = { res: resolution, extent, cfgKey: JSON.stringify(dggsConfig) }
       } else {
+        lastGen = null
         const total = webdggrid.nCells(resolution)
+        if (total > MAX_GLOBE_CELLS) throw new Error(`${total} cells — lower the resolution or use multi-resolution`)
         seqNums = Array.from({ length: total }, (_, i) => BigInt(i + 1))
       }
 
@@ -410,6 +465,8 @@ function generateGrid() {
       lastFineFc = fineFc
       lastBaseFc = baseFc
       await updateLayers(fineFc, baseFc)
+      // keep the selection drawn above the new grid
+      if (keepSelection && selectedCellId.value) await updateHierarchyLayers(selectedCellId.value, selectedCellRes.value)
 
       const modeLabel = multiRes ? `res ${resolution} · viewport` : `res ${resolution} · globe`
       const apLabel = isMixed ? `mixed [${dggsConfig.apertureSequence}]` : topology
@@ -436,9 +493,10 @@ watch(ctrlTopology, (val) => {
   }
 })
 
-watch(ctrlColorCells, () => {
+watch([ctrlColorCells, ctrlOpacity], () => {
   if (isReady.value) updateLayers(lastFineFc, lastBaseFc)
 })
+watch(ctrlBasemap, applyBasemap)
 
 watch(ctrlZoomOffset, () => {
   if (isReady.value && webdggrid) generateGrid()
@@ -460,34 +518,64 @@ function scheduleMultiResRegen() {
   multiResSettingsTimer = setTimeout(generateGrid, 150)
 }
 watch(
-  [ctrlResolution, ctrlTopology, ctrlProjection, ctrlAperture, ctrlAzimuth, ctrlPoleLng, ctrlPoleLat, ctrlMixedAperture, ctrlApertureSeq],
+  [ctrlResolution, ctrlTopology, ctrlProjection, ctrlAperture, ctrlAzimuth, ctrlPoleLng, ctrlPoleLat, ctrlMixedAperture, ctrlApertureSeq, ctrlDatum],
   scheduleMultiResRegen,
 )
+
+// Cesium entities get slow well before the Navara demo's limit
+const MAX_GLOBE_CELLS = 20000
+
+function syncMoveEndListener() {
+  if (!viewer) return
+  if (cameraMoveEndCb) {
+    viewer.camera.moveEnd.removeEventListener(cameraMoveEndCb)
+    cameraMoveEndCb = null
+  }
+  if (ctrlMultiRes.value) {
+    cameraMoveEndCb = onMoveEnd
+    viewer.camera.moveEnd.addEventListener(cameraMoveEndCb)
+  }
+}
 
 watch(ctrlMultiRes, (on) => {
   ctrlMaxResLabel.value = on ? 'Max Resolution' : 'Resolution'
   if (on) {
     ctrlResolution.value = 15
-  } else {
-    if (ctrlResolution.value > 5) ctrlResolution.value = 5
+  } else if (webdggrid) {
+    // the highest resolution up to 5 whose whole-globe grid stays drawable
+    let r = Math.min(ctrlResolution.value, 5)
+    while (r > 1 && webdggrid.nCells(r) > MAX_GLOBE_CELLS) r--
+    ctrlResolution.value = r
   }
-  if (viewer) {
-    if (cameraMoveEndCb) {
-      viewer.camera.moveEnd.removeEventListener(cameraMoveEndCb)
-      cameraMoveEndCb = null
-    }
-    if (on) {
-      cameraMoveEndCb = onMoveEnd
-      viewer.camera.moveEnd.addEventListener(cameraMoveEndCb)
-    }
-  }
-  if (on && isReady.value && webdggrid) generateGrid()
+  syncMoveEndListener()
+  if (isReady.value && webdggrid) generateGrid()
 })
+
+function currentConfigKey() {
+  const isMixed = ctrlMixedAperture.value && ctrlTopology.value === 'HEXAGON'
+  const cfg = {
+    poleCoordinates: { lat: ctrlPoleLat.value, lng: ctrlPoleLng.value },
+    azimuth: ctrlAzimuth.value, topology: ctrlTopology.value,
+    projection: ctrlProjection.value, aperture: ctrlAperture.value,
+    datum: ctrlDatum.value,
+  }
+  if (isMixed) cfg.apertureSequence = ctrlApertureSeq.value
+  return JSON.stringify(cfg)
+}
 
 function onMoveEnd() {
   if (!ctrlMultiRes.value || !isReady.value || !webdggrid) return
   clearTimeout(multiResTimer)
-  multiResTimer = setTimeout(generateGrid, 300)
+  multiResTimer = setTimeout(() => {
+    const isMixed = ctrlMixedAperture.value && ctrlTopology.value === 'HEXAGON'
+    const res = zoomToResolution(zoomFromAltitude(), isMixed ? ctrlApertureSeq.value.length : ctrlResolution.value)
+    const visible = viewportExtent()
+    const stillCovered = lastGen
+      && lastGen.res === res
+      && lastGen.cfgKey === currentConfigKey()
+      && visible && extentContains(lastGen.extent, visible)
+    if (!stillCovered) generateGrid({ keepSelection: true })
+  }, 300)
 }
 
 // ---------------------------------------------------------------------------
@@ -495,21 +583,7 @@ function onMoveEnd() {
 // ---------------------------------------------------------------------------
 
 function getCellIndexLabel(seqnum, resolution) {
-  try {
-    switch (ctrlIndexType.value) {
-      case 'SEQNUM': return seqnum.toString()
-      case 'VERTEX2DD': {
-        const v = webdggrid.sequenceNumToVertex2DD(seqnum, resolution)
-        return `v${v.vertNum} t${v.triNum}`
-      }
-      case 'ZORDER': return webdggrid.sequenceNumToZOrder(seqnum, resolution).toString()
-      case 'Z3': return webdggrid.sequenceNumToZ3(seqnum, resolution).toString()
-      case 'Z7': return webdggrid.sequenceNumToZ7(seqnum, resolution).toString()
-      default: return seqnum.toString()
-    }
-  } catch {
-    return seqnum.toString()
-  }
+  return indexLabel(webdggrid, ctrlIndexType.value, seqnum, resolution)
 }
 
 function selectCell(cellId, resolution) {
@@ -742,12 +816,7 @@ onMounted(async () => {
       useBrowserRecommendedResolution: false,
     })
 
-    if (props.showBasemap) {
-      viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
-        url: 'https://tile.openstreetmap.org/',
-        credit: '© OpenStreetMap contributors',
-      }))
-    }
+    applyBasemap()
     viewer.scene.globe.enableLighting = false
 
     // Sharpen the rendering pipeline: Cesium's defaults run an HDR tonemap
@@ -816,6 +885,7 @@ onMounted(async () => {
     }
 
     if (props.showControls) {
+      syncMoveEndListener()   // multi-resolution may be on from the start
       pickHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
 
       pickHandler.setInputAction((event) => {
@@ -861,7 +931,8 @@ onMounted(async () => {
       ? 'WASM loaded — click "Generate Grid"'
       : ''
 
-    if (props.showControls) {
+    // in multi-resolution mode the slider is the maximum resolution (15)
+    if (props.showControls && !ctrlMultiRes.value) {
       ctrlResolution.value = props.initialResolution
     }
 
@@ -927,6 +998,14 @@ defineExpose({ getMap: () => viewer })
       <h4>Grid System</h4>
 
       <div class="field">
+        <label>Preset</label>
+        <select v-model="ctrlPreset">
+          <option value="custom">Custom</option>
+          <option v-for="p in PRESETS" :key="p.name" :value="p.name">{{ p.label }}</option>
+        </select>
+      </div>
+
+      <div class="field">
         <label>Topology</label>
         <select v-model="ctrlTopology">
           <option value="HEXAGON">Hexagon</option>
@@ -938,8 +1017,14 @@ defineExpose({ getMap: () => viewer })
       <div class="field">
         <label>Projection</label>
         <select v-model="ctrlProjection">
-          <option value="ISEA">ISEA</option>
-          <option value="FULLER">Fuller</option>
+          <option v-for="p in PROJECTIONS" :key="p.value" :value="p.value">{{ p.label }}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Datum</label>
+        <select v-model="ctrlDatum">
+          <option v-for="d in DATUMS" :key="d.value" :value="d.value">{{ d.label }}</option>
         </select>
       </div>
 
@@ -1020,6 +1105,26 @@ defineExpose({ getMap: () => viewer })
         Color cells (YlOrBr)
       </label>
       <div class="ylorbr-swatch" />
+
+      <div class="field" style="margin-top: 5px">
+        <label>Cell opacity <span>{{ Math.round(ctrlOpacity * 100) }}%</span></label>
+        <input v-model.number="ctrlOpacity" type="range" min="0.05" max="0.95" step="0.05" />
+      </div>
+
+      <div class="field">
+        <label>Basemap</label>
+        <select v-model="ctrlBasemap">
+          <option value="satellite">Sentinel-2 satellite</option>
+          <option value="osm">OpenStreetMap</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div class="fly-row">
+        <button @click="flyTo(0, 90, 1.6)">North Pole</button>
+        <button @click="flyTo(0, -90, 1.6)">South Pole</button>
+        <button @click="flyTo(props.initialCenter[0], props.initialCenter[1], props.initialZoom)">Globe</button>
+      </div>
 
       <button
         :disabled="!isReady || isGenerating"
@@ -1467,4 +1572,13 @@ defineExpose({ getMap: () => viewer })
   /* keep Cesium's credit line small and out of the sheet's way */
   :deep(.cesium-widget-credits) { transform: scale(0.8); transform-origin: left bottom; }
 }
+
+.fly-row { display: flex; gap: 4px; margin-top: 6px; }
+.fly-row button {
+  flex: 1; font-size: 10px; padding: 3px 2px;
+  border: 1px solid var(--vp-c-divider); border-radius: 3px;
+  background: var(--vp-c-bg-soft); color: var(--vp-c-text-1); cursor: pointer;
+}
+.fly-row button:hover { border-color: var(--vp-c-brand-1); }
+@media (max-width: 768px) { .is-sheet .fly-row button { font-size: 12px; padding: 8px 4px; } }
 </style>
