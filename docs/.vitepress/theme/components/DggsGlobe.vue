@@ -55,6 +55,21 @@ const showAperture     = ref(props.initialTopology === 'HEXAGON')
 const ctrlMixedAperture = ref(false)
 const ctrlApertureSeq   = ref('434747')
 
+// --- small screens: the panels become bottom sheets opened from a toolbar ---
+const isMobile  = ref(false)
+const openSheet = ref(null)   // 'settings' | 'hierarchy' | null
+const isTouch   = ref(false)
+let mobileQuery = null
+const onMobileChange = (e) => {
+  isMobile.value = e.matches
+  if (!e.matches) openSheet.value = null
+}
+function toggleSheet(name) {
+  openSheet.value = openSheet.value === name ? null : name
+}
+// a hover tooltip left over from before the sheet opened would sit on top of it
+watch(openSheet, (v) => { if (v && tooltipEl.value) tooltipEl.value.style.display = 'none' })
+
 // --- hierarchy selection state ---
 const selectedCellId  = ref(null)
 const selectedCellRes = ref(null)
@@ -132,6 +147,24 @@ function rgbaArrayToCesium([r, g, b, a]) {
   return Cesium.Color.fromBytes(r, g, b, a ?? 255)
 }
 
+// Cesium draws polygon outlines as aliased 1 px GL lines and ignores
+// outlineWidth on WebGL, which is what made the cell edges look jagged and
+// hairline-thin. Draw each outline as a ground-clamped geodesic polyline on
+// the same entity instead: anti-aliased, real width, and picking still
+// returns the cell entity.
+function setOutline(entity, color, width) {
+  const h = entity.polygon?.hierarchy?.getValue(Cesium.JulianDate.now())
+  entity.polygon.outline = false
+  if (!h?.positions?.length) return
+  entity.polyline = new Cesium.PolylineGraphics({
+    positions: [...h.positions, h.positions[0]],
+    width,
+    material: color,
+    arcType: Cesium.ArcType.GEODESIC,
+    clampToGround: false,
+  })
+}
+
 // Pull the current theme background from the live VitePress CSS variable.
 // Falls back to the standard VitePress dark/light bg when the variable hasn't
 // been computed yet (very early in mount).
@@ -166,6 +199,14 @@ function altitudeFromZoom(zoom) {
   return 40_000_000 * Math.pow(2, -zoom)
 }
 
+// The zoom levels assume a landscape view; on a portrait screen the globe is
+// limited by the width, so move the camera back until it fits.
+function fitAltitude(zoom) {
+  const el = mapContainer.value
+  const aspect = el && el.clientHeight ? el.clientWidth / el.clientHeight : 1
+  return altitudeFromZoom(zoom) / Math.min(1, aspect * 1.15)
+}
+
 function zoomFromAltitude() {
   if (!viewer) return 0
   const h = viewer.camera.positionCartographic.height
@@ -186,12 +227,12 @@ async function buildCellDataSource(fc, { fill, stroke, isBase, colored }) {
 
   const baseFill = rgbaArrayToCesium(fill)
 
+  const strokeColor = rgbaArrayToCesium(stroke)
   ds.entities.values.forEach((e) => {
     if (!e.polygon) return
     e.polygon.arcType = Cesium.ArcType.GEODESIC
     e.polygon.height  = 0
-    e.polygon.outline = true
-    e.polygon.outlineWidth = isBase ? 3 : 1.5
+    setOutline(e, strokeColor, isBase ? 2.5 : 1.5)
     if (isBase) {
       e.polygon.fill = false
     } else if (colored) {
@@ -477,6 +518,7 @@ function selectCell(cellId, resolution) {
   const seqnum = typeof cellId === 'bigint' ? cellId : BigInt(cellId)
   selectedCellId.value = seqnum
   selectedCellRes.value = resolution
+  if (isMobile.value) openSheet.value = 'hierarchy'
 
   try {
     const fc = sanitizeFc(webdggrid.sequenceNumToGridFeatureCollection([seqnum], resolution, false))
@@ -561,9 +603,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
         e.polygon.arcType  = Cesium.ArcType.GEODESIC
         e.polygon.height   = 0
         e.polygon.material = Cesium.Color.fromCssColorString(isPrimary ? 'rgba(34,204,85,0.35)' : 'rgba(102,221,136,0.25)')
-        e.polygon.outline  = true
-        e.polygon.outlineColor = Cesium.Color.fromCssColorString(isPrimary ? '#11aa33' : '#44bb66')
-        e.polygon.outlineWidth = isPrimary ? 3.5 : 2.5
+        setOutline(e, Cesium.Color.fromCssColorString(isPrimary ? '#11aa33' : '#44bb66'), isPrimary ? 3 : 2)
       })
 
       // Parent labels at cell centers
@@ -602,9 +642,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
         e.polygon.arcType  = Cesium.ArcType.GEODESIC
         e.polygon.height   = 0
         e.polygon.material = Cesium.Color.fromCssColorString('rgba(255,204,0,0.3)')
-        e.polygon.outline  = true
-        e.polygon.outlineColor = Cesium.Color.fromCssColorString('#cc9900')
-        e.polygon.outlineWidth = 2
+        setOutline(e, Cesium.Color.fromCssColorString('#cc9900'), 2)
       })
 
       hierarchyInfo.children.forEach((c) => {
@@ -640,9 +678,7 @@ async function updateHierarchyLayers(seqnum, resolution) {
       e.polygon.arcType  = Cesium.ArcType.GEODESIC
       e.polygon.height   = 0
       e.polygon.material = Cesium.Color.fromCssColorString('rgba(255,51,51,0.25)')
-      e.polygon.outline  = true
-      e.polygon.outlineColor = Cesium.Color.fromCssColorString('#ff3333')
-      e.polygon.outlineWidth = 4
+      setOutline(e, Cesium.Color.fromCssColorString('#ff3333'), 3)
     })
 
     const geo = webdggrid.sequenceNumToGeo([seqnum], resolution)[0]
@@ -670,6 +706,11 @@ async function updateHierarchyLayers(seqnum, resolution) {
 onMounted(async () => {
   if (typeof window === 'undefined') return
 
+  mobileQuery = window.matchMedia('(max-width: 768px)')
+  onMobileChange(mobileQuery)
+  mobileQuery.addEventListener('change', onMobileChange)
+  isTouch.value = window.matchMedia('(hover: none)').matches
+
   // Needed so BigInt properties survive JSON serialisation
   if (!BigInt.prototype.toJSON) {
     BigInt.prototype.toJSON = function () { return this.toString() }
@@ -696,6 +737,9 @@ onMounted(async () => {
       infoBox: false,
       selectionIndicator: false,
       terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+      // render at the screen's pixel density; Cesium's default renders at
+      // CSS resolution and upscales, which blurs edges on high-DPI screens
+      useBrowserRecommendedResolution: false,
     })
 
     if (props.showBasemap) {
@@ -742,7 +786,7 @@ onMounted(async () => {
       destination: Cesium.Cartesian3.fromDegrees(
         props.initialCenter[0],
         props.initialCenter[1],
-        altitudeFromZoom(props.initialZoom),
+        fitAltitude(props.initialZoom),
       ),
     })
 
@@ -778,7 +822,7 @@ onMounted(async () => {
         const picked = viewer.scene.pick(event.endPosition)
         const isCell = picked && picked.id && picked.id.entityCollection?.owner === gridDataSource && picked.id.polygon
         if (isCell) {
-          if (tooltipEl.value) {
+          if (tooltipEl.value && !isTouch.value) {
             tooltipEl.value.style.display = 'block'
             tooltipEl.value.style.left = `${event.endPosition.x + 12}px`
             tooltipEl.value.style.top  = `${event.endPosition.y + 12}px`
@@ -809,6 +853,9 @@ onMounted(async () => {
 
     webdggrid = await Webdggrid.load()
 
+    // handy for poking at the scene from the console
+    window.__cesiumDemo = { viewer, webdggrid }
+
     isReady.value = true
     status.value = props.showControls && !props.autoGenerate
       ? 'WASM loaded — click "Generate Grid"'
@@ -828,6 +875,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  mobileQuery?.removeEventListener('change', onMobileChange)
   clearTimeout(multiResTimer)
   if (themeObserver) { themeObserver.disconnect(); themeObserver = null }
   if (viewer && cameraMoveEndCb) {
@@ -849,8 +897,19 @@ defineExpose({ getMap: () => viewer })
     <div ref="tooltipEl" class="dggs-tooltip" />
 
     <!-- Controls panel -->
-    <div v-if="showControls" class="dggs-controls">
-      <h3>DGGRID Grid Settings</h3>
+    <!-- small screens: toolbar that opens the panels as bottom sheets -->
+    <div v-if="showControls && isMobile" class="dggs-mobile-bar">
+      <button :class="{ active: openSheet === 'hierarchy' }" @click="toggleSheet('hierarchy')">
+        Cell<span v-if="selectedCellId" class="dot" />
+      </button>
+      <button :class="{ active: openSheet === 'settings' }" @click="toggleSheet('settings')">Settings</button>
+    </div>
+
+    <div v-if="showControls" v-show="!isMobile || openSheet === 'settings'" class="dggs-controls" :class="{ 'is-sheet': isMobile }">
+      <div class="panel-head">
+        <h3>DGGRID Grid Settings</h3>
+        <button v-if="isMobile" class="sheet-close" aria-label="Close settings" @click="openSheet = null">✕</button>
+      </div>
 
       <div class="field">
         <label>
@@ -974,8 +1033,11 @@ defineExpose({ getMap: () => viewer })
     </div>
 
     <!-- Cell Hierarchy panel (top-left) -->
-    <div v-if="showControls" class="dggs-hierarchy">
-      <h3>Cell Hierarchy</h3>
+    <div v-if="showControls" v-show="!isMobile || openSheet === 'hierarchy'" class="dggs-hierarchy" :class="{ 'is-sheet': isMobile }">
+      <div class="panel-head">
+        <h3>Cell Hierarchy</h3>
+        <button v-if="isMobile" class="sheet-close" aria-label="Close cell hierarchy" @click="openSheet = null">✕</button>
+      </div>
 
       <div class="field">
         <label>Index Type</label>
@@ -1030,11 +1092,11 @@ defineExpose({ getMap: () => viewer })
           </div>
         </div>
       </template>
-      <div v-else class="hier-hint">Click a cell on the map to inspect hierarchy</div>
+      <div v-else class="hier-hint">{{ isTouch ? 'Tap' : 'Click' }} a cell on the map to inspect hierarchy</div>
     </div>
 
     <!-- Status bar -->
-    <div v-if="status && (showControls || !isReady)" class="dggs-status">
+    <div v-if="status && (showControls || !isReady)" v-show="!(isMobile && openSheet)" class="dggs-status">
       {{ status }}
     </div>
   </div>
@@ -1345,5 +1407,64 @@ defineExpose({ getMap: () => viewer })
   color: var(--vp-c-text-3);
   font-style: italic;
   margin-top: 2px;
+}
+
+/* ---- panel header with a close button on small screens ---- */
+.panel-head { display: flex; align-items: center; justify-content: space-between; }
+.panel-head h3 { margin: 0 0 6px; }
+.sheet-close {
+  border: none; background: transparent; color: var(--vp-c-text-2);
+  font-size: 16px; line-height: 1; padding: 4px 6px; margin: -4px -6px 2px 0; cursor: pointer;
+}
+
+/* ---- small screens ---- */
+.dggs-mobile-bar { display: none; }
+@media (max-width: 768px) {
+  .dggs-mobile-bar {
+    display: flex; gap: 6px;
+    position: absolute; top: 10px; right: 10px; z-index: 12;
+  }
+  .dggs-mobile-bar button {
+    position: relative;
+    font-size: 13px; font-weight: 600; padding: 8px 14px; min-height: 36px;
+    border-radius: 18px; border: 1px solid var(--vp-c-divider);
+    background: var(--vp-c-bg-elv);
+    color: var(--vp-c-text-1); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  .dggs-mobile-bar button.active { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
+  .dggs-mobile-bar .dot {
+    position: absolute; top: 6px; right: 7px; width: 7px; height: 7px;
+    border-radius: 50%; background: #ff3333;
+  }
+
+  /* both panels become a bottom sheet over the lower part of the globe */
+  .dggs-controls.is-sheet,
+  .dggs-hierarchy.is-sheet {
+    top: auto; left: 0; right: 0; bottom: 0;
+    width: auto; max-height: 55%;
+    border-radius: 14px 14px 0 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+    z-index: 15;
+  }
+  .is-sheet .field input[type='number'],
+  .is-sheet .field select,
+  .is-sheet .field input[type='text'] { font-size: 14px; padding: 6px 8px; }
+  .is-sheet .field label,
+  .is-sheet .field-inline { font-size: 13px; }
+  .is-sheet .field-inline input[type='checkbox'] { width: 18px; height: 18px; }
+  .is-sheet .generate-btn { font-size: 13px; padding: 10px; }
+  .is-sheet .hier-chip { font-size: 12px; padding: 3px 7px; }
+
+  /* status: top-left, may wrap, out of the toolbar's way */
+  .dggs-status {
+    top: 10px; bottom: auto; left: 10px; transform: none;
+    max-width: calc(100% - 190px);
+    white-space: normal; font-size: 11px; line-height: 1.3;
+    padding: 6px 10px; border-radius: 12px;
+  }
+
+  /* keep Cesium's credit line small and out of the sheet's way */
+  :deep(.cesium-widget-credits) { transform: scale(0.8); transform-origin: left bottom; }
 }
 </style>

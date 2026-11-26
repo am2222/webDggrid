@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Live Demo
+sidebar: false
 ---
 
 <ClientOnly>
@@ -8,6 +9,6 @@ title: Live Demo
     :show-basemap="true"
     :show-controls="true"
     :auto-generate="true"
-    height="calc(100vh - var(--vp-nav-height, 64px))"
+    height="calc(100dvh - var(--vp-nav-height, 64px))"
   />
 </ClientOnly>

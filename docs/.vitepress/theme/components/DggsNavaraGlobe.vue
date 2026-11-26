@@ -20,6 +20,10 @@ const props = defineProps({
   /** Generate grid immediately on load */
   autoGenerate: { type: Boolean, default: true },
   initialResolution: { type: Number, default: 3 },
+  /** Start in multi-resolution mode: cells for the viewport, refined as you zoom */
+  initialMultiRes: { type: Boolean, default: true },
+  /** Zoom → resolution offset used in multi-resolution mode */
+  initialZoomOffset: { type: Number, default: 1 },
   initialTopology: { type: String, default: 'HEXAGON' },
   initialProjection: { type: String, default: 'ISEA' },
   initialAperture: { type: Number, default: 4 },
@@ -40,7 +44,8 @@ const status       = ref('Loading WASM and globe…')
 const isReady      = ref(false)
 const isGenerating = ref(false)
 
-const ctrlResolution    = ref(props.initialResolution)
+// in multi-resolution mode the slider is the maximum resolution
+const ctrlResolution    = ref(props.initialMultiRes ? 15 : props.initialResolution)
 const ctrlTopology      = ref(props.initialTopology)
 const ctrlProjection    = ref(props.initialProjection)
 const ctrlAperture      = ref(props.initialAperture)
@@ -48,8 +53,8 @@ const ctrlAzimuth       = ref(props.initialAzimuth)
 const ctrlPoleLng       = ref(props.initialPoleLng)
 const ctrlPoleLat       = ref(props.initialPoleLat)
 const ctrlColorCells    = ref(false)
-const ctrlMultiRes      = ref(false)
-const ctrlZoomOffset    = ref(0)
+const ctrlMultiRes      = ref(props.initialMultiRes)
+const ctrlZoomOffset    = ref(props.initialZoomOffset)
 const ctrlMixedAperture = ref(false)
 const ctrlApertureSeq   = ref('434747')
 const showAperture      = computed(() => ctrlTopology.value === 'HEXAGON')
@@ -75,6 +80,8 @@ const onMobileChange = (e) => {
 function toggleSheet(name) {
   openSheet.value = openSheet.value === name ? null : name
 }
+// a hover tooltip left over from before the sheet opened would sit on top of it
+watch(openSheet, (v) => { if (v && tooltipEl.value) tooltipEl.value.style.display = 'none' })
 
 // --- hierarchy selection state ---
 const selectedCellId  = ref(null)
@@ -655,7 +662,8 @@ onMounted(async () => {
       })
       .catch((e) => console.warn('[DggsNavaraGlobe] font not loaded, labels off', e))
 
-    view.on('moveend', onMoveEnd)
+    // camera events come from view.camera, not the view
+    view.camera.on('moveend', onMoveEnd)
 
     if (props.showControls) {
       mapContainer.value.addEventListener('pointermove', (e) => {
