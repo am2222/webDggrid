@@ -20,6 +20,10 @@ const props = defineProps({
   /** Generate grid immediately on load */
   autoGenerate: { type: Boolean, default: true },
   initialResolution: { type: Number, default: 3 },
+  /** Start in multi-resolution mode: cells for the viewport, refined as you zoom */
+  initialMultiRes: { type: Boolean, default: true },
+  /** Zoom → resolution offset used in multi-resolution mode */
+  initialZoomOffset: { type: Number, default: 1 },
   initialTopology: { type: String, default: 'HEXAGON' },
   initialProjection: { type: String, default: 'ISEA' },
   initialAperture: { type: Number, default: 4 },
@@ -40,7 +44,8 @@ const status       = ref('Loading WASM and globe…')
 const isReady      = ref(false)
 const isGenerating = ref(false)
 
-const ctrlResolution    = ref(props.initialResolution)
+// in multi-resolution mode the slider is the maximum resolution
+const ctrlResolution    = ref(props.initialMultiRes ? 15 : props.initialResolution)
 const ctrlTopology      = ref(props.initialTopology)
 const ctrlProjection    = ref(props.initialProjection)
 const ctrlAperture      = ref(props.initialAperture)
@@ -48,8 +53,8 @@ const ctrlAzimuth       = ref(props.initialAzimuth)
 const ctrlPoleLng       = ref(props.initialPoleLng)
 const ctrlPoleLat       = ref(props.initialPoleLat)
 const ctrlColorCells    = ref(false)
-const ctrlMultiRes      = ref(false)
-const ctrlZoomOffset    = ref(0)
+const ctrlMultiRes      = ref(props.initialMultiRes)
+const ctrlZoomOffset    = ref(props.initialZoomOffset)
 const ctrlMixedAperture = ref(false)
 const ctrlApertureSeq   = ref('434747')
 const showAperture      = computed(() => ctrlTopology.value === 'HEXAGON')
@@ -62,6 +67,21 @@ const ctrlBasemap   = ref('satellite')
 const ctrlSunHour   = ref(15.5) // UTC hour on the March equinox: terminator in view
 const ctrlOpacity   = ref(0.3)
 const ctrlCellsLit  = ref(true)
+
+// --- small screens: the panels become bottom sheets opened from a toolbar ---
+const isMobile  = ref(false)
+const openSheet = ref(null)   // 'settings' | 'hierarchy' | null
+const isTouch   = ref(false)
+let mobileQuery = null
+const onMobileChange = (e) => {
+  isMobile.value = e.matches
+  if (!e.matches) openSheet.value = null
+}
+function toggleSheet(name) {
+  openSheet.value = openSheet.value === name ? null : name
+}
+// a hover tooltip left over from before the sheet opened would sit on top of it
+watch(openSheet, (v) => { if (v && tooltipEl.value) tooltipEl.value.style.display = 'none' })
 
 // --- hierarchy selection state ---
 const selectedCellId  = ref(null)
@@ -117,6 +137,13 @@ function layerHeight(level) {
 }
 
 function altitudeFromZoom(zoom) { return 40_000_000 * Math.pow(2, -zoom) }
+// The zoom levels assume a landscape view; on a portrait screen the globe is
+// limited by the width, so move the camera back until it fits.
+function fitAltitude(zoom) {
+  const el = mapContainer.value
+  const aspect = el && el.clientHeight ? el.clientWidth / el.clientHeight : 1
+  return altitudeFromZoom(zoom) / Math.min(1, aspect * 1.15)
+}
 function zoomFromAltitude() {
   const h = view?.camera.positionGeographic.height ?? 1
   return Math.log2(40_000_000 / Math.max(h, 1))
@@ -452,6 +479,7 @@ function selectCell(cellId, resolution) {
   webdggrid.setDggs(dggsConfig(), resolution)
   selectedCellId.value = seqnum
   selectedCellRes.value = resolution
+  if (isMobile.value) openSheet.value = 'hierarchy'
   try { hierarchyInfo.neighbors = webdggrid.sequenceNumNeighbors([seqnum], resolution)[0] } catch { hierarchyInfo.neighbors = [] }
   try {
     hierarchyInfo.allParents = resolution > 0 ? webdggrid.sequenceNumAllParents([seqnum], resolution)[0] : []
@@ -581,7 +609,8 @@ function onMoveEnd() {
 }
 
 function flyTo(lng, lat, zoom) {
-  view?.flyTo({ lng, lat, height: altitudeFromZoom(zoom), heading: 0, pitch: -90, roll: 0 }, { duration: 1800 })
+  view?.flyTo({ lng, lat, height: fitAltitude(zoom), heading: 0, pitch: -90, roll: 0 }, { duration: 1800 })
+  if (isMobile.value) openSheet.value = null
 }
 
 // ---------------------------------------------------------------------------
@@ -590,6 +619,10 @@ function flyTo(lng, lat, zoom) {
 
 onMounted(async () => {
   if (typeof window === 'undefined') return
+  mobileQuery = window.matchMedia('(max-width: 768px)')
+  onMobileChange(mobileQuery)
+  mobileQuery.addEventListener('change', onMobileChange)
+  isTouch.value = window.matchMedia('(hover: none)').matches
   try {
     // client-only: Navara touches WebGL, workers and WASM on import
     const [nav, pluginMod, Webdggrid] = await Promise.all([
@@ -617,7 +650,7 @@ onMounted(async () => {
 
     view.setCamera({
       lng: props.initialCenter[0], lat: props.initialCenter[1],
-      height: altitudeFromZoom(props.initialZoom), heading: 0, pitch: -90, roll: 0,
+      height: fitAltitude(props.initialZoom), heading: 0, pitch: -90, roll: 0,
     })
 
     // labels need a font; the grid works without one
@@ -629,7 +662,8 @@ onMounted(async () => {
       })
       .catch((e) => console.warn('[DggsNavaraGlobe] font not loaded, labels off', e))
 
-    view.on('moveend', onMoveEnd)
+    // camera events come from view.camera, not the view
+    view.camera.on('moveend', onMoveEnd)
 
     if (props.showControls) {
       mapContainer.value.addEventListener('pointermove', (e) => {
@@ -642,7 +676,7 @@ onMounted(async () => {
       })
       view.on('featureHover', (info) => {
         const onCell = info && info.layerId === gridLayerId && info.properties?.id != null
-        if (tooltipEl.value) {
+        if (tooltipEl.value && !isTouch.value) {
           tooltipEl.value.style.display = onCell ? 'block' : 'none'
           if (onCell) {
             tooltipEl.value.innerHTML = `<b>Cell ID:</b> ${info.properties.id}`
@@ -672,6 +706,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  mobileQuery?.removeEventListener('change', onMobileChange)
   clearTimeout(multiResTimer)
   clearTimeout(settingsTimer)
   view?.dispose()
@@ -687,8 +722,19 @@ defineExpose({ getView: () => view })
     <div ref="tooltipEl" class="dggs-tooltip" />
 
     <!-- Controls panel -->
-    <div v-if="showControls" class="dggs-controls">
-      <h3>DGGRID Grid Settings</h3>
+    <!-- small screens: toolbar that opens the panels as bottom sheets -->
+    <div v-if="showControls && isMobile" class="dggs-mobile-bar">
+      <button :class="{ active: openSheet === 'hierarchy' }" @click="toggleSheet('hierarchy')">
+        Cell<span v-if="selectedCellId" class="dot" />
+      </button>
+      <button :class="{ active: openSheet === 'settings' }" @click="toggleSheet('settings')">Settings</button>
+    </div>
+
+    <div v-if="showControls" v-show="!isMobile || openSheet === 'settings'" class="dggs-controls" :class="{ 'is-sheet': isMobile }">
+      <div class="panel-head">
+        <h3>DGGRID Grid Settings</h3>
+        <button v-if="isMobile" class="sheet-close" aria-label="Close settings" @click="openSheet = null">✕</button>
+      </div>
 
       <div class="field">
         <label>{{ ctrlMaxResLabel }} <span>{{ ctrlResolution }}</span></label>
@@ -786,8 +832,11 @@ defineExpose({ getView: () => view })
     </div>
 
     <!-- Cell Hierarchy panel (top-left) -->
-    <div v-if="showControls" class="dggs-hierarchy">
-      <h3>Cell Hierarchy</h3>
+    <div v-if="showControls" v-show="!isMobile || openSheet === 'hierarchy'" class="dggs-hierarchy" :class="{ 'is-sheet': isMobile }">
+      <div class="panel-head">
+        <h3>Cell Hierarchy</h3>
+        <button v-if="isMobile" class="sheet-close" aria-label="Close cell hierarchy" @click="openSheet = null">✕</button>
+      </div>
       <div class="field">
         <label>Index Type</label>
         <select v-model="ctrlIndexType">
@@ -829,10 +878,10 @@ defineExpose({ getView: () => view })
           </div>
         </div>
       </template>
-      <div v-else class="hier-hint">Click a cell on the globe to inspect its hierarchy</div>
+      <div v-else class="hier-hint">{{ isTouch ? 'Tap' : 'Click' }} a cell on the globe to inspect its hierarchy</div>
     </div>
 
-    <div v-if="status" class="dggs-status">{{ status }}</div>
+    <div v-if="status" v-show="!(isMobile && openSheet)" class="dggs-status">{{ status }}</div>
   </div>
 </template>
 
@@ -1156,6 +1205,65 @@ defineExpose({ getView: () => view })
 .dggs-controls, .dggs-hierarchy {
   background: color-mix(in srgb, var(--vp-c-bg-elv) 88%, transparent);
   backdrop-filter: blur(8px);
+}
+
+/* ---- panel header with a close button on small screens ---- */
+.panel-head { display: flex; align-items: center; justify-content: space-between; }
+.panel-head h3 { margin: 0 0 6px; }
+.sheet-close {
+  border: none; background: transparent; color: var(--vp-c-text-2);
+  font-size: 16px; line-height: 1; padding: 4px 6px; margin: -4px -6px 2px 0; cursor: pointer;
+}
+
+/* ---- small screens ---- */
+.dggs-mobile-bar { display: none; }
+@media (max-width: 768px) {
+  .dggs-mobile-bar {
+    display: flex; gap: 6px;
+    position: absolute; top: 10px; right: 10px; z-index: 12;
+  }
+  .dggs-mobile-bar button {
+    position: relative;
+    font-size: 13px; font-weight: 600; padding: 8px 14px; min-height: 36px;
+    border-radius: 18px; border: 1px solid var(--vp-c-divider);
+    background: color-mix(in srgb, var(--vp-c-bg-elv) 90%, transparent);
+    backdrop-filter: blur(8px);
+    color: var(--vp-c-text-1); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  }
+  .dggs-mobile-bar button.active { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
+  .dggs-mobile-bar .dot {
+    position: absolute; top: 6px; right: 7px; width: 7px; height: 7px;
+    border-radius: 50%; background: #ff3333;
+  }
+
+  /* both panels become a bottom sheet over the lower part of the globe */
+  .dggs-controls.is-sheet,
+  .dggs-hierarchy.is-sheet {
+    top: auto; left: 0; right: 0; bottom: 0;
+    width: auto; max-height: 55%;
+    border-radius: 14px 14px 0 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 15;
+  }
+  /* larger touch targets */
+  .is-sheet .field input[type='number'],
+  .is-sheet .field select,
+  .is-sheet .field input[type='text'] { font-size: 14px; padding: 6px 8px; }
+  .is-sheet .field label,
+  .is-sheet .field-inline { font-size: 13px; }
+  .is-sheet .field-inline input[type='checkbox'] { width: 18px; height: 18px; }
+  .is-sheet .fly-row button { font-size: 12px; padding: 8px 4px; }
+  .is-sheet .generate-btn { font-size: 13px; padding: 10px; }
+  .is-sheet .hier-chip { font-size: 12px; padding: 3px 7px; }
+
+  /* status: top-left, may wrap, out of the toolbar's way */
+  .dggs-status {
+    top: 10px; bottom: auto; left: 10px; transform: none;
+    max-width: calc(100% - 190px);
+    white-space: normal; font-size: 11px; line-height: 1.3;
+    padding: 6px 10px; border-radius: 12px;
+  }
 }
 </style>
 
