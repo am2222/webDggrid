@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.1](https://github.com/am2222/webDggrid/compare/v2.2.0...v2.2.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **docs:** make the demo globes usable on mobile screens ([3d9fbb4](https://github.com/am2222/webDggrid/commit/3d9fbb489f5cccb372f5ad384878f462f4c19e52))
+* **docs:** make the Navara demo usable on mobile screens ([3d9fbb4](https://github.com/am2222/webDggrid/commit/3d9fbb489f5cccb372f5ad384878f462f4c19e52))
+
 ## [2.2.0](https://github.com/am2222/webDggrid/compare/v2.1.1...v2.2.0) (2026-11-26)
 
 
